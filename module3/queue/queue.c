@@ -9,7 +9,7 @@
  * 
  */
 #include <stdio.h>
-#inlcude <stdlib.h>
+#include <stdlib.h>
 #include "queue.h"
 
 typedef struct node {
@@ -63,7 +63,7 @@ int32_t qput(queue_t *qp, void *elementp){
 	store->data = elementp;
 	store->next = NULL;
 
-	if (qp->head == NULL) {
+	if (qp->start == NULL) {
 		qp->start = store;
 		qp->end = store;
 	}else {
