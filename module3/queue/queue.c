@@ -17,14 +17,14 @@ typedef struct node {
 	struct node *next;
 }node;
 
-typedef struct queue {
+struct queue {
 	node *start;
 	node *end;
-}queue_t;
+};
 
 /* create an empty queue */
 queue_t* qopen(void){
-	queue_t *qp = (queue_t*)malloc(sizeof(queue_t));
+	struct queue *qp = (struct queue*)malloc(sizeof(struct queue));
 	if (qp==NULL){
 		return NULL;
 	}
@@ -35,10 +35,11 @@ queue_t* qopen(void){
 
 /* deallocate a queue, frees everything in it */
 void qclose(queue_t *qp) {
-	if (qp  == NULL){
+	struct queue *q = (struct queue*)qp;
+	if (q  == NULL){
 		return;
 	}
-	node *current = qp->start;
+	node *current = q->start;
 	while (current != NULL){
 		node *temp = current->next;
 		free(current);
@@ -52,7 +53,8 @@ void qclose(queue_t *qp) {
 	returns 0 is successful; nonzero otherwise
 */
 int32_t qput(queue_t *qp, void *elementp){
-	if (qp == NULL){
+	struct queue *q = (struct queue*)qp;
+	if (q == NULL){
 		return -1;
 	}
 
@@ -63,49 +65,51 @@ int32_t qput(queue_t *qp, void *elementp){
 	store->data = elementp;
 	store->next = NULL;
 
-	if (qp->start == NULL) {
-		qp->start = store;
-		qp->end = store;
+	if (q->start == NULL) {
+		q->start = store;
+		q->end = store;
 	}else {
-		qp->end->next = store;
-		qp->end = store;
+		q->end->next = store;
+		q->end = store;
 	}
 	return 0;
 }
 
 /* get the first element from queue, removing it from the queue */
 void* qget(queue_t *qp) {
-	if (qp == NULL){
+	struct queue *q = (struct queue*)qp;
+	if (q == NULL){
 		fprintf(stderr,"invalid input.\n");
 		exit(EXIT_FAILURE);
 	}
-	if (qp->start == NULL) {
+	if (q->start == NULL) {
 		fprintf(stderr,"invalid input.Queue is empty.\n");
 		exit(EXIT_FAILURE);
 	}
-	void *info = qp->start->data;
+	void *info = q->start->data;
 	//special case when there is only one element in the queue
-	if (qp->start == qp->end) {
-		node *temp = qp->start;   
-		qp->start = NULL;
-		qp->end = NULL;
+	if (q->start == q->end) {
+		node *temp = q->start;   
+		q->start = NULL;
+		q->end = NULL;
 		free(temp);
 		return info;
 	}
 
 	//all other cases
-	node *temp1 = qp->start;
-	qp->start = qp->start->next;
+	node *temp1 = q->start;
+	q->start = q->start->next;
 	free(temp1);
 	return info;
 }
 
 /* apply a function to every element of the queue */
 void qapply(queue_t *qp, void (*fn)(void* elementp)) {
-	if (qp == NULL) {
+	struct queue *q = (struct queue*)qp;
+	if (q == NULL) {
 		return;
 	}
-	node *current = qp->start;
+	node *current = q->start;
 	while (current != NULL) {
 		fn(current->data);
 		current = current ->next;
@@ -121,10 +125,11 @@ void qapply(queue_t *qp, void (*fn)(void* elementp)) {
 	returns a pointer to an element, or NULL if not found
 */
 void* qsearch(queue_t *qp, bool (*searchfn)(void* elementp,const void* keyp),const void* skeyp) {
-	if (qp == NULL) {
+	struct queue *q = (struct queue*)qp;
+	if (q == NULL) {
 		return NULL;
 	}
-	node *current = qp->start;
+	node *current = q->start;
 	while (current != NULL) {
 		if (searchfn(current->data, skeyp)) {
 				void *res = (void*)current->data;
@@ -140,20 +145,21 @@ void* qsearch(queue_t *qp, bool (*searchfn)(void* elementp,const void* keyp),con
 	 NULL if not found
 */
 void* qremove(queue_t *qp, bool (*searchfn)(void* elementp,const void* keyp),const void* skeyp){
-	if (qp == NULL) {
+	struct queue *q = (struct queue*)qp;
+	if (q == NULL) {
 		return NULL;
 	}
-	node *current = qp->start;
+	node *current = q->start;
 	node *prev = NULL;
 	while (current != NULL) {
 		if (searchfn(current->data, skeyp)) {
 			//condition1: when it is at the front of the queue:
 			void *res = (void*)current->data; 
 			if (prev == NULL){
-				node *tempnode = qp->start;
-			  qp->start = current->next;
-				if (qp->start == NULL){
-					qp->end = NULL;
+				node *tempnode = q->start;
+			  q->start = current->next;
+				if (q->start == NULL){
+					q->end = NULL;
 				}
 				free(tempnode);
 				return res;
@@ -161,8 +167,8 @@ void* qremove(queue_t *qp, bool (*searchfn)(void* elementp,const void* keyp),con
 				// other cases
 				node *tempnode = current;
 				prev->next = current->next;
-				if (current == qp->end) {
-					qp->end = prev;
+				if (current == q->end) {
+					q->end = prev;
 				}
 				free(tempnode);
 				return res;
@@ -179,37 +185,39 @@ void* qremove(queue_t *qp, bool (*searchfn)(void* elementp,const void* keyp),con
 	 */
 void qconcat(queue_t *q1p, queue_t *q2p) {
 	// first move q2 to q1
-	if (q1p == NULL){
-		if (q2p == NULL){
+	struct queue *q1 = (struct queue*)q1p;
+	struct queue *q2 = (struct queue*)q2p;
+	if (q1 == NULL){
+		if (q2 == NULL){
 			return;
 		}
 		free(q2p);
 		return;
 	}
 
-	if (q2p == NULL) {
+	if (q2 == NULL) {
 		return;
 	}
 	
-	if (q1p->start == NULL) {
-		if (q2p->start == NULL) {
+	if (q1->start == NULL) {
+		if (q2->start == NULL) {
 			free(q2p);
 			return;
 		} else {
-			q1p->start = q2p->start;
-			q1p->end = q2p->end;
+			q1->start = q2->start;
+			q1->end = q2->end;
 			free(q2p);
 			return;
 		}
 	}
 
-	if (q2p->start == NULL) {
+	if (q2->start == NULL) {
 		free(q2p);
 		return;
 	}
 
-	q1p->end->next =q2p->start;
-	q1p->end = q2p->end;
+	q1->end->next =q2->start;
+	q1->end = q2->end;
 	free(q2p);
 	return;
 }
