@@ -120,7 +120,102 @@ void qapply(queue_t *qp, void (*fn)(void* elementp)) {
 					 -- returns TRUE or FALSE as defined in bool.h
 	returns a pointer to an element, or NULL if not found
 */
+void* qsearch(queue_t *qp, bool (*searchfn)(void* elementp,const void* keyp),const void* skeyp) {
+	if (qp == NULL) {
+		return NULL;
+	}
+	node *current = qp->start;
+	while (current != NULL) {
+		if (searchfn(current->data, skeyp)) {
+				void *res = (void*)current->data;
+				return res;
+			}
+		current = current->next;
+	}
+	return NULL;
+}
 
+/* search a queue using a supplied boolean function (as in qsearch),
+	 removes the element from the queue and returns a pointer to it or
+	 NULL if not found
+*/
+void* qremove(queue_t *qp, bool (*searchfn)(void* elementp,const void* keyp),const void* skeyp){
+	if (qp == NULL) {
+		return NULL;
+	}
+	node *current = qp->start;
+	node *prev = NULL;
+	while (current != NULL) {
+		if (searchfn(current->data, skeyp)) {
+			//condition1: when it is at the front of the queue:
+			void *res = (void*)current->data; 
+			if (prev == NULL){
+				node *tempnode = qp->start;
+			  qp->start = current->next;
+				if (qp->start == NULL){
+					qp->end = NULL;
+				}
+				free(tempnode);
+				return res;
+			}else{
+				// other cases
+				node *tempnode = current;
+				prev->next = current->next;
+				if (current == qp->end) {
+					qp->end = prev;
+				}
+				free(tempnode);
+				return res;
+			}
+		}
+		prev = current;
+		current = current->next;
+	}
+	return NULL;
+}
+
+/* concatenatenates elements of q2 into q1
+	 q2 is dealocated, closed, and unusable upon completion
+	 */
+void qconcat(queue_t *q1p, queue_t *q2p) {
+	// first move q2 to q1
+	if (q1p == NULL){
+		if (q2p == NULL){
+			return;
+		}
+		free(q2p);
+		return;
+	}
+
+	if (q2p == NULL) {
+		return;
+	}
+	
+	if (q1p->start == NULL) {
+		if (q2p->start == NULL) {
+			free(q2p);
+			return;
+		} else {
+			q1p->start = q2p->start;
+			q1p->end = q2p->end;
+			free(q2p);
+			return;
+		}
+	}
+
+	if (q2p->start == NULL) {
+		free(q2p);
+		return;
+	}
+
+	q1p->end->next =q2p->start;
+	q1p->end = q2p->end;
+	free(q2p);
+	return;
+}
+			
+		
+		
 
 	
 
