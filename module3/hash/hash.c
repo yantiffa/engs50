@@ -12,6 +12,13 @@
  * Hash.
  */
 #define get16bits(d) (*((const uint16_t *) (d)))
+#include "hash.h"
+#include "queue.h"
+
+struct hashtable_t {
+	queue_t ** queues;
+	unit32_t size;
+};
 
 static uint32_t SuperFastHash(const char *data, int len, uint32_t tablesize) {
     uint32_t hash = len, tmp;
@@ -61,3 +68,23 @@ static uint32_t SuperFastHash(const char *data, int len, uint32_t tablesize) {
     
     return hash % tablesize;
 }
+
+/* hopen -- opens a hash table with initial size hsize */
+hashtable_t *hopen(uint32_t hsize) {
+	hashtable_t *hash = (hashtable_t*)malloc(sizeof(hashtable_t));
+	hash->queues = calloc(hsize, sizeof(queue_t));
+	hash->size = hsize;
+	return hash;
+}
+
+/* hclose -- closes a hash table */
+void hclose(hashtable_t *htp) {
+	for (uint32_t i = 0; i < htp->size; i++) {
+		if (htp->queues[i] != NULL){
+			qclose((htp->queues[i]));
+		}
+	}
+	free(htp->queues);
+	free(htp);
+}
+	
