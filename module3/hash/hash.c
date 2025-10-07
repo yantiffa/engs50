@@ -16,7 +16,7 @@
 #include "queue.h"
 
 struct hashtable_t {
-	queue_t ** queues;
+	queue_t **queues;
 	unit32_t size;
 };
 
@@ -71,20 +71,29 @@ static uint32_t SuperFastHash(const char *data, int len, uint32_t tablesize) {
 
 /* hopen -- opens a hash table with initial size hsize */
 hashtable_t *hopen(uint32_t hsize) {
-	hashtable_t *hash = (hashtable_t*)malloc(sizeof(hashtable_t));
-	hash->queues = calloc(hsize, sizeof(queue_t));
+	struct hashtable_t *hash = (hashtable_t*)malloc(sizeof(hashtable_t));
+	if (hash == NULL) {
+		fprintf(stderr, "malloc failed:(\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	hash->queues = calloc(hsize, sizeof(queue_t*));
 	hash->size = hsize;
-	return hash;
+	return (hashtable *)hash;
 }
 
 /* hclose -- closes a hash table */
 void hclose(hashtable_t *htp) {
-	for (uint32_t i = 0; i < htp->size; i++) {
-		if (htp->queues[i] != NULL){
-			qclose((htp->queues[i]));
+	struct hashtable_t *hash = (struct hashtable_t *)htp;
+	if (hash == NULL) {
+		exit(EXIT_FAILURE);
+	}
+	for (uint32_t i = 0; i < hash->size; i++) {
+		if (hash->queues[i] != NULL){
+			qclose((hash->queues[i]));
 		}
 	}
-	free(htp->queues);
-	free(htp);
+	free(hash->queues);
+	free(hash);
 }
 	
