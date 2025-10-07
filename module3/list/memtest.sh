@@ -4,7 +4,7 @@
 # Exit if any command fails
 set -e
 
-TEST_DIR="./"
+TEST_DIR="./testlist"
 
 # Counter for failed tests
 FAIL_COUNT=0
