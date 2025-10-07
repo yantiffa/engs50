@@ -99,9 +99,68 @@ int main(){
 	 free(node);
 	 printf("success: apply() a function to a non-empty list\n");
 	 //remove() from an empty list
-	 //remove() from a non-empty list at the end
-	 //remove() from a non-empty list at the beginning
-	 //remove() from a non-empty list somewhere in the middle
+	car_t *removed = lremove("some_plate");
+	if (removed == NULL)
+	{
+		printf("success: remove() from an empty list\n");
+	}
+	//create 5 cars
+	car_t* car5 = malloc(sizeof(car_t));
+	strcpy(car5->plate, "QQQ0000");
+
+	car_t* car6 = malloc(sizeof(car_t));
+	strcpy(car6->plate, "QWE1234");
+
+	car_t* car7 = malloc(sizeof(car_t));
+	strcpy(car7->plate, "ASD2345");
+
+	car_t* car8 = malloc(sizeof(car_t));
+	strcpy(car8->plate, "ZXC3456");
+
+	car_t* car9 = malloc(sizeof(car_t));
+	strcpy(car9->plate, "CCC4567");
+
+	lput(car5);
+	lput(car6);
+	lput(car7);
+	lput(car8);
+	lput(car9);
+
+	//remove() from a non-empty list at the end
+	removed = lremove(car5->plate);
+	if (removed != NULL)
+	{
+		printf("success: remove() from a non-empty llist at the end. Car just removed: %s\n", removed->plate);
+		free(removed);
+	}
+	else
+	{
+		printf("Car not found\n");
+	}
+
+	//remove() from a non-empty list at the beginning
+	removed = lremove(car9->plate);
+	if (removed != NULL)
+	{
+		printf("success: remove() from a non-empty list at the beginning. Car just removed: %s\n", removed->plate);
+		free(removed);
+	}
+	else
+	{
+		printf("Car not found\n");
+	}
+	//remove() from a non-empty list somewhere in the middle
+
+	removed = lremove(car7->plate);
+	if (removed != NULL)
+	{
+		printf("success: remove() from a non-empty list somewhere in the middle. Car just removed: %s\n", removed->plate);
+		free(removed);
+	}
+	else
+	{
+		printf("Car not found\n");
+	}
 	 printf("All test cases passed!\n");
 	 exit(EXIT_SUCCESS); 
 }
