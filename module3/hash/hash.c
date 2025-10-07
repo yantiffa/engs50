@@ -17,7 +17,7 @@
 
 struct hashtable_t {
 	queue_t **queues;
-	unit32_t size;
+	uint32_t size;
 };
 
 static uint32_t SuperFastHash(const char *data, int len, uint32_t tablesize) {
@@ -100,7 +100,10 @@ void hclose(hashtable_t *htp) {
 /* hput -- puts an entry into a hash table under designated key
 	 returns 0 for success; non-zero otherwise
  */
-int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen);
+int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen)
+{
+    
+}
 
 /* happly -- applies a function to every entry in hash table */
 void happly(hashtable_t *htp, void (*fn)(void *ep));
