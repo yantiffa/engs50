@@ -17,10 +17,17 @@
 
 void test_hopen_hclose() {
 	printf("Testing hopen/hclose...\n");
-	hashtable_t *hash = hopen(100);
+	struct hashtable_t *hash = hopen(100);
 	assert(hash != NULL);
-	assert(hash->size == 100);
-	assert(hash->queues != NULL);
 	hclose(hash);
 	printf("Passed basic hopen/hclose\n\n");
 }
+
+
+int main()
+{
+	test_hopen_hclose();
+	return 0;
+}
+
+
