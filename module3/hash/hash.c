@@ -1,8 +1,9 @@
 /*
  * hash.c -- implements a generic hash table as an indexed set of queues.
  */
+#include <stdio.h>
 #include <stdint.h>
-
+#include <stdlib.h>
 /*
  * SuperFastHash() -- produces a number between 0 and the tablesize-1.
  *
@@ -79,7 +80,7 @@ hashtable_t *hopen(uint32_t hsize) {
 	
 	hash->queues = calloc(hsize, sizeof(queue_t*));
 	hash->size = hsize;
-	return (hashtable *)hash;
+	return (hashtable_t *)hash;
 }
 
 /* hclose -- closes a hash table */
@@ -102,7 +103,18 @@ void hclose(hashtable_t *htp) {
  */
 int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen)
 {
+    struct hashtable_t *hash = (struct hashtable_t *)htp;
     
+    uint32_t index = SuperFastHash(key, keylen, hash->size);
+
+    if (hash->queues[index] == 0)
+    {
+        hash->queues[index] = qopen();
+    }
+
+    qput(hash->queues, key);
+    
+
 }
 
 /* happly -- applies a function to every entry in hash table */
