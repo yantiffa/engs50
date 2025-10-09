@@ -1,5 +1,7 @@
 CFLAGS=-Wall -pedantic -std=c11 -I. -g
 
+all: test_hash
+
 hash.o: hash.c
 	gcc $(CFLAGS) -c hash.c
 
@@ -11,5 +13,3 @@ test_hash: hash.o test_hash.o
 
 clean:
 	rm -f *.o test_hash
-
-
