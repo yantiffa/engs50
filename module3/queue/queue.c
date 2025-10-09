@@ -79,12 +79,11 @@ int32_t qput(queue_t *qp, void *elementp){
 void* qget(queue_t *qp) {
 	struct queue *q = (struct queue*)qp;
 	if (q == NULL){
-		fprintf(stderr,"invalid input.\n");
-		exit(EXIT_FAILURE);
+		return NULL;
 	}
 	if (q->start == NULL) {
-		fprintf(stderr,"invalid input.Queue is empty.\n");
-		exit(EXIT_FAILURE);
+		// Queue is empty
+		return NULL;
 	}
 	void *info = q->start->data;
 	//special case when there is only one element in the queue
