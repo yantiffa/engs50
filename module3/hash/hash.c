@@ -17,10 +17,10 @@
 #include "queue.h"
 #include <stddef.h>
 
-struct hashtable {
+typedef struct hashtable_t {
 	queue_t **queues;
 	uint32_t size;
-};
+} hashtable;
 
 static uint32_t SuperFastHash(const char *data, int len, uint32_t tablesize) {
     uint32_t hash = len, tmp;
@@ -73,7 +73,7 @@ static uint32_t SuperFastHash(const char *data, int len, uint32_t tablesize) {
 
 /* hopen -- opens a hash table with initial size hsize */
 hashtable_t *hopen(uint32_t hsize) {
-	struct hashtable *hash = malloc(sizeof(struct hashtable));
+	hashtable *hash = malloc(sizeof(hashtable));
 	if (hash == NULL) {
 		return NULL;
 	}
@@ -89,7 +89,7 @@ hashtable_t *hopen(uint32_t hsize) {
 
 /* hclose -- closes a hash table */
 void hclose(hashtable_t *htp) {
-	struct hashtable *hash = (struct hashtable *)htp;
+	hashtable *hash = (hashtable *)htp;
 	if (hash == NULL) {
 		return;
 	}
@@ -107,7 +107,7 @@ void hclose(hashtable_t *htp) {
  */
 int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen)
 {
-    struct hashtable *hash = (struct hashtable_t *)htp;
+    hashtable *hash = (hashtable*)htp;
     
     uint32_t index = SuperFastHash(key, keylen, hash->size);
 
@@ -122,7 +122,7 @@ int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen)
 /* happly -- applies a function to every entry in hash table */
 void happly(hashtable_t *htp, void (*fn)(void *ep))
 {
-    struct hashtable *hash = (struct hashtable_t *)htp;
+    hashtable *hash = (hashtable*)htp;
 
     for (uint32_t i = 0; i < hash->size; i++) 
     {
