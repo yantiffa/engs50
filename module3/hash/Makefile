@@ -1,15 +1,16 @@
 CFLAGS=-Wall -pedantic -std=c11 -I. -g
 
-all: test_hash
+SRCS := $(wildcard *.c)
+OBJS := $(SRCS:.c=.o)
+TARGET := test_hash
 
-hash.o: hash.c
-	gcc $(CFLAGS) -c hash.c
+all: $(TARGET)
 
-test_hash.o: test_hash.c
-	gcc $(CFLAGS) -c test_hash.c
+$(OBJS): %.o: %.c
+	gcc $(CFLAGS) -c $< -o $@
 
-test_hash: hash.o test_hash.o
-	gcc hash.o test_hash.o -o test_hash
+$(TARGET): $(OBJS)
+	gcc $(OBJS) -o $(TARGET)
 
 clean:
-	rm -f *.o test_hash
+	rm -f *.o $(TARGET)
