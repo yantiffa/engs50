@@ -13,7 +13,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include "queue.h"
-#include "hashtable.h"
+#include "hash.h"
 
 void test_hopen_hclose() {
 	printf("Testing hopen/hclose...\n");
