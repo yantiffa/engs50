@@ -113,13 +113,16 @@ int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen)
         hash->queues[index] = qopen();
     }
 
-    qput(hash->queues[index], ep);
+    return qput(hash->queues[index], ep);
     
-
+    
 }
 
 /* happly -- applies a function to every entry in hash table */
-void happly(hashtable_t *htp, void (*fn)(void *ep));
+void happly(hashtable_t *htp, void (*fn)(void *ep))
+{
+
+}
 
 /* hsearch -- searches for an entry under a designated key using a
      designated search fn -- returns a pointer to the entry or NULL if
