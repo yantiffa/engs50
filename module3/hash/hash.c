@@ -108,7 +108,7 @@ int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen)
     
     uint32_t index = SuperFastHash(key, keylen, hash->size);
 
-    if (hash->queues[index] == 0)
+    if (hash->queues[index] == NULL)
     {
         hash->queues[index] = qopen();
     }
