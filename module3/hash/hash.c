@@ -15,7 +15,7 @@
 #define get16bits(d) (*((const uint16_t *) (d)))
 #include "hash.h"
 #include "queue.h"
-#include <cstddef>
+#include <stddef.h>
 
 struct hashtable_t {
 	queue_t **queues;
@@ -113,7 +113,7 @@ int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen)
         hash->queues[index] = qopen();
     }
 
-    qput(hash->queues, key);
+    qput(hash->queues[index], ep);
     
 
 }
@@ -156,7 +156,10 @@ void *hremove(hashtable_t *htp,
     uint32_t idx = SuperFastHash(key, keylen, hash->size);
 
     if (hash->queues[idx] == NULL)
+    {
         return NULL;
+    }
+        
 
     return qremove(hash->queues[idx], searchfn, key);
 }
