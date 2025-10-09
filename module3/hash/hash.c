@@ -15,6 +15,7 @@
 #define get16bits(d) (*((const uint16_t *) (d)))
 #include "hash.h"
 #include "queue.h"
+#include <cstddef>
 
 struct hashtable_t {
 	queue_t **queues;
@@ -121,16 +122,41 @@ int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen)
 void happly(hashtable_t *htp, void (*fn)(void *ep));
 
 /* hsearch -- searches for an entry under a designated key using a
-	 designated search fn -- returns a pointer to the entry or NULL if
-	 not found
+     designated search fn -- returns a pointer to the entry or NULL if
+     not found
 */
-void *hsearch(hashtable_t *htp, bool (*searchfn)(void *elementp, const void *searchkeyp),const char *key,int32_t keylen);
+void *hsearch(hashtable_t *htp, bool (*searchfn)(void *elementp, const void *searchkeyp),
+              const char *key, int32_t keylen)
+{
+    if (htp == NULL || key == NULL || keylen <= 0 || searchfn == NULL)
+        return NULL;
+
+    struct hashtable_t *hash = (struct hashtable_t *)htp;
+    uint32_t idx = SuperFastHash(key, keylen, hash->size);
+
+    if (hash->queues[idx] == NULL)
+        return NULL;
+
+    return qsearch(hash->queues[idx], searchfn, key);
+}
 
 /* hremove -- removes and returns an entry under a designated key
-	 using a designated search fn -- returns a pointer to the entry or
-	 NULL if not found
+     using a designated search fn -- returns a pointer to the entry or
+     NULL if not found
 */
 void *hremove(hashtable_t *htp,
               bool (*searchfn)(void *elementp, const void *searchkeyp),
               const char *key,
-              int32_t keylen);
+              int32_t keylen)
+{
+    if (htp == NULL || key == NULL || keylen <= 0 || searchfn == NULL)
+        return NULL;
+
+    struct hashtable_t *hash = (struct hashtable_t *)htp;
+    uint32_t idx = SuperFastHash(key, keylen, hash->size);
+
+    if (hash->queues[idx] == NULL)
+        return NULL;
+
+    return qremove(hash->queues[idx], searchfn, key);
+}
