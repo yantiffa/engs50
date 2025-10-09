@@ -1,8 +1,9 @@
 /*
  * hash.c -- implements a generic hash table as an indexed set of queues.
  */
+#include <stdio.h>
 #include <stdint.h>
-
+#include <stdlib.h>
 /*
  * SuperFastHash() -- produces a number between 0 and the tablesize-1.
  *
@@ -14,7 +15,7 @@
 #define get16bits(d) (*((const uint16_t *) (d)))
 #include "hash.h"
 #include "queue.h"
-#include <cstddef>
+#include <stddef.h>
 
 struct hashtable_t {
 	queue_t **queues;
@@ -80,7 +81,7 @@ hashtable_t *hopen(uint32_t hsize) {
 	
 	hash->queues = calloc(hsize, sizeof(queue_t*));
 	hash->size = hsize;
-	return (hashtable *)hash;
+	return (hashtable_t *)hash;
 }
 
 /* hclose -- closes a hash table */
@@ -103,11 +104,31 @@ void hclose(hashtable_t *htp) {
  */
 int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen)
 {
+    struct hashtable_t *hash = (struct hashtable_t *)htp;
     
+    uint32_t index = SuperFastHash(key, keylen, hash->size);
+
+    if (hash->queues[index] == 0)
+    {
+        hash->queues[index] = qopen();
+    }
+
+    return qput(hash->queues[index], ep);
 }
 
 /* happly -- applies a function to every entry in hash table */
-void happly(hashtable_t *htp, void (*fn)(void *ep));
+void happly(hashtable_t *htp, void (*fn)(void *ep))
+{
+    struct hashtable_t *hash = (struct hashtable_t *)htp;
+
+    for (uint32_t i = 0; i < hash->size; i++) 
+    {
+        if (hash->queues[i] != NULL) 
+        {                              
+            qapply(hash->queues[i], fn); // apply fn to each element
+        }
+    }
+}
 
 /* hsearch -- searches for an entry under a designated key using a
      designated search fn -- returns a pointer to the entry or NULL if
@@ -144,7 +165,10 @@ void *hremove(hashtable_t *htp,
     uint32_t idx = SuperFastHash(key, keylen, hash->size);
 
     if (hash->queues[idx] == NULL)
+    {
         return NULL;
+    }
+        
 
     return qremove(hash->queues[idx], searchfn, key);
 }
