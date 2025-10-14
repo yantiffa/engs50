@@ -27,7 +27,7 @@ int main() {
     printf("First word: %s\n", word);
 
     free(word);
-    printf("hello\n");
-    webpage_delete(&seed);
+    printf("hello hi\n");
+
     return 0;
 }
