@@ -1,16 +1,19 @@
 CFLAGS=-Wall -pedantic -std=c11 -I. -g
 
-SRCS := $(wildcard *.c)
-OBJS := $(SRCS:.c=.o)
-TARGET := test_hash
+OFILES = queue.o hash.o webpage.o
+LIBDIR = lib
+LIBNAME = libutils.a
 
-all: $(TARGET)
+all: $(LIBDIR)/$(LIBNAME)
 
-$(OBJS): %.o: %.c
+%.o: %.c
 	gcc $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(OBJS)
-	gcc $(OBJS) -o $(TARGET)
+$(LIBDIR)/$(LIBNAME): $(OFILES) | $(LIBDIR)
+	ar cr $@ $(OFILES)
+
+$(LIBDIR):
+	mkdir -p $(LIBDIR)
 
 clean:
-	rm -f *.o $(TARGET)
+	rm -f *.o $(LIBDIR)/$(LIBNAME)
