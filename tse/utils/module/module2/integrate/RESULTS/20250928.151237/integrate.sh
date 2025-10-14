@@ -1,0 +1,16 @@
+#!/bin/bash
+
+runtest.sh "test2"
+runtest.sh "test2 -n 9 8"
+runtest.sh "test2 -n 10 11"
+runtest.sh "test2 -nn 10 11"
+runtest.sh "test2 -p 0.1 9 8"
+runtest.sh "test2 -pp 10 12"
+runtest.sh "test2 2.1 3.7 -p 0.0001"
+runtest.sh "test2 2.1 3.7 -p 1.1"
+runtest.sh "test2 2.1 3.7 -p -0.1"
+runtest.sh "test1"
+runtest.sh "test1 2.1 3.7 -p 0.1" 
+runtest.sh "test1 -n 9 8"
+runtest.sh "test1 -nn 10 11"
+runtest.sh "test1 2.1 3.7 -p -0.1" 

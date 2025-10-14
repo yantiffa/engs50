@@ -1,0 +1,227 @@
+Bash (Shell) Scripts 
+--------------------
+
+command interpreter -- not meant for heavy computing, mainly for
+executing housekeeping and maintenacnce tasks
+
+all commands can be entered at the command line or placed in file and
+executed
+
+commands typically returns 0 (meaning success/true) or non-zero
+(failure/false)
+
+arguments to commands are strings separated by spaces
+
+
+#special files
+stdout -- by default the screen
+stdin -- by default the keyboard
+stderr -- by default the screen
+
+cat verse.txt
+
+# output redirection
+echo hello there > foo
+echo this is a little test file >> foo
+
+# input delivery 
+wc -l < boy.txt 
+
+#pipes
+cat boy.txt | wc -l
+cat boy.text | grep father
+ls -lR | grep <file>
+
+# when the shell starts its given a default environment
+printenv
+PATH
+SHELL
+HOME
+USER
+PWD
+
+which
+
+#add bin to path
+export NAME=WORD
+export PATH=".:~/bin:$PATH"  -- place/replace NAME in environment
+
+# NOTE: Variables are explanded when used in double quotes but not in single quotes
+
+#welcome.sh
+#!/bin/bash
+date
+hostname
+whoami
+
+chmod 700 welcome.sh
+
+#variables:
+VERSION=1.0
+ARCH=x86_64
+
+# Braces ( ) -- expands to OUTPUT of a command
+THISHOST=$(hostname)
+TODAY=$(date)
+
+ME=${USER}  -- from the environment
+or
+ME=$(whoami) -- by executing the command
+
+# A value can be referred to with $
+BANNER="Welcome ${ME}@${THISHOST}, ${TODAY} (Version ${VERSION}:${ARCH})"
+
+
+ARGUMENTS: Remember all arguments are passed as strings and
+delineated by spaces
+
+#? -- exit status of the last command executed
+   -- 0 success; nonzero otherwise
+$# -- number of arguments
+$1 -- first argument
+$2 -- second argument
+$3 -- third argument etc.
+
+echo "there are $# arguments !!!"
+
+
+# making decisions
+test command: test operand1 operator operand3
+OR
+[ operand1 operator operand3 ]
+
+Typically condition is the built "test" command written [...]
+   -- returns 0 (meaning success/true) or non-zero (failure/false)
+
+NOTE: spaces necessary to distinguish operand from commands
+
+String Comparison: == !=
+Numeric Comparison: -lt, -gt, -eq, -ne, -le, -ge
+
+if condition
+then
+	command1
+	command2
+fi
+
+if [ $# != 0 ]
+then
+	echo "error: there are $# arguments !!!"
+	exit
+fi
+
+# ; means sequential execution and can be used to place multiple commands on line
+
+if condition ; then
+	command1
+	command2
+fi
+
+if condition ; then
+	command1
+	command2
+else
+	command3
+	command4
+fi
+
+if condition1 ; then
+	command1
+	command2
+elif condition2 ; then
+	command3
+	command4
+elif condition3 ; then
+	command5
+	command6
+else
+	command7
+	command8
+fi
+
+Variables are explanded when used in double quotes but
+not in single quotes
+
+if [ $# == 1 ] && [ $1 == "-h" ] ; then
+	 echo "usage: ./welcome.sh -- print useful info (${VERSION})"
+	 exit
+fi
+
+Useful conditions
+-e does the file exist?
+-d does the directory exist?
+-f does the file exist and is it an ordinary file (not a directory)?
+-r does the file exist and is it readable?
+-s does the file exist and have a size greater than 0 bytes
+-w does the file exist and is it writeable?
+-x does the file exist and is it executable?
+
+if [ -d ~/mydir ] ; then
+	 echo "mydir is present"
+   exit
+fi
+
+if [ ! -d ~/mydir ] ; then
+	 echo "mydir not present"
+   exit
+fi
+
+pushd <dir>
+echo [$(pwd)]
+popd
+
+# suppress pushd and popd output
+pushd () {
+    command pushd "$@" > /dev/null
+}
+
+popd () {
+    command popd "$@" > /dev/null
+}
+
+pushd stuff
+echo [$(pwd)]
+touch t1.c
+touch t2.c
+touch t3.c
+touch t4.c
+popd
+
+
+loops -- typically used to loop over lists:
+   -- expands to list of all that match pattern
+
+for VARIABLE in 1 2 3 4 5 .. N
+do
+	command1 on $VARIABLE
+	command2 on $VARIABLE
+	commandN on $VARIABLE
+done
+
+for VARIABLE in file1 file2 file3 ... fileN
+do
+	command1 on $VARIABLE
+	command2 on $VARIABLE
+	commandN on $VARIABLE
+done
+
+for X in red green blue ; do
+	echo $X
+done
+	
+# f expands to a list of files 
+for f in *.c ; do
+		echo ${f}
+done
+
+# let evaluates expressions
+    -- note no spaces otherwise assumes X is a command
+# note you can also use $((...) to evaluate arithmentic expressions
+
+X=0
+while [ ${X} -lt 5 ] ; do
+		echo ${X}
+		let X=X+1
+done
+
+
