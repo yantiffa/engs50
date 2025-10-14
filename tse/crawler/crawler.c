@@ -15,19 +15,21 @@ typedef struct webpage {
 
 int main() {
 
-    webpage_t seed = *webpage_new("https://thayer.github.io/engs50/", 0, NULL);
+    webpage_t *seed = webpage_new("https://thayer.github.io/engs50/", 0, NULL);
 
-    if(!webpage_fetch(&seed)) {
-        fprintf(stderr, "Failed to fetch webpage\n");
+    if(!webpage_fetch(seed)) {
+        printf("Failed to fetch webpage\n");
+        webpage_delete(seed);
         exit(EXIT_FAILURE);
     }
     
-    char *word = malloc(100 * sizeof(char));
-    webpage_getNextWord(&seed, 0, &word);
+    char *word = NULL;
+    webpage_getNextWord(seed, 0, &word);
+
     printf("First word: %s\n", word);
 
     free(word);
-    printf("hello hi\n");
 
+    webpage_delete(seed);
     return 0;
 }
