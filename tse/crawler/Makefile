@@ -1,21 +1,10 @@
-CFLAGS=-Wall -pedantic -std=c11 -I. -L$(LIBDIR) -g
-LIBDIR = lib
-LIBNAME = libutils.a
+CFLAGS= -Wall -pedantic -std=c11 -I../ -L../lib/ -g
 LIBS=-lutils -lcurl
 
-all: $(LIBDIR)/$(LIBNAME) crawler
+all: crawler
 
-%.o: %.c
-	gcc $(CFLAGS) -c $< -o $@
-
-$(LIBDIR)/$(LIBNAME): $(OFILES) | $(LIBDIR)
-	ar cr $@ $(OFILES)
-
-$(LIBDIR):
-	mkdir -p $(LIBDIR)
-
-crawler: crawler.c $(LIBDIR)/$(LIBNAME)
+crawler:
 	gcc $(CFLAGS) crawler.c $(LIBS) -o $@
 
 clean:
-	rm -f *.o $(LIBDIR)/$(LIBNAME) crawler
+	rm -f crawler *.o
