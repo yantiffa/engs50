@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "../webpage.h"
+#include "queue.h"
 
 // Ensure the definition of struct webpage is available
 // If webpage.h does not define struct webpage, add its definition here:

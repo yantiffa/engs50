@@ -88,6 +88,9 @@ void webpage_delete(void *data)
   }
 }
 
+
+
+
 /**************** webpage_getNextWord ****************/
 /*
  * webpage_getNextWord - returns the next word from doc[pos] into word
