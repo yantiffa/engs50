@@ -14,27 +14,6 @@ typedef struct webpage {
 } webpage_t;
 
 int main() {
-    webpage_t *seed = webpage_new("https://thayer.github.io/engs50/", 0, NULL);
-
-    if(!webpage_fetch(seed)) {
-        printf("Failed to fetch webpage\n");
-        webpage_delete(seed);
-        exit(EXIT_FAILURE);
-    }
-    
-    char *word = NULL;
-    webpage_getNextWord(seed, 0, &word);
-
-    printf("First word: %s\n", word);
-
-    free(word);
-
-    webpage_delete(seed);
-    return 0;
-}
-
-// I have noticed we are suppose to print out all the  urls insetad of just the first word?
-int main() {
 	webpage_t *page = webpage_new("https://thayer.github.io/engs50/", 0, NULL);
 	if(!webpage_fetch(page)) {
 		printf("Failed to fetch webpage\n");
