@@ -14,7 +14,6 @@ typedef struct webpage {
 } webpage_t;
 
 int main() {
-
     webpage_t *seed = webpage_new("https://thayer.github.io/engs50/", 0, NULL);
 
     if(!webpage_fetch(seed)) {
@@ -32,4 +31,26 @@ int main() {
 
     webpage_delete(seed);
     return 0;
+}
+
+// I have noticed we are suppose to print out all the  urls insetad of just the first word?
+int main() {
+	webpage_t *page = webpage_new("https://thayer.github.io/engs50/", 0, NULL);
+	if(!webpage_fetch(page)) {
+		printf("Failed to fetch webpage\n");
+		webpage_delete(page);
+		exit(EXIT_FAILURE);
+	}
+	int pos = 0;
+	char *result;
+	while ((pos = webpage_getNextURL(page, pos, &result)) > 0) {
+		if(IsInternalURL(result)){
+			printf("internal: %s\n", result);
+		}else{
+			printf("external: %s\n", result);
+		}
+		free(result);
+	}
+	webpage_delete(page);
+	return 0;
 }
