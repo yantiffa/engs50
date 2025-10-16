@@ -13,23 +13,33 @@ typedef struct webpage {
   int depth;                               // depth of crawl
 } webpage_t;
 
+void print_webpage(void* elementp) {
+    webpage_t *page = (webpage_t*)elementp;
+    printf("URL: %s, Depth: %d\n", webpage_getURL(page), webpage_getDepth(page));
+}
+
 int main() {
 	webpage_t *page = webpage_new("https://thayer.github.io/engs50/", 0, NULL);
 	if(!webpage_fetch(page)) {
-		printf("Failed to fetch webpage\n");
-		webpage_delete(page);
-		exit(EXIT_FAILURE);
-	}
+	printf("Failed to fetch webpage\n");
+	webpage_delete(page);
+	exit(EXIT_FAILURE);
+}
+	//step3: with queue
+	queue_t * queue = qopen();
 	int pos = 0;
 	char *result;
 	while ((pos = webpage_getNextURL(page, pos, &result)) > 0) {
 		if(IsInternalURL(result)){
-			printf("internal: %s\n", result);
-		}else{
-			printf("external: %s\n", result);
+			int current_depth = webpage_getDepth(page);
+			webpage_t *child_page = webpage_new(result, 1, NULL);
+			qput(queue, child_page);
 		}
 		free(result);
 	}
 	webpage_delete(page);
-	return 0;
-}
+	qapply(queue, print_webpage);
+	qapply(queue, webpage_delete);
+	qclose(queue);
+	exit(EXIT_SUCCESS);
+} 
