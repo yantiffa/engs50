@@ -11,6 +11,24 @@ void print_webpage(void* elementp) {
     printf("URL: %s, Depth: %d\n", webpage_getURL(page), webpage_getDepth(page));
 }
 
+int32_t pagesave(webpage_t *pagep, int id, char *dirname) {
+	char path[256];
+	sprintf(path, "%s/%d", dirname, id);
+	FILE *fp = fopen(path, "w");
+
+	if (fp==NULL) {
+		//error
+		return -1;
+	}
+	fprintf(fp, "%s\n", webpage_getURL(pagep));
+	fprintf(fp, "%d\n", webpage_getDepth(pagep));
+	fprintf(fp, "%d\n", webpage_getHTMLlen(pagep));
+	fprintf(fp, "%s\n", webpage_getHTML(pagep));
+	
+	fclose(fp);
+	return 0;
+}
+	
 // Used in hsearch: compare a stored webpage_t*'s URL to a URL string
 static bool same_url(void *elementp, const void *searchkeyp) 
 {
@@ -28,7 +46,9 @@ int main() {
 		webpage_delete(page);
 		exit(EXIT_FAILURE);
 	}
-	
+
+	//step5: store a copy of the file
+	pagesave(page, 1, "pages");
 	hashtable_t*visited = hopen(107);
 	hput(visited, page, seed, strlen(seed));
 
