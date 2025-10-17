@@ -48,7 +48,7 @@ int main() {
 	}
 
 	//step5: store a copy of the file
-	pagesave(page, 1, "pages");
+	pagesave(page, 1, "../pages");
 	hashtable_t*visited = hopen(107);
 	hput(visited, page, seed, strlen(seed));
 
