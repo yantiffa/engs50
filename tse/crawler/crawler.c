@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdint.h>
 #include "webpage.h"
 #include "queue.h"
 #include "hash.h"
@@ -70,15 +71,28 @@ int main() {
                     qput(queue, child_page);                                // enqueue once
                     hput(visited, child_page, result, (int)strlen(result)); // remember seen
                 }
+
             }
         }
         free(result);  // ALWAYS free what webpage_getNextURL allocates
         result = NULL;
     }
 
-	webpage_delete(page);
-	qapply(queue, print_webpage);
-	qapply(queue, webpage_delete);
+	// Dequeue each stored child page, print and delete it to avoid leaks
+	webpage_t *child;
+	while ((child = qget(queue)) != NULL) {
+		print_webpage(child);
+		webpage_delete(child);
+	}
+	// close the queue now that all elements have been removed and freed
 	qclose(queue);
+
+	// close the hashtable (we have deleted the stored webpage objects above)
+	hclose(visited);
+
+	// delete the original fetched page now that we're done with it
+	webpage_delete(page);
+
 	exit(EXIT_SUCCESS);
 } 
+ 
