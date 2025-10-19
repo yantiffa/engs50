@@ -14,5 +14,19 @@ crawler.o: crawler.c ../webpage.h \
                      ../utils/module/module3/hash/hash.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+counts: crawler pagedir
+	@rm -f pagedir/*
+	@for d in 0 1 2 3; do \
+	  ./crawler "https://thayer.github.io/engs50/" pagedir $$d >/dev/null || true; \
+	  n=$$(ls -1 pagedir/[0-9]* 2>/dev/null | wc -l); \
+	  echo "$$d: $$n"; \
+	  rm -f pagedir/*; \
+	done
+
+	@echo "" >> crawl_counts.txt
+	@echo "(3 Points) TA Signature:" >> crawl_counts.txt
+	@echo "Wrote crawl_counts.txt"
+
+
 clean:
 	rm -f crawler *.o
