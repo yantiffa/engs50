@@ -109,15 +109,13 @@ int main(int argc, char *argv[]) {
 				result = NULL;
 			}
 		}
-		
+		webpage_delete(curr);
 	}
 
 	// close the queue now that all elements have been removed and freed
 	qclose(queue);
-	// close the hashtable (we have deleted the stored webpage objects above)
+	// close the hashtable
 	hclose(visited);
-	// delete the original fetched page now that we're done with it
-	webpage_delete(page);
 	exit(EXIT_SUCCESS);
 	printf("Saved %d page(s) to %s\n", id-1, pagedir);
 	
