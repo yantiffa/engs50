@@ -75,7 +75,11 @@ webpage_t *pageload(int id, char *dirname) {
             html[i] = (char)c;
         }
         html[i] = '\0';
-    }
+    } else {
+		free(url);
+		fclose(fp);
+		return NULL;
+	}
 
     fclose(fp);
 
