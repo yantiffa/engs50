@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "webpage.h": "c"
+        "webpage.h": "c",
+        "stdint.h": "c"
     }
 }
