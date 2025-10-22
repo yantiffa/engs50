@@ -78,13 +78,14 @@ int main(int argc, char **argv) {
 	// Defaults
 	const char *pagedir = "../crawler/pagedir";
 	int id = 1;
-
-	// Override from command line if provided
-	if (argc > 1) pagedir = argv[1];
-	if (argc > 2) id = atoi(argv[2]);
-
-	// (optional) show what will be used
-	// printf("Using pagedir='%s', id=%d\n", pagedir, id);
+	if (argc > 1) 
+	{
+		pagedir = argv[1];
+	}
+	if (argc > 2) 
+	{
+		id = atoi(argv[2]);
+	}
 
 	webpage_t *page = pageload(id, (char*)pagedir);
 	if (page == NULL) {
