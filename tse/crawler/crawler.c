@@ -7,29 +7,13 @@
 #include "webpage.h"
 #include "queue.h"
 #include "hash.h"
+#include "pageio.h"
 
 void print_webpage(void* elementp) {
     webpage_t *page = (webpage_t*)elementp;
     printf("URL: %s, Depth: %d\n", webpage_getURL(page), webpage_getDepth(page));
 }
 
-int32_t pagesave(webpage_t *pagep, int id, char *dirname) {
-	char path[256];
-	sprintf(path, "%s/%d", dirname, id);
-	FILE *fp = fopen(path, "w");
-
-	if (fp==NULL) {
-		//error
-		return -1;
-	}
-	fprintf(fp, "%s\n", webpage_getURL(pagep));
-	fprintf(fp, "%d\n", webpage_getDepth(pagep));
-	fprintf(fp, "%d\n", webpage_getHTMLlen(pagep));
-	fprintf(fp, "%s\n", webpage_getHTML(pagep));
-	
-	fclose(fp);
-	return 0;
-}
 
 static void usage(const char* program_name) 
 {

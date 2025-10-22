@@ -1,6 +1,8 @@
 CFLAGS=-Wall -pedantic -std=c11 -I. -g
 
-OFILES = queue.o hash.o webpage.o
+pageio.o: utils/pageio.c
+	gcc $(CFLAGS) -c $< -o $@
+OFILES = queue.o hash.o webpage.o pageio.o
 LIBDIR = lib
 LIBNAME = libutils.a
 
