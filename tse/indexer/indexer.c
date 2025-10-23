@@ -113,45 +113,41 @@ static void sum_counts(void *elem)
 
 int main(int argc, char **argv) {
 
-	const char *pagedir = "../crawler/pagedir";
-	int id = 1;
-	if (argc > 1) 
-	{
-		pagedir = argv[1];
+	const char *pagedir = "../pages";
+	int ending_id;
+	if (argc > 1) {
+		ending_id = atoi(argv[1]);
 	}
-	if (argc > 2) 
-	{
-		id = atoi(argv[2]);
-	}
-
-	webpage_t *page = pageload(id, (char*)pagedir);
-	if (page == NULL) {
-		fprintf(stderr, "error!\n");
-		return 1;
-	}
-	int pos = 0;
-	char *word = NULL;
-
 
 	hashtable_t *ht = hopen(1000);
-	int stream_count = 0;  
-	while ((pos = webpage_getNextWord(page, pos, &word)) > 0) {
-		if (NormalizeWord(word) == 1) 
-		{
-			add_or_increment(ht, word, id);
-			stream_count++;
+	int stream_count = 0;
+
+	for (int id = 1; id <= ending_id; id++) {
+		webpage_t *page = pageload(id, (char*)pagedir);
+		if (page == NULL) {
+			fprintf(stderr, "error!\n");
+			return 1;
 		}
-		free(word);
-	}
-	webpage_delete(page);
-	
+		int pos = 0;
+		char *word = NULL; 
+		
+		while ((pos = webpage_getNextWord(page, pos, &word)) > 0) {
+			if (NormalizeWord(word) == 1) 
+				{
+					add_or_increment(ht, word, id);
+					stream_count++;
+				}
+			free(word);
+		}
+		webpage_delete(page);
+	}	
 	g_total = 0;
-    happly(ht, sum_counts);
+  happly(ht, sum_counts);
 
 	// Report & check
-    printf("Sum of counts over hash table: %d\n", g_total);
-    printf("Stream normalized word count : %d\n", stream_count);
-    printf("Check (sum == stream): %s\n", (g_total == stream_count) ? "YES" : "NO");
+  printf("Sum of counts over hash table: %d\n", g_total);
+  printf("Stream normalized word count : %d\n", stream_count);
+  printf("Check (sum == stream): %s\n", (g_total == stream_count) ? "YES" : "NO");
 
 	hclose(ht);
 
