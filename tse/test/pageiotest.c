@@ -17,7 +17,7 @@
 int main(){
 	//normal case
 	printf("testing for pageio.c\n");
-	webpage_t *page = pageload(1, "../pages");
+	webpage_t *page = pageload(1, "../pagedir");
 
 	if (page == NULL) {
 		fprintf(stderr, "error!");
