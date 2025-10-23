@@ -20,7 +20,7 @@ int main(){
 	webpage_t *page = pageload(1, "../pages");
 
 	if (page == NULL) {
-		fprintf(stderr, "error!");
+		fprintf(stderr, "error 1!");
 		return 1;
 	}
 	printf("sucessful to retrieve!\n");
@@ -32,7 +32,7 @@ int main(){
 
 	webpage_t *copy = pageload(1, "../test/temp");
 	if (copy == NULL) {
-		fprintf(stderr, "error!");
+		fprintf(stderr, "error 2!");
 		webpage_delete(page);
 		return 1;
 	}
