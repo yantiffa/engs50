@@ -16,11 +16,20 @@
 #include "webpage.h"  
 #include "pageio.h"   
 #include "hash.h"
+#include "queue.h"
 
 typedef struct {
-    char *w;   // normalized word (heap copy)
-    int   count;  // frequency on page 1
-} wordcount_t;
+    int doc_id;
+    int count;
+} doc_count_t;
+
+// Structure for index entries - word mapped to queue of documents
+typedef struct {
+    char *word;           // normalized word 
+    queue_t *doc_queue;   // queue of doc_count_t entries
+} index_entry_t;
+
+static int g_total = 0;
 
 int NormalizeWord(char *word) {
 	// if word is empty
@@ -42,40 +51,68 @@ int NormalizeWord(char *word) {
 	return 1;
 }
 //for hsearch
- bool match_word(void *elem, const void *key) 
- {
-    const wordcount_t *wc = (const wordcount_t*)elem;
-    const char *k = (const char*)key;
-    return strcmp(wc->w, k) == 0;
-}
-
-
-void add_or_increment(hashtable_t *ht, const char *norm_word) 
+bool match_word(void *elem, const void *key) 
 {
-    wordcount_t *wc = hsearch(ht, match_word, norm_word, (int)strlen(norm_word));
-    if (wc != NULL) 
-	{
-        wc->count++;
-    }
+    const index_entry_t *entry = (const index_entry_t*)elem;
+    const char *k = (const char*)key;
+    return strcmp(entry->word, k) == 0;
+}
 
-	else 
-	{
-        wc = malloc(sizeof(*wc));
-        wc->w = strdup(norm_word);
-        wc->count = 1;
-        hput(ht, wc, wc->w, (int)strlen(wc->w));
+bool match_doc(void *elem, const void *key) 
+{
+    const doc_count_t *dc = (const doc_count_t*)elem;
+    const int *doc_id = (const int*)key;
+    return dc->doc_id == *doc_id;
+}
+
+
+
+
+void add_or_increment(hashtable_t *ht, const char *norm_word, int doc_id) {
+    index_entry_t *entry = hsearch(ht, match_word, norm_word, (int)strlen(norm_word));
+    
+    if (entry != NULL) {
+        // Word exists, check if document exists in queue
+        doc_count_t *dc = qsearch(entry->doc_queue, match_doc, &doc_id);
+        if (dc != NULL) 
+		{
+            dc->count++;
+        } 
+		else 
+		{
+            dc = malloc(sizeof(*dc));
+            dc->doc_id = doc_id;
+            dc->count = 1;
+            qput(entry->doc_queue, dc);
+        }
+    } else {
+        // Word doesn't exist, create new entry
+        entry = malloc(sizeof(*entry));
+        entry->word = strdup(norm_word);
+        entry->doc_queue = qopen();
+        
+        doc_count_t *dc = malloc(sizeof(*dc));
+        dc->doc_id = doc_id;
+        dc->count = 1;
+        qput(entry->doc_queue, dc);
+        
+        hput(ht, entry, entry->word, (int)strlen(entry->word));
     }
 }
 
-//get the total count  
-static int g_total = 0;
+static void sum_doc_count(void *elem) {
+    doc_count_t *dc = (doc_count_t*)elem;
+    g_total += dc->count;
+}
+
 static void sum_counts(void *elem) 
 {
-    g_total += ((wordcount_t*)elem)->count;
+    index_entry_t *entry = (index_entry_t*)elem;
+    qapply(entry->doc_queue, sum_doc_count);
 }
-	
+
 int main(int argc, char **argv) {
-	// Defaults
+
 	const char *pagedir = "../crawler/pagedir";
 	int id = 1;
 	if (argc > 1) 
@@ -95,13 +132,13 @@ int main(int argc, char **argv) {
 	int pos = 0;
 	char *word = NULL;
 
-	int stream_count = 0;  
-	hashtable_t *ht = hopen(1000);
 
+	hashtable_t *ht = hopen(1000);
+	int stream_count = 0;  
 	while ((pos = webpage_getNextWord(page, pos, &word)) > 0) {
 		if (NormalizeWord(word) == 1) 
 		{
-			add_or_increment(ht, word);
+			add_or_increment(ht, word, id);
 			stream_count++;
 		}
 		free(word);
