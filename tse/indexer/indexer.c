@@ -101,7 +101,8 @@ int main(int argc, char **argv) {
 	while ((pos = webpage_getNextWord(page, pos, &word)) > 0) {
 		if (NormalizeWord(word) == 1) 
 		{
-			printf("%s\n", word);
+			add_or_increment(ht, word);
+			stream_count++;
 		}
 		free(word);
 	}
