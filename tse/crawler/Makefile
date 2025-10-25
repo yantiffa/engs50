@@ -5,6 +5,7 @@ CFLAGS   = -Wall -pedantic -std=c11 -g \
            -I../utils/module/module3/hash
 LDFLAGS  = -L../lib
 LDLIBS   = -lutils -lcurl
+PAGEDIR  := /workspaces/modules/tse/pagedir
 
 crawler: ../lib/libutils.a crawler.o
 	$(CC) -o $@ crawler.o $(LDFLAGS) $(LDLIBS)
@@ -14,13 +15,13 @@ crawler.o: crawler.c ../webpage.h \
                      ../utils/module/module3/hash/hash.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-counts: crawler pagedir
-	@rm -f pagedir/*
+counts: crawler $(PAGEDIR)
+	@rm -f $(PAGEDIR)/*
 	@for d in 0 1 2 3; do \
-	  ./crawler "https://thayer.github.io/engs50/" pagedir $$d >/dev/null || true; \
+	  ./crawler "https://thayer.github.io/engs50/" $(PAGEDIR) $$d >/dev/null || true; \
 	  n=$$(ls -1 pagedir/[0-9]* 2>/dev/null | wc -l); \
 	  echo "$$d: $$n"; \
-	  rm -f pagedir/*; \
+	  rm -f $(PAGEDIR)/*; \
 	done
 
 	@echo "" >> crawl_counts.txt
