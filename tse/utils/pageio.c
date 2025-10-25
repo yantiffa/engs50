@@ -16,11 +16,14 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirname) {
 		//error
 		return -1;
 	}
-	fprintf(fp, "%s\n", webpage_getURL(pagep));
-	fprintf(fp, "%d\n", webpage_getDepth(pagep));
-	fprintf(fp, "%d\n", webpage_getHTMLlen(pagep));
-	fprintf(fp, "%s\n", webpage_getHTML(pagep));
-	
+    const char *url  = webpage_getURL(pagep);
+    int         depth= webpage_getDepth(pagep);
+    const char *html = webpage_getHTML(pagep);
+    int         hlen = webpage_getHTMLlen(pagep);	
+
+    fprintf(fp, "%s\n%d\n%d\n", url, depth, hlen);  // headers
+    fwrite(html, 1, hlen, fp);      
+
 	fclose(fp);
 	return 0;
 }

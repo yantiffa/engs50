@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "webpage.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "indexio.h": "c"
     }
 }
