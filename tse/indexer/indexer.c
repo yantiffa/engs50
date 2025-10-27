@@ -10,6 +10,7 @@
  */
 
 #define _POSIX_C_SOURCE 200809L
+#include <dirent.h>
 #include <stdbool.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -136,6 +137,14 @@ int main(int argc, char **argv) {
 	}
 	const char *pagedir = argv[1];
 	const char *indexnum = argv[2];
+
+	DIR *dir = opendir(pagedir);
+	if (!dir) {
+		fprintf(stderr, "no directory\n");
+		return 1;
+	}else{
+		closedir(dir);
+	}
 	
 
 	hashtable_t *ht = hopen(1000);
