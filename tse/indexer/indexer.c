@@ -118,17 +118,6 @@ void add_or_increment(hashtable_t *ht, const char *norm_word, int doc_id) {
     }
 }
 
-static void sum_doc_count(void *elem) {
-    doc_count_t *dc = (doc_count_t*)elem;
-    g_total += dc->count;
-}
-
-static void sum_counts(void *elem) 
-{
-    index_entry_t *entry = (index_entry_t*)elem;
-    qapply(entry->doc_queue, sum_doc_count);
-}
-
 int main(int argc, char **argv) {
 	// condition check
 	if (argc != 3) {
