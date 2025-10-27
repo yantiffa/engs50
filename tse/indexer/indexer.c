@@ -10,13 +10,17 @@
  */
 
 #define _POSIX_C_SOURCE 200809L
+#include <stdbool.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "pageio.h"
 #include "webpage.h"  
 #include "pageio.h"   
 #include "hash.h"
 #include "queue.h"
+#include "indexio.h"
 
 typedef struct {
     int doc_id;
@@ -65,6 +69,19 @@ bool match_doc(void *elem, const void *key)
     return dc->doc_id == *doc_id;
 }
 
+static void free_doc(void *elem) {
+	free(elem);
+}
+
+static void free_each(void *elem) {
+	index_entry_t *entry = (index_entry_t*)elem;
+	qapply(entry->doc_queue, free_doc);
+	qclose(entry->doc_queue);
+	free(entry->word);
+	free(entry);	
+}
+	
+
 
 
 
@@ -112,21 +129,23 @@ static void sum_counts(void *elem)
 }
 
 int main(int argc, char **argv) {
-
-	const char *pagedir = "../pages";
-	int ending_id;
-	if (argc > 1) {
-		ending_id = atoi(argv[1]);
+	// condition check
+	if (argc != 3) {
+		fprintf(stderr, "wrong number of commands given:(\n");
+		return 1;
 	}
+	const char *pagedir = argv[1];
+	const char *indexnum = argv[2];
+	
 
 	hashtable_t *ht = hopen(1000);
 	int stream_count = 0;
+	int id = 1;
 
-	for (int id = 1; id <= ending_id; id++) {
+	while (true) {
 		webpage_t *page = pageload(id, (char*)pagedir);
 		if (page == NULL) {
-			fprintf(stderr, "error!\n");
-			return 1;
+			break;
 		}
 		int pos = 0;
 		char *word = NULL; 
@@ -140,14 +159,10 @@ int main(int argc, char **argv) {
 			free(word);
 		}
 		webpage_delete(page);
+		id++;
 	}	
-	g_total = 0;
-  happly(ht, sum_counts);
-
-	// Report & check
-  printf("Sum of counts over hash table: %d\n", g_total);
-  printf("Stream normalized word count : %d\n", stream_count);
-  printf("Check (sum == stream): %s\n", (g_total == stream_count) ? "YES" : "NO");
+	indexsave(ht, indexnum);
+	happly(ht, free_each);
 
 	hclose(ht);
 
