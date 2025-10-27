@@ -34,7 +34,6 @@ typedef struct {
     queue_t *doc_queue;   // queue of doc_count_t entries
 } index_entry_t;
 
-static int g_total = 0;
 
 int NormalizeWord(char *word) {
 	// if word is empty
