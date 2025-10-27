@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
 		webpage_delete(page);
 		id++;
 	}	
-	indexsave(ht, indexnum);
+	indexsave(indexnum, ht);
 	happly(ht, free_each);
 
 	hclose(ht);
