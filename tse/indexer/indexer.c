@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
 	}
 	
 
-	hashtable_t *ht = hopen(1000);
+	Index *idx = index_new();
 	int stream_count = 0;
 	int id = 1;
 
@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
 		while ((pos = webpage_getNextWord(page, pos, &word)) > 0) {
 			if (NormalizeWord(word) == 1) 
 				{
-					add_or_increment(ht, word, id);
+					index_add_posting(idx, word, id, 1);
 					stream_count++;
 				}
 			free(word);
@@ -158,10 +158,8 @@ int main(int argc, char **argv) {
 		webpage_delete(page);
 		id++;
 	}	
-	indexsave(indexnum, ht);
-	happly(ht, free_each);
-
-	hclose(ht);
+	indexsave(indexnum, idx);
+	index_free(idx);
 
 	return 0;
 }
