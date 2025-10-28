@@ -40,7 +40,10 @@ void index_free(Index *idx) {
     free(idx);
 }
 
-/* Add a posting to index; creates entry if necessary. Returns 0 on success, -1 on error. */
+/* Add a posting to index; creates entry if necessary.
+   If the word already exists and the same docid is added again, the count is incremented.
+   Returns 0 on success, -1 on error.
+*/
 int index_add_posting(Index *idx, const char *word, int docid, int count) {
     if (!idx || !word || docid <= 0 || count <= 0) return -1;
 
@@ -62,6 +65,17 @@ int index_add_posting(Index *idx, const char *word, int docid, int count) {
         if (prev) prev->next = e; else idx->head = e;
     }
 
+    // Check for existing posting with the same docid
+    Posting *q = e->postings;
+    while (q) {
+        if (q->docid == docid) {
+            q->count += count;
+            return 0;
+        }
+        if (!q->next) break;
+        q = q->next;
+    }
+
     Posting *p = malloc(sizeof(Posting));
     if (!p) return -1;
     p->docid = docid;
@@ -71,8 +85,6 @@ int index_add_posting(Index *idx, const char *word, int docid, int count) {
     if (!e->postings) {
         e->postings = p;
     } else {
-        Posting *q = e->postings;
-        while (q->next) q = q->next;
         q->next = p;
     }
     return 0;

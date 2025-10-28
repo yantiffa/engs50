@@ -29,6 +29,7 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirname) {
 }
 
 webpage_t *pageload(int id, char *dirname) {
+    webpage_t *page = NULL;
     char path[256];
     sprintf(path, "%s/%d", dirname, id);
     FILE *fp = fopen(path, "r");
@@ -56,7 +57,9 @@ webpage_t *pageload(int id, char *dirname) {
             url[urllen - 1] = '\0';
             /* urllen--; not needed further */
         }
+        
     }
+
     if (fscanf(fp, "%d\n", &depth) != 1) {
         free(url);
         fclose(fp);
@@ -67,26 +70,27 @@ webpage_t *pageload(int id, char *dirname) {
         fclose(fp);
         return NULL;
     }
-    html = malloc((html_len > 0 ? html_len : 0) + 1);
-    if (html != NULL) {
-        int i = 0;
-        for (; i < html_len; ++i) {
-            int c = fgetc(fp);
-            if (c == EOF) {
-                break;
-            }
-            html[i] = (char)c;
-        }
-        html[i] = '\0';
+    html = malloc(html_len + 1);
+    if (html == NULL) {
+        free(url);
+        fclose(fp);
+        return NULL;
+    }
+
+    if (fread(html, 1, html_len, fp) == (size_t)html_len) {
+        html[html_len] = '\0';
+        page = webpage_new(url, depth, html);
+    }
+
+    if (page == NULL) {
+        if(url!= NULL) free(url);
+        if(html!= NULL) free(html);
     } else {
-		free(url);
-		fclose(fp);
-		return NULL;
-	}
+        free(url); // webpage_new makes a copy of url
+    }
+
 
     fclose(fp);
-
-    // Create a new webpage_t object and return it
-    webpage_t *page = webpage_new(url, depth, html);
+    
     return page;
 }

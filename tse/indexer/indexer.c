@@ -71,33 +71,36 @@ bool match_doc(void *elem, const void *key)
 
 void add_or_increment(hashtable_t *ht, const char *norm_word, int doc_id) {
     index_entry_t *entry = hsearch(ht, match_word, norm_word, (int)strlen(norm_word));
-    
-    if (entry != NULL) {
-        // Word exists, check if document exists in queue
-        doc_count_t *dc = qsearch(entry->doc_queue, match_doc, &doc_id);
-        if (dc != NULL) 
-		{
-            dc->count++;
-        } 
-		else 
-		{
-            dc = malloc(sizeof(*dc));
-            dc->doc_id = doc_id;
-            dc->count = 1;
-            qput(entry->doc_queue, dc);
-        }
-    } else {
-        // Word doesn't exist, create new entry
+    if (entry == NULL) {
         entry = malloc(sizeof(*entry));
         entry->word = strdup(norm_word);
         entry->doc_queue = qopen();
-        
-        doc_count_t *dc = malloc(sizeof(*dc));
+        hput(ht, entry, entry->word, (int)strlen(entry->word));
+    }
+
+    // Merge: scan the queue and increment if doc_id exists
+    bool found = false;
+    queue_t *tmp = qopen();
+    doc_count_t *dc;
+
+    while ((dc = qget(entry->doc_queue)) != NULL) {
+        if (!found && dc->doc_id == doc_id) {
+            dc->count++;
+            found = true;
+        }
+        qput(tmp, dc);
+    }
+
+    // Restore original order
+    qconcat(entry->doc_queue, tmp);
+    qclose(tmp);
+
+    // If not found, append new doc entry
+    if (!found) {
+        dc = malloc(sizeof(*dc));
         dc->doc_id = doc_id;
         dc->count = 1;
         qput(entry->doc_queue, dc);
-        
-        hput(ht, entry, entry->word, (int)strlen(entry->word));
     }
 }
 
@@ -145,6 +148,7 @@ int main(int argc, char **argv) {
 	indexsave(indexnum, idx);
 	index_free(idx);
 
+	printf("Indexed %d total words across %d documents\n", stream_count, id - 1);
 	return 0;
 }
 
