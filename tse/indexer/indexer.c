@@ -76,7 +76,7 @@ static void sum_counts(void *elem)
 	
 int main(int argc, char **argv) {
 	// Defaults
-	const char *pagedir = "../crawler/pagedir";
+	const char *pagedir = "../test/temp";
 	int id = 1;
 	if (argc > 1) 
 	{
