@@ -1,15 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -pedantic -std=c11 -I../utils -I../lib -I.. -g
 LIB = ../lib/libutils.a
-<<<<<<< HEAD
-TARGET := pageiotest pageio
-
-all: $(TARGET)
-$(OBJS): %.o: %.c
-	gcc $(CFLAGS) -c $< -o $@
-$(TARGET): $(OBJS)
-	$(CC) $(OBJS) $(LIB) -lcurl -o $(TARGET)
-=======
 LDFLAGS = -lcurl
 
 SRCS := $(wildcard *.c)
@@ -36,6 +27,5 @@ pageiotest: $(OBJS_MAIN) $(OBJS_OTHER)
 %: $(OBJS_OTHER) %.o
 	$(CC) $^ $(LIB) $(LDFLAGS) -o $@
 
->>>>>>> c39944313ef2942b4697c11dc2667be0c32eaaec
 clean:
 	rm -f *.o pageiotest $(TEST_TARGETS)
