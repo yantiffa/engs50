@@ -1,24 +1,23 @@
 CC       = gcc
 CFLAGS   = -Wall -pedantic -std=c11 -g \
-           -I.. \
-           -I../utils \
-           -I../utils/module/module3/hash
+		   -I.. \
+		   -I../utils \
+		   -I../utils/module/module3/hash
 LDFLAGS  = -L../lib
 LDLIBS   = -lutils -lcurl
 
 indexer: indexer.o ../utils/pageio.o ../utils/indexio.o
 	$(CC) -o $@ indexer.o ../utils/pageio.o ../utils/indexio.o $(LDFLAGS) $(LDLIBS)
 
-indexer.o: indexer.c ../webpage.h ../utils/pageio.h ../utils/module/module3/hash/hash.h
+indexer.o: indexer.c ../webpage.h ../utils/pageio.h ../utils/indexio.h ../utils/module/module3/hash/hash.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-../utils/pageio.o: ../utils/pageio.c ../webpage.h ../utils/pageio.h
+pageio.o: ../utils/pageio.c ../webpage.h ../utils/pageio.h
 	$(CC) $(CFLAGS) -c ../utils/pageio.c -o ../utils/pageio.o
 
-../utils/indexio.o: ../utils/indexio.c ../utils/indexio.h
+indexio.o: ../utils/indexio.c ../utils/indexio.h
 	$(CC) $(CFLAGS) -c ../utils/indexio.c -o ../utils/indexio.o
 
-
 clean:
-	rm -f indexer *.o
+	rm -f indexer *.o ../utils/pageio.o ../utils/indexio.o
 

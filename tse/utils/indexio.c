@@ -5,7 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-#include "indexio.h"
+#include "../utils/indexio.h"
 
 
 /* Create and destroy index */

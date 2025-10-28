@@ -21,7 +21,7 @@
 #include "pageio.h"   
 #include "hash.h"
 #include "queue.h"
-#include "indexio.h"
+#include "../utils/indexio.h"
 
 typedef struct {
     int doc_id;
@@ -68,22 +68,6 @@ bool match_doc(void *elem, const void *key)
     const int *doc_id = (const int*)key;
     return dc->doc_id == *doc_id;
 }
-
-static void free_doc(void *elem) {
-	free(elem);
-}
-
-static void free_each(void *elem) {
-	index_entry_t *entry = (index_entry_t*)elem;
-	qapply(entry->doc_queue, free_doc);
-	qclose(entry->doc_queue);
-	free(entry->word);
-	free(entry);	
-}
-	
-
-
-
 
 void add_or_increment(hashtable_t *ht, const char *norm_word, int doc_id) {
     index_entry_t *entry = hsearch(ht, match_word, norm_word, (int)strlen(norm_word));
