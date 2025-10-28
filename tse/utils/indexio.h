@@ -1,7 +1,21 @@
 #pragma once
 #include <stddef.h>
 
-typedef struct Index Index;
+typedef struct Posting {
+    int docid;
+    int count;
+    struct Posting *next;
+} Posting;
+
+typedef struct Entry {
+    char *word;
+    Posting *postings;
+    struct Entry *next;
+} Entry;
+
+typedef struct Index {
+    Entry *head;
+} Index;
 
 Index *index_new(void);
 
