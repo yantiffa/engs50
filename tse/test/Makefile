@@ -8,8 +8,7 @@ TEST_SRCS := $(filter test_%.c,$(SRCS))
 MAIN_SRCS := $(filter pageiotest.c,$(SRCS))
 OTHER_SRCS := $(filter-out $(TEST_SRCS) $(MAIN_SRCS),$(SRCS))
 
-OBJS_OTHER := $(OTHER_SRCS:.c=.o)
-OBJS_MAIN := $(MAIN_SRCS:.c=.o)
+OBJS_OTHER := $(OTHER_SRCS:.c=.o) ../utils/indexio.o
 TEST_TARGETS := $(TEST_SRCS:.c=)
 
 .PHONY: all clean
@@ -18,13 +17,12 @@ all: pageiotest $(TEST_TARGETS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Build the primary executable that provides the standalone main
-pageiotest: $(OBJS_MAIN) $(OBJS_OTHER)
-	$(CC) $(OBJS_MAIN) $(OBJS_OTHER) $(LIB) $(LDFLAGS) -o $@
+# Build pageiotest as standalone executable
+pageiotest: pageiotest.o $(OBJS_OTHER)
+	$(CC) $^ $(LIB) $(LDFLAGS) -o $@
 
-# Build each test executable without linking the main program object(s)
-# This prevents multiple-definition-of-main when a pageiotest.c exists.
-%: $(OBJS_OTHER) %.o
+# Build each test executable as standalone (each has its own main)
+test_%: test_%.o $(OBJS_OTHER)
 	$(CC) $^ $(LIB) $(LDFLAGS) -o $@
 
 clean:

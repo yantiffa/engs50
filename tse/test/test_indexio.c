@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
-#include "indexio.h"
+#include "../utils/indexio.h"
 
 /* Opaque forward declaration for Index and prototypes from ../utils/indexio.c */
 typedef struct Index Index;
