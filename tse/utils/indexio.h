@@ -1,5 +1,4 @@
 #pragma once
-#include "webpage.h"
 #include <stddef.h>
 
 typedef struct Index Index;
