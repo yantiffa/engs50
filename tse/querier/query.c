@@ -10,7 +10,7 @@
 #define MAX_WORDS 100
 
 // CHANGED: tiny in-memory table for word -> count(doc 1)
-typedef struct { char *w; int c; } entry_t;
+typedef struct { char *w; int *cs; } entry_t;
 static entry_t *gtab = NULL;         
 static size_t gN = 0, gCap = 0;      
 
@@ -18,16 +18,16 @@ static size_t gN = 0, gCap = 0;
 static void die(const char *m){ perror(m); exit(1); }
 static void *xmalloc(size_t n){ void *p=malloc(n); if(!p) die("malloc"); return p; }
 static char *xstrdup(const char *s){ size_t n=strlen(s)+1; char *p=xmalloc(n); memcpy(p,s,n); return p; }
-static void add_entry(const char *w, int c)
+static void add_entry(const char *w, int *c)
 {
-    for(size_t i=0;i<gN;i++){ if(strcmp(gtab[i].w,w)==0){ gtab[i].c = c; return; } }
+    for(size_t i=0;i<gN;i++){ if(strcmp(gtab[i].w,w)==0){ gtab[i].cs = c; return; } }
     if(gN==gCap){ gCap = gCap? gCap*2 : 256; gtab = realloc(gtab, gCap*sizeof(entry_t)); if(!gtab) die("realloc"); }
     gtab[gN].w = xstrdup(w);
-    gtab[gN].c = c;
+    gtab[gN].cs = c;
     gN++;
 }
-static int get_count(const char *w){
-    for(size_t i=0;i<gN;i++) if(strcmp(gtab[i].w,w)==0) return gtab[i].c;
+static int get_count(const char *w, int docID){
+    for(size_t i=0;i<gN;i++) if(strcmp(gtab[i].w,w)==0) return gtab[i].cs[docID];
     return 0;
 }
 static void lowerize(char *s){ for(;*s;++s) *s=(char)tolower((unsigned char)*s); }
@@ -39,7 +39,7 @@ static bool is_stop_or_short(const char *w){
 
 
 // Index line format: word docID count [docID count] ...
-static void load_index_doc1(const char *indexpath){
+static void load_index_all(const char *indexpath){
     FILE *f = fopen(indexpath, "r");
     if(!f){ perror("fopen index"); exit(1); }
 
@@ -58,53 +58,38 @@ static void load_index_doc1(const char *indexpath){
         lowerize(word);   // CHANGED: use your helper so it's not "unused"
 
         // scan pairs: docID count ...
-        int have1 = 0, c1 = 0;
+        int *count = calloc(1000, sizeof(int));
         while (1) {
             char *d = strtok(NULL, " \t\r\n");  if(!d) break;
             char *c = strtok(NULL, " \t\r\n");  if(!c) break;
             long doc = strtol(d, NULL, 10);
             long cnt = strtol(c, NULL, 10);
-            if (doc == 1) { have1 = 1; c1 = (int)cnt; }
+            count[doc] = (int)cnt;
         }
-        if (have1) add_entry(word, c1);
+        add_entry(word, count);
     }
     fclose(f);
 }
 
-// Function to process a single line of query input
-static void process_query(char* query);  // unchanged signature
+static char* get_url(const char *pageDir, int docID) {
+    char path[500];
+    sprintf(path, "%s/%d", pageDir, docID);
 
-// CHANGED: accept args; last arg is treated as index file (so both ./q idx and ./q pagedir idx work)
-int main(int argc, char **argv) {  // CHANGED
-    char query[MAX_QUERY_LEN];
-
-    // CHANGED: choose index path from argv (last arg), else default
-    const char *indexfile = NULL;
-    if (argc >= 2) indexfile = argv[argc-1];
-    else indexfile = "../indexer/index0.txt"; // small convenience default
-
-    load_index_doc1(indexfile);   // CHANGED: load the index (doc 1) once
-
-    // Loop indefinitely, prompting for and processing queries
-    while (true) {
-        printf("> ");
-        fflush(stdout);
-
-        // Read a line from stdin
-        if (fgets(query, sizeof(query), stdin) == NULL) {
-            // End-of-file (Ctrl-D) detected
-            printf("\n");
-            break;
-        }
-
-        // Process the read line
-        process_query(query);
+    FILE *file = fopen(path, "r");
+    if (!file) {
+        return xstrdup("unknown");
     }
 
-    return 0;
+    char *cur = NULL;
+    size_t lens = 0;
+    getline(&cur, &lens, file);
+    fclose(file);
+    cur[strcspn(cur, "\n")] = "\0";
+    return cur;
 }
 
-static void process_query(char* query) {
+// Function to process a single line of query input
+static void process_query(char* query, const char *pageDir) {
     char* words[MAX_WORDS];
     int word_count = 0;
     bool is_valid = true;
@@ -134,18 +119,57 @@ static void process_query(char* query) {
     if (!is_valid) {
         printf("[invalid query]\n");
     } else if (word_count > 0) {
-        //look up counts and compute rank = min
-        int rank = -1;
         for (int i = 0; i < word_count; i++) {
-            int c = get_count(words[i]);
             if (i) printf(" ");
-            printf("%s:%d", words[i], c);
-            if (rank < 0 || c < rank) rank = c;
+            printf("%s", words[i]);
         }
-        printf(" -- %d\n", rank);
-    } else {
-        // If nothing after filtering, say rank 0
-        // (matches spec behavior when no valid AND terms remain)
-        printf("-- 0\n"); 
+        printf("\n");
+
+        for (int docID = 1; docID<1000; docID++) {
+            int min = -1;
+            bool has_all = true;
+            for (int i = 0; i < word_count; i++) {
+                int c = get_count(words[i], docID);
+                if (c == 0) { has_all = false; break; }
+                if (min < 0 || c < min) min = c;
+            }
+            if (has_all) {
+                char *url = get_url(pageDir, docID);
+                printf("rank: %d: doc: %d: %s\n", min, docID, url);
+                free(url);
+            }
+        }
     }
+}
+
+
+
+// CHANGED: accept args; last arg is treated as index file (so both ./q idx and ./q pagedir idx work)
+int main(int argc, char **argv) {  // CHANGED
+    if (argc != 3){
+        fprintf(stderr, "wrong number of commands\n");
+        return 1;
+    }
+    char *pageDir = argv[1];
+    char *indexfile = argv[2];
+    char query[MAX_QUERY_LEN];
+    load_index_all(indexfile);   // CHANGED: load the index (doc 1) once
+
+    // Loop indefinitely, prompting for and processing queries
+    while (true) {
+        printf("> ");
+        fflush(stdout);
+
+        // Read a line from stdin
+        if (fgets(query, sizeof(query), stdin) == NULL) {
+            // End-of-file (Ctrl-D) detected
+            printf("\n");
+            break;
+        }
+
+        // Process the read line
+        process_query(query, pageDir);
+    }
+
+    return 0;
 }
