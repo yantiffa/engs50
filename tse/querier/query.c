@@ -1,9 +1,9 @@
+#define _POSIX_C_SOURCE 200809L 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdbool.h>
-#define _POSIX_C_SOURCE 200809L   
+#include <stdbool.h>  
 #include <sys/types.h>   
 
 #define MAX_QUERY_LEN 512
@@ -84,7 +84,7 @@ static char* get_url(const char *pageDir, int docID) {
     size_t lens = 0;
     getline(&cur, &lens, file);
     fclose(file);
-    cur[strcspn(cur, "\n")] = "\0";
+    cur[strcspn(cur, "\n")] = '\0';
     return cur;
 }
 
