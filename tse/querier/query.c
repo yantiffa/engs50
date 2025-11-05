@@ -31,12 +31,6 @@ static int get_count(const char *w, int docID){
     return 0;
 }
 static void lowerize(char *s){ for(;*s;++s) *s=(char)tolower((unsigned char)*s); }
-static bool is_stop_or_short(const char *w){
-    size_t L = strlen(w);
-    if(L < 3) return true;
-    return (strcmp(w,"and")==0 || strcmp(w,"or")==0);
-}
-
 
 // Index line format: word docID count [docID count] ...
 static void load_index_all(const char *indexpath){
@@ -45,7 +39,6 @@ static void load_index_all(const char *indexpath){
 
     char buf[4096];
     while (fgets(buf, sizeof buf, f)) {
-        // CHANGED: removed unused 'save'
         char *tok;
 
         // first token = word
@@ -55,7 +48,7 @@ static void load_index_all(const char *indexpath){
         char word[256];
         strncpy(word, tok, sizeof(word));
         word[sizeof(word)-1] = '\0';
-        lowerize(word);   // CHANGED: use your helper so it's not "unused"
+        lowerize(word);
 
         // scan pairs: docID count ...
         int *count = calloc(1000, sizeof(int));
@@ -88,64 +81,109 @@ static char* get_url(const char *pageDir, int docID) {
     return cur;
 }
 
-// Function to process a single line of query input
-static void process_query(char* query, const char *pageDir) {
-    char* words[MAX_WORDS];
-    int word_count = 0;
-    bool is_valid = true;
+typedef struct {
+    char *words[MAX_WORDS];
+    int count;
+} AndSequence;
 
-    // Tokenize the query string by spaces, tabs, and newlines
-    char* token = strtok(query, " \t\n");
-    while (token != NULL && word_count < MAX_WORDS) {
-        // Validate and normalize the token
-        for (char* p = token; *p; p++) {
+typedef struct {
+    AndSequence sequences[MAX_WORDS];
+    int count;
+} Query;
+
+static bool parse_query(char *input, Query *q) {
+    q->count = 0;
+    char *tokens[MAX_WORDS];
+    int token_count = 0;
+
+    // Tokenize
+    char *token = strtok(input, " \t\n");
+    while (token != NULL && token_count < MAX_WORDS) {
+        for (char *p = token; *p; p++) {
             if (!isalpha((unsigned char)*p)) {
-                is_valid = false;
-                break;
+                return false;
             }
             *p = (char)tolower((unsigned char)*p);
         }
-        if (!is_valid) break;
-
-        // CHANGED: keep only words >=3 chars and not and/or
-        if (!is_stop_or_short(token)) {
-            words[word_count++] = token;
-        }
-
+        tokens[token_count++] = token;
         token = strtok(NULL, " \t\n");
     }
 
-    // Print results based on validation
-    if (!is_valid) {
-        printf("[invalid query]\n");
-    } else if (word_count > 0) {
-        for (int i = 0; i < word_count; i++) {
-            if (i) printf(" ");
-            printf("%s", words[i]);
-        }
-        printf("\n");
+    if (token_count == 0) return true;
 
-        for (int docID = 1; docID<1000; docID++) {
-            int min = -1;
+    // Check for invalid starting/ending
+    if (strcmp(tokens[0], "and") == 0 || strcmp(tokens[0], "or") == 0) return false;
+    if (strcmp(tokens[token_count-1], "and") == 0 || strcmp(tokens[token_count-1], "or") == 0) return false;
+
+    // Parse into OR-separated AND sequences
+    AndSequence *current = &q->sequences[0];
+    current->count = 0;
+    q->count = 1;
+
+    for (int i = 0; i < token_count; i++) {
+        if (strcmp(tokens[i], "or") == 0) {
+            if (current->count == 0) return false;
+            if (i + 1 < token_count && (strcmp(tokens[i+1], "and") == 0 || strcmp(tokens[i+1], "or") == 0)) return false;
+            q->count++;
+            current = &q->sequences[q->count - 1];
+            current->count = 0;
+        } else if (strcmp(tokens[i], "and") == 0) {
+            if (current->count == 0) return false;
+            if (i + 1 < token_count && (strcmp(tokens[i+1], "and") == 0 || strcmp(tokens[i+1], "or") == 0)) return false;
+        } else {
+            if (strlen(tokens[i]) < 3) continue;
+            current->words[current->count++] = tokens[i];
+        }
+    }
+
+    return (q->sequences[q->count - 1].count > 0);
+}
+
+static void process_query(char* query, const char *pageDir) {
+    Query q;
+    if (!parse_query(query, &q)) {
+        printf("[invalid query]\n");
+        return;
+    }
+
+    if (q.count == 0 || q.sequences[0].count == 0) return;
+
+    // Print normalized query
+    bool first = true;
+    for (int s = 0; s < q.count; s++) {
+        for (int w = 0; w < q.sequences[s].count; w++) {
+            if (!first) printf(" ");
+            printf("%s", q.sequences[s].words[w]);
+            first = false;
+        }
+        if (s < q.count - 1) printf(" or ");
+    }
+    printf("\n");
+
+    // Compute scores
+    for (int docID = 1; docID < 1000; docID++) {
+        int total_score = 0;
+        for (int s = 0; s < q.count; s++) {
+            int min_score = -1;
             bool has_all = true;
-            for (int i = 0; i < word_count; i++) {
-                int c = get_count(words[i], docID);
+            for (int w = 0; w < q.sequences[s].count; w++) {
+                int c = get_count(q.sequences[s].words[w], docID);
                 if (c == 0) { has_all = false; break; }
-                if (min < 0 || c < min) min = c;
+                if (min_score < 0 || c < min_score) min_score = c;
             }
             if (has_all) {
-                char *url = get_url(pageDir, docID);
-                printf("rank: %d: doc: %d: %s\n", min, docID, url);
-                free(url);
+                total_score += min_score;
             }
+        }
+        if (total_score > 0) {
+            char *url = get_url(pageDir, docID);
+            printf("rank: %d: doc: %d: %s\n", total_score, docID, url);
+            free(url);
         }
     }
 }
 
-
-
-// CHANGED: accept args; last arg is treated as index file (so both ./q idx and ./q pagedir idx work)
-int main(int argc, char **argv) {  // CHANGED
+int main(int argc, char **argv) {
     if (argc != 3){
         fprintf(stderr, "wrong number of commands\n");
         return 1;
@@ -153,21 +191,17 @@ int main(int argc, char **argv) {  // CHANGED
     char *pageDir = argv[1];
     char *indexfile = argv[2];
     char query[MAX_QUERY_LEN];
-    load_index_all(indexfile);   // CHANGED: load the index (doc 1) once
+    load_index_all(indexfile);
 
-    // Loop indefinitely, prompting for and processing queries
     while (true) {
         printf("> ");
         fflush(stdout);
 
-        // Read a line from stdin
         if (fgets(query, sizeof(query), stdin) == NULL) {
-            // End-of-file (Ctrl-D) detected
             printf("\n");
             break;
         }
 
-        // Process the read line
         process_query(query, pageDir);
     }
 
