@@ -9,7 +9,7 @@
 ./querier ./ file  
 
 # professor's error tests
-valgrind --leak-check=full --show-leak-kinds=all ./querier ../pages ../indexer/indexnm < test/error-queries.txt  
+valgrind --leak-check=full --show-leak-kinds=all ./querier ../pages ../indexer/indexnm < error-queries.txt  
 
 # run quietly test with professor's queries
-valgrind --leak-check=full --show-leak-kinds=all ./querier ../pages ../indexer/indexnm -q < test/good-queries.txt > myoutput
+valgrind --leak-check=full --show-leak-kinds=all ./querier ../pages ../indexer/indexnm -q < good-queries.txt > myoutput
