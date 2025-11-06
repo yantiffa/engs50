@@ -196,6 +196,22 @@ int main(int argc, char **argv) {
     }
     char *pageDir = argv[1];
     char *indexfile = argv[2];
+    char crawlerFile[512];
+    snprintf(crawlerFile, sizeof(crawlerFile), "%s/.crawler", pageDir);
+    FILE *cf = fopen(crawlerFile, "r");
+    if (!cf) {
+        fprintf(stderr, "Error: not a crawler directory\n");
+        return 1;
+    }
+    fclose(cf);
+    
+    FILE *if_test = fopen(indexfile, "r");
+    if (!if_test) {
+        fprintf(stderr, "Error: cannot read index file\n");
+        return 1;
+    }
+    fclose(if_test);
+    
     char query[MAX_QUERY_LEN];
     load_index_all(indexfile);
 
