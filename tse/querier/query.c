@@ -233,7 +233,7 @@ static void process_query(char* query, const char *pageDir) {
         // empty or all-too-short words: ignore
         return;
     }
-
+    
     // Print normalized query
     bool first = true;
     for (int s = 0; s < q.count; s++) {
@@ -245,6 +245,8 @@ static void process_query(char* query, const char *pageDir) {
         if (s < q.count - 1) printf(" or ");
     }
     printf("\n");
+
+    int res = 0;
 
     // Compute scores over all docs
     for (int docID = 1; docID < MAX_DOCS; docID++) {
@@ -274,6 +276,9 @@ static void process_query(char* query, const char *pageDir) {
             free(url);
             res++;
         }
+    }
+    if (res == 0) {
+        printf("No documents match.\n");
     }
 }
 
