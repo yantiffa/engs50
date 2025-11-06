@@ -185,7 +185,7 @@ static void process_query(char* query, const char *pageDir) {
         }
     }
     if (res == 0) {
-        fprintf(stderr, "No document match\n");
+        printf("No documents match.\n");
     }
 }
 
