@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OUFILE=testing.out
+OUTFILE=testing.out
 rm -f testing.out
 
 tests() {
@@ -52,7 +52,7 @@ echo "" | tee -a $OUTFILE
 
 #test 7: tab or enter then EOF
 tests "test 7: tab or enter then EOF"
-printf"\t\n" | querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
+printf "\t\n" | querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
 echo "" | tee -a $OUTFILE
 
 #test 8: a single word that does not exist
@@ -91,7 +91,7 @@ echo "" | tee -a $OUTFILE
 
 #test 14: tab then and at the beginning
 tests "test 14: tab then and at the beginning"
-printf "\tand dartmouth" |  querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
+printf "\tand dartmouth\n" |  querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
 echo "" | tee -a $OUTFILE 
 
 #test 15: and at the end
@@ -106,7 +106,7 @@ echo "" | tee -a $OUTFILE
 
 #test 17: or then tab at the end
 tests "test 17: or then tab at the end"
-printf "dartmouth or \t" | querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
+printf "dartmouth or \t\n" | querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
 echo "" | tee -a $OUTFILE
 
 #test 18: and/or combos adjacent to one another in the middle of query
