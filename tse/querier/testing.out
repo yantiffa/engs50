@@ -1,0 +1,114 @@
+-------------------------------------------------------------
+test 1:invalid number of parameters (should fail)
+-------------------------------------------------------------
+
+./test.sh: line 16: querier: command not found
+
+-------------------------------------------------------------
+test 2: directory that has not been crawled
+-------------------------------------------------------------
+
+./test.sh: line 21: querier: command not found
+
+-------------------------------------------------------------
+test 3: directory that is not accessible 
+-------------------------------------------------------------
+
+./test.sh: line 28: querier: command not found
+
+-------------------------------------------------------------
+test 4:an index file that is not readable
+-------------------------------------------------------------
+
+./test.sh: line 35: querier: command not found
+
+-------------------------------------------------------------
+test 5: a large indexfile
+-------------------------------------------------------------
+
+./test.sh: line 40: querier: command not found
+
+-------------------------------------------------------------
+#test 6: Empty
+-------------------------------------------------------------
+
+./test.sh: line 50: querier: command not found
+
+-------------------------------------------------------------
+test 7: tab or enter then EOF
+-------------------------------------------------------------
+
+./test.sh: line 55: querier: command not found
+
+-------------------------------------------------------------
+test 8: a single word that does not exist
+-------------------------------------------------------------
+
+./test.sh: line 60: querier: command not found
+
+-------------------------------------------------------------
+test 9: a valid word or'd with an invalid word
+-------------------------------------------------------------
+
+./test.sh: line 65: querier: command not found
+
+-------------------------------------------------------------
+test 10: a valud word and'd with an invalid word
+-------------------------------------------------------------
+
+./test.sh: line 70: querier: command not found
+
+-------------------------------------------------------------
+test 11: a combination of or's and and's and spaces and tabs separating valid and invalid words
+-------------------------------------------------------------
+
+./test.sh: line 79: querier: command not found
+
+-------------------------------------------------------------
+test 12: and at the beginning
+-------------------------------------------------------------
+
+./test.sh: line 84: querier: command not found
+
+-------------------------------------------------------------
+test 13: or at the beginning
+-------------------------------------------------------------
+
+./test.sh: line 89: querier: command not found
+
+-------------------------------------------------------------
+test 14: tab then and at the beginning
+-------------------------------------------------------------
+
+./test.sh: line 94: querier: command not found
+
+-------------------------------------------------------------
+test 15: end at the end
+-------------------------------------------------------------
+
+./test.sh: line 99: querier: command not found
+
+-------------------------------------------------------------
+test 16: or at the end
+-------------------------------------------------------------
+
+./test.sh: line 104: querier: command not found
+
+-------------------------------------------------------------
+test 17: or then tab at the end
+-------------------------------------------------------------
+
+./test.sh: line 109: querier: command not found
+
+-------------------------------------------------------------
+test 18: and/or combos adjacent to one another in the middle of query
+-------------------------------------------------------------
+
+./test.sh: line 114: querier: command not found
+
+-------------------------------------------------------------
+test 19: Handles cases where there are no scores returned
+-------------------------------------------------------------
+
+./test.sh: line 119: querier: command not found
+
