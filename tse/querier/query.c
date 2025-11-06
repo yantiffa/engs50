@@ -219,8 +219,9 @@ static bool parse_query(char *input, Query *q) {
     return (q->sequences[q->count - 1].count > 0);
 }
 
-/* ===== Query processing ===== */
 
+/* ===== Query processing ===== */
+int res = 0;
 static void process_query(char* query, const char *pageDir) {
     Query q;
     if (!parse_query(query, &q)) {
@@ -271,6 +272,7 @@ static void process_query(char* query, const char *pageDir) {
             char *url = get_url(pageDir, docID);
             printf("rank: %d: doc: %d: %s\n", total_score, docID, url);
             free(url);
+            res++;
         }
     }
 }
