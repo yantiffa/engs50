@@ -25,7 +25,7 @@ echo "" | tee -a $OUTFILE
 tests "test 3: directory that is not accessible "
 mkdir -p ../notaccessible
 chmod 000 ../notaccessible
-querier ../notaccessible ../indexer/indexnm 2>&1 | tee -a $OUTFILE
+./querier ../notaccessible ../indexer/indexnm 2>&1 | tee -a $OUTFILE
 chmod 755 ../notaccessible
 rmdir ../notaccessible
 echo "" | tee -a $OUTFILE
