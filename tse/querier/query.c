@@ -160,6 +160,8 @@ static void process_query(char* query, const char *pageDir) {
     }
     printf("\n");
 
+    int res = 0;
+
     // Compute scores
     for (int docID = 1; docID < 1000; docID++) {
         int total_score = 0;
@@ -179,7 +181,11 @@ static void process_query(char* query, const char *pageDir) {
             char *url = get_url(pageDir, docID);
             printf("rank: %d: doc: %d: %s\n", total_score, docID, url);
             free(url);
+            res++;
         }
+    }
+    if (res == 0) {
+        fprintf(stderr, "No document match\n");
     }
 }
 
