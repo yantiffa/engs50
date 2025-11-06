@@ -93,3 +93,28 @@ echo "" | tee -a $OUTFILE
 tests "test 14: tab then and at the beginning"
 printf "\tand dartmouth" |  querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
 echo "" | tee -a $OUTFILE 
+
+#test 15: and at the end
+tests "test 15: end at the end"
+echo "dartmouth and" | querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
+echo "" | tee -a $OUTFILE
+
+#test 16: or at the end
+tests "test 16: or at the end"
+echo "dartmouth or" | querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
+echo "" | tee -a $OUTFILE
+
+#test 17: or then tab at the end
+tests "test 17: or then tab at the end"
+printf "dartmouth or \t" | querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
+echo "" | tee -a $OUTFILE
+
+#test 18: and/or combos adjacent to one another in the middle of query
+tests "test 18: and/or combos adjacent to one another in the middle of query"
+echo "dartmouth and or college" | querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
+echo "" | tee -a $OUTFILE
+
+#test 19: Handles cases where there are no scores returned
+tests "test 19: Handles cases where there are no scores returned"
+echo "Thayer School at Dartmouth College" | querier ../pages ../indexer/indexnum 2>&1 | tee -a $OUTFILE
+echo "" | tee -a $OUTFILE  
