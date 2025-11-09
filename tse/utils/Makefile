@@ -1,4 +1,4 @@
-CFLAGS=-Wall -pedantic -std=c11 -I. -I.. -g
+CFLAGS=-Wall -pedantic -std=c11 -I. -I.. -I../utils/module/module3/queue -g
 SRCS := $(wildcard *.c)
 OBJS := $(SRCS:.c=.o)
 LIB = ../lib/libutils.a
