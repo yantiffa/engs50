@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/querier/
+https://thayer.github.io/engs50/Labs/Lab5/
 2
-32542
+23682
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/querier/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>TSE Querier</title>
+  <title>Lab 5 - Indexer</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/querier/">
+  <link rel="canonical" href="/engs50/Labs/Lab5/">
 </head>
 
 
@@ -44,388 +44,259 @@ https://thayer.github.io/engs50/Notes/querier/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">TSE Querier</h1>
+    <h1 class="post-title">Lab 5 - Indexer</h1>
   </header>
 
   <div class="post-content">
-    <h3 id="goals">Goals</h3>
+    <p><strong>Due Friday, May 5, at 10pm</strong></p>
 
-<p>There are three mini lectures today.</p>
+<p>In this lab you’ll continue the Tiny Search Engine (TSE) by coding the Indexer and a program for testing a unit that saves and loads index files, according to the <a href="REQUIREMENTS.html">Indexer Requirements Spec</a>.</p>
 
 <ul id="markdown-toc">
-  <li><a href="#goals" id="markdown-toc-goals">Goals</a></li>
-  <li><a href="#the-querier" id="markdown-toc-the-querier">the Querier</a></li>
-  <li><a href="#fuzz-testing" id="markdown-toc-fuzz-testing">Fuzz Testing</a></li>
-  <li><a href="#expressions" id="markdown-toc-expressions">Expressions and accumulators</a>    <ul>
-      <li><a href="#arithmetic-expressions" id="markdown-toc-arithmetic-expressions">Arithmetic expressions</a></li>
-      <li><a href="#precedence" id="markdown-toc-precedence">Precedence</a></li>
+  <li><a href="#preparation" id="markdown-toc-preparation">Preparation</a></li>
+  <li><a href="#assignment" id="markdown-toc-assignment">Assignment</a>    <ul>
+      <li><a href="#whatsubmit" id="markdown-toc-whatsubmit">Submission - what</a></li>
+      <li><a href="#howsubmit" id="markdown-toc-howsubmit">Submission - how</a></li>
+      <li><a href="#extensions" id="markdown-toc-extensions">Extensions</a></li>
     </ul>
   </li>
-  <li><a href="#activity" id="markdown-toc-activity">Activity</a></li>
+  <li><a href="#hints-and-tips" id="markdown-toc-hints-and-tips">Hints and tips</a>    <ul>
+      <li><a href="#review-the-lecture-notes" id="markdown-toc-review-the-lecture-notes">Review the lecture notes</a></li>
+      <li><a href="#libcs50" id="markdown-toc-libcs50">libcs50</a></li>
+      <li><a href="#markdown" id="markdown-toc-markdown">Markdown</a></li>
+      <li><a href="#testing" id="markdown-toc-testing">Testing</a></li>
+      <li><a href="#use-valgrind-and-gdb" id="markdown-toc-use-valgrind-and-gdb">Use valgrind and gdb</a></li>
+      <li><a href="#memory-allocation" id="markdown-toc-memory-allocation">Memory allocation</a></li>
+      <li><a href="#hashtable" id="markdown-toc-hashtable">Hashtable</a></li>
+      <li><a href="#pagedirectory" id="markdown-toc-pagedirectory">pageDirectory</a></li>
+      <li><a href="#index-files" id="markdown-toc-index-files">Index files</a></li>
+      <li><a href="#makefile" id="markdown-toc-makefile">Makefile</a></li>
+    </ul>
+  </li>
 </ul>
 
-<h2 id="the-querier">the Querier</h2>
+<h2 id="preparation">Preparation</h2>
 
-<p>The third component of the Tiny Search Engine is the <em>Querier</em>, which reads the index produced by the Indexer and the page files produced by the Crawler, to interactively answer written queries entered by the user.</p>
+<ol>
+  <li>
+    <p>Start with the same Gitlab project you used for Lab 4.
+<em>Before you begin</em>, make sure you submitted Lab 4 correctly: you tagged the submitted version with <code class="language-plaintext highlighter-rouge">lab4submit</code>, <a href="/engs50/Labs/Lab4/#howsubmit">as instructed</a>, and pushed that tag to your Gitlab remote.</p>
+  </li>
+  <li>
+    <p>Check to ensure your local repo is clean with <code class="language-plaintext highlighter-rouge">make clean</code> and everything has been committed and pushed according to <code class="language-plaintext highlighter-rouge">git status</code>.
+If you have files that need to be committed, or commits that should be pushed, do that now.
+(oops - were those supposed to be part of your Lab 4 submission?
+See the first step above.)</p>
+  </li>
+  <li>
+    <p><strong>Do not proceed</strong> if you have uncommitted changes or unpushed commits.
+Seek help if you need to sort out your repo and Gitlab.</p>
+  </li>
+  <li>Pull the updated and additional files from the upstream master (the TSE starter kit) into your local repository:
+<code class="language-plaintext highlighter-rouge">git pull upstream master</code>
+(this works if you earlier followed the <a href="/05/">instructions from Section meeting</a>).
+    <blockquote>
+      <p><a href="https://gitlab.cs.dartmouth.edu/CS50/tse/compare/341328cc0ba0501a0f53eabace60a5cdbbd5b762...HEAD">Here</a> you can see the changes that will happen when you run this command - all the changes made to the starter kit since it was released.</p>
+    </blockquote>
+  </li>
+  <li>
+    <p>Commit and push your changes; perhaps tag this commit for easy reference later: <code class="language-plaintext highlighter-rouge">git commit -a; git tag lab5start; git push --tags</code>.</p>
+  </li>
+  <li>Check again to be sure your Gitlab repo is <strong><em>private</em></strong> (not <em>internal</em> or <em>public</em>).
+Visit your repo on Gitlab, click on <em>Settings</em>, and scroll down to <em>Project Visibility</em>.</li>
+</ol>
 
-<p>Our Querier loads the index into memory (a data structure we developed for the Indexer) and then prompts the user for queries.
-Queries are comprised of words, with optional <code class="language-plaintext highlighter-rouge">and</code>/<code class="language-plaintext highlighter-rouge">or</code> operators.
+<h2 id="assignment">Assignment</h2>
+
+<p>Write the <em>indexer</em>, second sub-system of the Tiny Search Engine.
+Please follow the <a href="/engs50/Resources/CodingStyle.html">CS50 coding style guidelines</a> and the <a href="REQUIREMENTS.html">Indexer Requirements Spec</a>, and make good use of our abstract data structures.</p>
+
+<p>Now is a good time to read Section 4 in <em><a href="/engs50/Reading/searchingtheweb.pdf">Searching the Web</a></em>, the paper about search engines.</p>
+
+<ol>
+  <li>In the <code class="language-plaintext highlighter-rouge">indexer</code> subdirectory, write
+    <ul>
+      <li>a program <code class="language-plaintext highlighter-rouge">indexer</code>;</li>
+      <li>a program <code class="language-plaintext highlighter-rouge">indextest</code>;</li>
+      <li>a short file <code class="language-plaintext highlighter-rouge">README.md</code> to provide any special information about compiling or using your indexer or indextest programs;</li>
+      <li>a file <code class="language-plaintext highlighter-rouge">DESIGN.md</code> to provide the Design Spec for indexer (not index tester), drawing inspiration from the <a href="/indexer/">lecture notes</a>;</li>
+      <li>a file <code class="language-plaintext highlighter-rouge">IMPLEMENTATION.md</code> to provide the implementation spec and testing plan for indexer (not index tester);</li>
+      <li>a file <code class="language-plaintext highlighter-rouge">TESTING.md</code>, telling the grader how you tested your indexer (see <a href="#testing">about testing</a> below);</li>
+      <li>a <code class="language-plaintext highlighter-rouge">.gitignore</code> file telling Git to ignore the binary files (libraries, executables) in this directory.</li>
+    </ul>
+  </li>
+  <li>
+    <p>Both programs shall leverage common code from <code class="language-plaintext highlighter-rouge">common.a</code> in the <code class="language-plaintext highlighter-rouge">../common</code> directory:</p>
+
+    <ul>
+      <li>a module <code class="language-plaintext highlighter-rouge">index.c</code> that contains all the logic for saving and loading index files (this module is common between the Indexer, Querier, and indextest);</li>
+      <li>a module <code class="language-plaintext highlighter-rouge">pagedir.c</code> that contains all the logic for saving pages to a crawler output directory, for loading pages from a crawler output directory (this module is common between the Crawler and Indexer);</li>
+      <li>(optionally) a module <code class="language-plaintext highlighter-rouge">word.c</code> that implements <code class="language-plaintext highlighter-rouge">NormalizeWord</code> (this module is common between the Indexer and Querier);</li>
+      <li>a <code class="language-plaintext highlighter-rouge">Makefile</code> that builds <code class="language-plaintext highlighter-rouge">common.a</code> for use by the programs;</li>
+      <li>a short <code class="language-plaintext highlighter-rouge">README.md</code> file explaining how to build <code class="language-plaintext highlighter-rouge">common.a</code>;</li>
+      <li>a <code class="language-plaintext highlighter-rouge">.gitignore</code> file telling Git to ignore the binary files (libraries, executables) in this directory.</li>
+    </ul>
+  </li>
+  <li>Review your top-level <code class="language-plaintext highlighter-rouge">README.md</code> and <code class="language-plaintext highlighter-rouge">Makefile</code> to update as needed.</li>
+</ol>
+
+<h3 id="whatsubmit">Submission - what</h3>
+
+<p>In this lab you shall edit or add files as described above.
+<strong><em>You must arrange your directory like ours, so we can better navigate and test your code.</em></strong>  Of course, you may have additional files - test scripts, test output, code you’ve chosen to break into multiple files.
+Here is the solution’s <a href="/engs50/Labs/Lab5/tse-tree.txt">directory structure</a>; it includes some of the optional files and some of the testing files, which may not be present in your solution.
+The point is that your code must be organized in the same <em>directory</em> structure.</p>
+
+<p><em>You shall NOT modify any of the code we provide in <code class="language-plaintext highlighter-rouge">libcs50</code></em>.</p>
+
+<p><em>You shall NOT include any data files produced by the crawler or indexer, or any binary/object files produced by the compiler, backup files, core dumps, etc.</em></p>
+
+<h3 id="howsubmit">Submission - how</h3>
+
+<p>When you are ready for final submission,</p>
+
+<ul>
+  <li><strong>Add</strong> all required files using an appropriate <code class="language-plaintext highlighter-rouge">git add</code> commandline.</li>
+  <li><strong>Commit</strong> all changes using an appropriate <code class="language-plaintext highlighter-rouge">git commit</code> commandline.</li>
+  <li><strong>Tag</strong>: <code class="language-plaintext highlighter-rouge">git tag lab5submit</code></li>
+  <li><strong>Push</strong>: <code class="language-plaintext highlighter-rouge">git push --tags</code> to ensure the tags are pushed to the remote.
+See <a href="/git/tags.html">more about tags</a>.</li>
+</ul>
+
+<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="language-plaintext highlighter-rouge">lab5submit</code> and the files associated with that tagged commit include everything we’ll need to grade your lab.</p>
+
+<p>We grade the version tagged <code class="language-plaintext highlighter-rouge">lab5submit</code> so it is safe for you to continue work (e.g., so you can start work on Lab 6), even if you commit or push.</p>
+
+<p>We will clone your repo at 0h, 24h, 48h, and 72h after the original deadline.
+We will start grading when we first see one with tag <code class="language-plaintext highlighter-rouge">lab5submit</code>, and judge it late if that tag was added after the deadline.
+To avoid confusion, <em>please blitz the team <code class="language-plaintext highlighter-rouge">cs50 AT cs.dartmouth.edu</code> if you want a late submission to be graded instead of your on-time submission.</em></p>
+
+<p><strong><em>Your entire codebase must compile with <code class="language-plaintext highlighter-rouge">make</code> from the top-level directory and produce no compiler warnings.</em></strong>  If we find that your code will not compile, or has <strong>segmentation faults</strong>, we will send it back to you as soon as we can for repair; recall the <a href="/#crashes">grading policy</a>.</p>
+
+<p>We will run your indexer on our own set of test data.</p>
+
+<p>We will run <code class="language-plaintext highlighter-rouge">valgrind</code> on your program to look for memory leaks; you will lose points for memory leaks or memory errors.</p>
+
+<h3 id="extensions">Extensions</h3>
+
+<p>If you want to claim your extension, create a file <code class="language-plaintext highlighter-rouge">EXTENSION</code> at the top-level directory of your repository.
+Don’t forget to <code class="language-plaintext highlighter-rouge">git push</code> <em>(before the deadline!)</em> so we will see the file.
 For example,</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>computer science
-computer and science
-computer or science
-baseball or basketball or ultimate frisbee
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">touch </span>EXTENSION
+<span class="nv">$ </span>git add EXTENSION
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"extension request"</span>
+<span class="nv">$ </span>git tag lab5submit     <span class="c"># add tag, as above</span>
+<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab, including tags</span>
 </code></pre></div></div>
 
-<p>The first two examples are treated identically, matching only documents that have <em>both</em> words - not necessarily together (as in the phrase “computer science”).
-The third picks up documents that have <em>either</em> word.
-The fourth matches documents that mention baseball, or basketball, or both “ultimate” and the word “frisbee” (not necessarily together).</p>
+<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="language-plaintext highlighter-rouge">lab5submit</code> and that its files include <code class="language-plaintext highlighter-rouge">EXTENSION</code>.</p>
 
-<p>Here’s an example run, with the output truncated a bit:</p>
+<p>When you are ready to submit your code, remove <code class="language-plaintext highlighter-rouge">EXTENSION</code> as follows, <em>update your submission tag</em>, and push to Gitlab:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$  querier/querier data/cs50-3 data/cs50-index3
-KEY WORDs:&gt; computer and science
-Query: computer and science 
-Matches 139 documents (ranked):
-score 141 doc  19: http://old-www.cs.dartmouth.edu/~dfk/papers/index.html
-score 135 doc 349: http://old-www.cs.dartmouth.edu/~dfk/papers/index-t.html
-score 135 doc 348: http://old-www.cs.dartmouth.edu/~dfk/papers/index-a.html
-score 135 doc 347: http://old-www.cs.dartmouth.edu/~dfk/papers/index-c.html
-score  10 doc  11: http://old-www.cs.dartmouth.edu/~dfk/armada/
-score   4 doc   9: http://old-www.cs.dartmouth.edu/~dfk/people.html
-score   4 doc   7: http://old-www.cs.dartmouth.edu/~dfk/teaching.html
-score   3 doc 206: http://old-www.cs.dartmouth.edu/~dfk/papers/abstracts/deshpande-thesis.html
-score   3 doc 167: http://old-www.cs.dartmouth.edu/~dfk/papers/abstracts/nanda-thesis.html
-score   3 doc  18: http://old-www.cs.dartmouth.edu/~dfk/index.html
-...
-KEY WORDs:&gt; tiny search engine
-Query: tiny search engine 
-No documents match.
------------------------------------------------
-KEY WORDs:&gt; TSE
-Query: tse 
-No documents match.
------------------------------------------------
-KEY WORDs:&gt; NOTE we LOWERcase the query first
-Query: note we lowercase the query first 
-No documents match.
------------------------------------------------
-KEY WORDs:&gt;  spaces      do    not    mattter
-Query: spaces do not mattter 
-No documents match.
------------------------------------------------
-KEY WORDs:&gt; non-letter characters are disallowed
-Error: bad character '-' in query.
-KEY WORDs:&gt; even digits as in cs50
-Error: bad character '5' in query.
-KEY WORDs:&gt; and
-Query: and 
-Error: 'and' cannot be first
-KEY WORDs:&gt; or
-Query: or 
-Error: 'or' cannot be first
-KEY WORDs:&gt; what about and
-Query: what about and 
-Error: 'and' cannot be last
-KEY WORDs:&gt; friend and foe
-Query: friend and foe 
-No documents match.
------------------------------------------------
-KEY WORDs:&gt; quit
-Query: quit 
-No documents match.
------------------------------------------------
-KEY WORDs:&gt; exit
-Query: exit 
-Matches 1 documents (ranked):
-score   3 doc   3: http://old-www.cs.dartmouth.edu/~dfk/visit-dartmouth.html
------------------------------------------------
-KEY WORDs:&gt; ^D
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git <span class="nb">rm </span>EXTENSION
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"ready for grading"</span>
+<span class="nv">$ </span>git push <span class="nt">--delete</span> origin lab5submit <span class="c"># remove the tag from remote</span>
+<span class="nv">$ </span>git tag <span class="nt">-f</span> lab5submit  <span class="c"># move the local tag forward to this commit</span>
+<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab remote, including tags</span>
 </code></pre></div></div>
 
-<p>Let’s study the <a href="/engs50/Labs/Lab6/REQUIREMENTS.html">Requirements Spec</a> for the Querier, and run some demos.</p>
+<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="language-plaintext highlighter-rouge">lab5submit</code>, that its files do <em>not</em> include <code class="language-plaintext highlighter-rouge">EXTENSION</code>, and its files include everything we’ll need to grade your lab.</p>
 
-<p>Today’s demo scripts are here: <a href="/engs50/Notes/querier/script1.txt">script1</a> and <a href="/engs50/Notes/querier/script2.txt">script2</a>.</p>
+<h2 id="hints-and-tips">Hints and tips</h2>
 
-<h2 id="fuzz-testing">Fuzz Testing</h2>
+<h3 id="review-the-lecture-notes">Review the lecture notes</h3>
 
-<p>In a recent lecture we talked about <em>unit testing</em>, and the difference between <em>glass-box testing</em> and <em>black-box testing</em>.
-Usually, these tests are based on a carefully constructed series of test cases, devised to test all code sequences and push on the “edge cases”.</p>
+<p>There are some design tips in the <a href="/indexer/">lecture notes</a>.
+This week’s <a href="/engs50/Reading/#week-6">reading</a> is great too!</p>
 
-<p>However, such tests are only as good as the test writer - who must logically study the code (for glass-box testing) or the specs (for black-box testing) to think of the suitable test cases.
-It’s possible they will miss some important cases.</p>
+<h3 id="libcs50">libcs50</h3>
 
-<p>Another solution, therefore, is <strong><em>fuzz testing</em></strong>, a form of black-box testing in which you fire thousands of random inputs at the program to see how it reacts.
-The chances of triggering an unconsidered test case is far greater if you try a lot of cases!</p>
+<p>We provide several modules in the <code class="language-plaintext highlighter-rouge">libcs50</code> directory, which compiles to a library <code class="language-plaintext highlighter-rouge">libcs50.a</code> you can link with your indexer.
+<em>You should not change any of our code.</em>
+You may drop in your <code class="language-plaintext highlighter-rouge">set.[ch]</code>, <code class="language-plaintext highlighter-rouge">counters.[ch]</code>, <code class="language-plaintext highlighter-rouge">hashtable.[ch]</code> files from Lab 3.
+If you’d prefer to use our version of <em>set</em>, <em>counters</em>, and <em>hashtable</em>, that’s totally fine; the starter kit includes a pre-compiled library you can use instead; see <code class="language-plaintext highlighter-rouge">libcs50/README.md</code>.</p>
 
-<p>Here is a fuzz-testing program for our <em>querier</em>.
-It generates a series of random queries on stdout, which it then pipes to the querier on stdin.
-Here’s the core of the fuzz tester:</p>
+<p>Most of the modules in this directory are documented with a corresponding Markdown file.</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**************** generate_query ****************/</span>
-<span class="cm">/* generate one random query and print to stdout.
- * pull random words from the wordlist and from the dictionary.
- */</span>
-<span class="k">static</span> <span class="kt">void</span>
-<span class="nf">generate_query</span><span class="p">(</span><span class="k">const</span> <span class="n">wordlist_t</span> <span class="o">*</span><span class="n">wordlist</span><span class="p">,</span> <span class="k">const</span> <span class="n">wordlist_t</span> <span class="o">*</span><span class="n">dictionary</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="c1">// some parameters that affect query generation</span>
-  <span class="k">const</span> <span class="kt">int</span> <span class="n">max_words</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>        <span class="c1">// generate 1..max_words</span>
-  <span class="k">const</span> <span class="kt">float</span> <span class="n">or_probability</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">3</span><span class="p">;</span>   <span class="c1">// P(OR between two words)</span>
-  <span class="k">const</span> <span class="kt">float</span> <span class="n">and_probability</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">2</span><span class="p">;</span>  <span class="c1">// P(AND between two words)</span>
-  <span class="k">const</span> <span class="kt">float</span> <span class="n">dict_probability</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">2</span><span class="p">;</span> <span class="c1">// P(draw from dict instead of wordlist)</span>
+<h3 id="markdown">Markdown</h3>
 
-  <span class="kt">int</span> <span class="n">qwords</span> <span class="o">=</span> <span class="n">random</span><span class="p">()</span> <span class="o">%</span> <span class="n">max_words</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// number of words in query</span>
-  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">qw</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">qw</span> <span class="o">&lt;</span> <span class="n">qwords</span><span class="p">;</span> <span class="n">qw</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// draw a word either dictionary or wordlist</span>
-    <span class="k">if</span> <span class="p">((</span><span class="n">random</span><span class="p">()</span> <span class="o">%</span> <span class="mi">100</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">dict_probability</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span> <span class="p">{</span>
-      <span class="n">printf</span><span class="p">(</span><span class="s">"%s "</span><span class="p">,</span> <span class="n">dictionary</span><span class="o">-&gt;</span><span class="n">words</span><span class="p">[</span><span class="n">random</span><span class="p">()</span> <span class="o">%</span> <span class="n">dictionary</span><span class="o">-&gt;</span><span class="n">nwords</span><span class="p">]);</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-      <span class="n">printf</span><span class="p">(</span><span class="s">"%s "</span><span class="p">,</span> <span class="n">wordlist</span><span class="o">-&gt;</span><span class="n">words</span><span class="p">[</span><span class="n">random</span><span class="p">()</span> <span class="o">%</span> <span class="n">wordlist</span><span class="o">-&gt;</span><span class="n">nwords</span><span class="p">]);</span>
-    <span class="p">}</span>
+<p>In this and subsequent labs, you must provide documentation files in Markdown format, that is, you should supply <code class="language-plaintext highlighter-rouge">README.md</code>, <code class="language-plaintext highlighter-rouge">DESIGN.md</code>, <code class="language-plaintext highlighter-rouge">IMPLEMENTATION.md</code>, and <code class="language-plaintext highlighter-rouge">TESTING.md</code>.
+The Markdown syntax provides very simple (and readable) markup for headings, lists, italics, bold, and code snippets.
+(This course website is written in Markdown.) See <a href="/engs50/Resources/#markdown">Markdown resources</a>.</p>
 
-    <span class="c1">// last word?</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">qw</span> <span class="o">&lt;</span> <span class="n">qwords</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-      <span class="c1">// which operator to print?</span>
-      <span class="kt">int</span> <span class="n">op</span> <span class="o">=</span> <span class="n">random</span><span class="p">()</span> <span class="o">%</span> <span class="mi">100</span><span class="p">;</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">op</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">and_probability</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span> <span class="p">{</span>
-        <span class="n">printf</span><span class="p">(</span><span class="s">"AND "</span><span class="p">);</span>
-      <span class="p">}</span>
-      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">and_probability</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">+</span> <span class="n">or_probability</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span> <span class="p">{</span>
-        <span class="n">printf</span><span class="p">(</span><span class="s">"OR "</span><span class="p">);</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
-<span class="p">}</span>
+<h3 id="testing">Testing</h3>
+
+<p>If your crawler never quite worked, never fear!
+You do not need a working crawler to write or test your indexer.
+Try your indexer on the crawler’s output, which is in <code class="language-plaintext highlighter-rouge">~cs50/demo/crawler-output/</code>.</p>
+
+<p>We recommend that you write a bash script to execute your indexer; you might run that script from a <code class="language-plaintext highlighter-rouge">make test</code> target.
+Your <code class="language-plaintext highlighter-rouge">TESTING.md</code> file can name the script and describe what it does.</p>
+
+<p>Because some of our data-structure implementations have unspecified ordering – the order in which data appears when traversing the structure may not be the same as the order items were inserted – the file saved by the index tester may not be literally identical to the file read by that program.
+We provide an <a href="/engs50/Labs/Lab5/indexsort.awk"><code class="language-plaintext highlighter-rouge">indexsort.awk</code></a>  script that sorts the index file into a ‘canonical’ ordering, making it possible to compare two index files for their content.</p>
+
+<p>Note that <code class="language-plaintext highlighter-rouge">TESTING.md</code> is different from the ‘Testing plan’, which is a short high-level description written before you code.
+<code class="language-plaintext highlighter-rouge">TESTING.md</code> contains (or refers to) results from the tests.
+It may refer to other files that contain input to or output from your test runs, or scripts to run the tests; they need not be copied into this file.
+(Indeed, your file will be much more readable if you don’t fill it with long scripts or output!)</p>
+
+<h3 id="use-valgrind-and-gdb">Use valgrind and gdb</h3>
+
+<p>In <a href="/debug/">Lecture</a> we learned how to use <code class="language-plaintext highlighter-rouge">valgrind</code> and <code class="language-plaintext highlighter-rouge">gdb</code>; make use of them.</p>
+
+<h3 id="memory-allocation">Memory allocation</h3>
+
+<p>You may find the <code class="language-plaintext highlighter-rouge">memory.c</code> module useful.
+Its use is optional, but it is ready to use as part of library <code class="language-plaintext highlighter-rouge">libcs50.a</code>.</p>
+
+<p>In our Lab3 we tried to recover gracefully from memory-allocation failures.
+In the TSE application programs, we’ll be a bit more lazy: on NULL return from malloc/calloc you can print an error and exit with non-zero exit status.
+(You may find the <code class="language-plaintext highlighter-rouge">assertp()</code> function, defined by the <code class="language-plaintext highlighter-rouge">memory</code> module, to be useful here.)</p>
+
+<h3 id="hashtable">Hashtable</h3>
+
+<p>“How big should the hashtable be?”</p>
+
+<p>In the indexer/querier, we use a hashtable to store an inverted index (words –&gt; documents), and thus the hashtable is keyed by words.
+The answer to the above question, then, depends on how many words will be in the index.</p>
+
+<p>When building the inverted index, it’s impossible to know in advance how many words you will find in all those pages encountered by the crawler.
+Pick a reasonable size, perhaps something in the range of 200..900 slots.</p>
+
+<p>When loading an inverted index from a file, though, you <em>can</em> know how many words… because there is one word per line in the index file, and it’s easy to count the number of lines (see <code class="language-plaintext highlighter-rouge">file.c</code>).
+Once your code can obtain the number of words, think about how it can compute a good size for your hashtable.</p>
+
+<h3 id="pagedirectory">pageDirectory</h3>
+
+<p>Recall that the Crawler fills a directory with saved pages; in Lab 4 we recommended that you also create and leave a file <code class="language-plaintext highlighter-rouge">.crawler</code> in the page directory.
+If you followed that advice, you now have a great opportunity!
+You might include a function <code class="language-plaintext highlighter-rouge">isCrawlerDirectory(char *dir)</code> in your <code class="language-plaintext highlighter-rouge">pagedir</code> module, which can easily verify whether <code class="language-plaintext highlighter-rouge">dir</code> is indeed a Crawler-produced directory.
+If it can open a file <code class="language-plaintext highlighter-rouge">dir/.crawler</code> for reading, then <code class="language-plaintext highlighter-rouge">dir</code> is a Crawler-produced directory; if not, either the <code class="language-plaintext highlighter-rouge">dir</code> is not a valid pathname, not a directory, not a readable directory, it’s not a Crawler produced directory, or some other error - all easily caught by this simple test.</p>
+
+<h3 id="index-files">Index files</h3>
+
+<p>To read each line of the index file, it works well to read the word, then loop calling <code class="language-plaintext highlighter-rouge">fscanf</code> with format <code class="language-plaintext highlighter-rouge">"%d %d "</code> to pull off one pair at a time, checking the return value of <code class="language-plaintext highlighter-rouge">fscanf</code>.</p>
+
+<p>To write the index file, use the <code class="language-plaintext highlighter-rouge">_iterate</code> methods built into your data structures.
+(Indeed you may need to have iterators call iterators!) Do <em>not</em> use your <code class="language-plaintext highlighter-rouge">_print</code> methods for this purpose; those are meant for producing pretty human-readable output for debugging purposes.</p>
+
+<p>The functions found in <code class="language-plaintext highlighter-rouge">file.c</code> should be helpful.</p>
+
+<h3 id="makefile">Makefile</h3>
+
+<p>Your <code class="language-plaintext highlighter-rouge">indexer/Makefile</code> needs to build both <code class="language-plaintext highlighter-rouge">indexer</code> and <code class="language-plaintext highlighter-rouge">indextest</code>.
+It may be most convenient to add a phony top-most rule:</p>
+
+<div class="language-make highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">all</span><span class="o">:</span> <span class="nf">indexer indextest</span>
 </code></pre></div></div>
 
-<p>With the following setup,</p>
+<p>so that <code class="language-plaintext highlighter-rouge">make</code> or <code class="language-plaintext highlighter-rouge">make all</code> will build both programs; if you want to build just one, run <code class="language-plaintext highlighter-rouge">make indexer</code> or <code class="language-plaintext highlighter-rouge">make indextest</code>.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd </span>tse
-<span class="nv">$ </span><span class="nb">mkdir </span>data/cs50-3
-<span class="nv">$ </span>crawler/crawler http://old-www.cs.dartmouth.edu/~cs50/ data/cs50-3 3
-<span class="nv">$ </span>indexer/indexer data/cs50-3 data/cs50-index3
-</code></pre></div></div>
+<p>You may also find it useful to add phony rules so you can <code class="language-plaintext highlighter-rouge">make test</code> or <code class="language-plaintext highlighter-rouge">make valgrind</code>.</p>
 
-<p>And here’s the output of 10 random queries:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>querier/fuzzquery 
-usage: querier/fuzzquery indexFile numQueries randomSeed
-<span class="nv">$ </span>querier/fuzzquery data/cs50-index3 10 0
-querier/fuzzquery: generating 10 queries from 5586 words
-captured AND despite
-pcs OR frontiers activityaware OR relay tour 
-unix downloading OR pre 
-triactine pieces colgate OR aspects OR wine-wise OR direx 
-uncompressed OR early taxonomy austrian AND jewelry OR manages 
-once forced odame localization OR marsch 
-comparison 
-suffer desires OR workflow 
-facilitated 
-garth OR yang OR cardiac AND ruslan AND synthetic 
-</code></pre></div></div>
-
-<p>And here’s what happens when we pipe it to our querier (output abbreviated a little):</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ querier/fuzzquery data/cs50-index3 10 0 | querier/querier data/cs50-3 data/cs50-index3
-querier/fuzzquery: generating 10 queries from 5586 words
-KEY WORDs:&gt; Query: captured and despite 
-No documents match.
------------------------------------------------
-KEY WORDs:&gt; Query: pcs or frontiers activityaware or relay tour 
-Matches 39 documents (ranked):
-score  37 doc 349: http://old-www.cs.dartmouth.edu/~dfk/papers/index-t.html
-score  37 doc 348: http://old-www.cs.dartmouth.edu/~dfk/papers/index-a.html
-score  37 doc 347: http://old-www.cs.dartmouth.edu/~dfk/papers/index-c.html
-score  37 doc  19: http://old-www.cs.dartmouth.edu/~dfk/papers/index.html
-score   2 doc  53: http://old-www.cs.dartmouth.edu/~dfk/papers/abstracts/oldfield-app-pario.html
-...
------------------------------------------------
-KEY WORDs:&gt; Query: unix downloading or pre 
-Matches 1 documents (ranked):
-score   1 doc 104: http://old-www.cs.dartmouth.edu/~dfk/papers/abstracts/khanna-group.html
------------------------------------------------
-KEY WORDs:&gt; Error: bad character '-' in query.
-KEY WORDs:&gt; Query: uncompressed or early taxonomy austrian and jewelry or manages 
-Matches 3 documents (ranked):
-score   2 doc  19: http://old-www.cs.dartmouth.edu/~dfk/papers/index.html
-score   1 doc  81: http://old-www.cs.dartmouth.edu/~dfk/STARFISH/
-score   1 doc  67: http://old-www.cs.dartmouth.edu/~dfk/RAPID-Transit.html
------------------------------------------------
-KEY WORDs:&gt; Query: once forced odame localization or marsch 
-Matches 5 documents (ranked):
-score   2 doc  19: http://old-www.cs.dartmouth.edu/~dfk/papers/index.html
-score   1 doc 316: http://old-www.cs.dartmouth.edu/~dfk/papers/abstracts/anthony-sith3.html
-score   1 doc 349: http://old-www.cs.dartmouth.edu/~dfk/papers/index-t.html
-score   1 doc 348: http://old-www.cs.dartmouth.edu/~dfk/papers/index-a.html
-score   1 doc 347: http://old-www.cs.dartmouth.edu/~dfk/papers/index-c.html
------------------------------------------------
-KEY WORDs:&gt; Query: comparison 
-Matches 11 documents (ranked):
-score   3 doc 349: http://old-www.cs.dartmouth.edu/~dfk/papers/index-t.html
-score   3 doc 348: http://old-www.cs.dartmouth.edu/~dfk/papers/index-a.html
-score   3 doc 347: http://old-www.cs.dartmouth.edu/~dfk/papers/index-c.html
-...
------------------------------------------------
-KEY WORDs:&gt; Query: suffer desires or workflow 
-Matches 1 documents (ranked):
-score   1 doc 336: http://old-www.cs.dartmouth.edu/~dfk/papers/abstracts/mare-thesis.html
------------------------------------------------
-KEY WORDs:&gt; Query: facilitated 
-Matches 2 documents (ranked):
-score   1 doc 260: http://old-www.cs.dartmouth.edu/~dfk/papers/abstracts/chen-fusenet.html
-score   1 doc 180: http://old-www.cs.dartmouth.edu/~dfk/papers/abstracts/tan-crf-s3.html
------------------------------------------------
-KEY WORDs:&gt; Query: garth or yang or cardiac and ruslan and synthetic 
-Matches 3 documents (ranked):
-score   1 doc  19: http://old-www.cs.dartmouth.edu/~dfk/papers/index.html
-score   1 doc  90: http://old-www.cs.dartmouth.edu/~dfk/charisma/
-score   1 doc   9: http://old-www.cs.dartmouth.edu/~dfk/people.html
------------------------------------------------
-</code></pre></div></div>
-
-<p>We could generate a different series of random queries by changing the random seed, and we can run a lot more queries, too!</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ querier/fuzzquery data/cs50-index3 10 999 | querier/querier data/cs50-3 data/cs50-index3 &gt; /dev/null
-querier/fuzzquery: generating 10 queries from 5586 words
-$ querier/fuzzquery data/cs50-index3 10000 999 | querier/querier data/cs50-3 data/cs50-index3
-querier/fuzzquery: generating 10000 queries from 5586 words
-</code></pre></div></div>
-
-<p>The fuzz tester does not test <em>all</em> aspects of the querier; in particular, it will not generate syntactically incorrect inputs.
-Those should be tested by another program, perhaps another fuzz tester.
-Furthermore, it does not verify whether the querier actually produces the right answers!</p>
-
-<p>For regression testing, we might save the querier output in a file, and then compare the output of a fresh test run against the saved results from earlier runs.
-If we had earlier believed those results to be correct, then seeing unchanged output would presumably indicate the results (and thus the new code) are still correct.</p>
-
-<h2 id="expressions">Expressions and accumulators</h2>
-
-<p>Thinking ahead to the querier, let’s think about how one evaluates an expression involving operators.
-We’ll work with an arithmetic analogy.</p>
-
-<h3 id="arithmetic-expressions">Arithmetic expressions</h3>
-
-<p>Consider the following arithmetic expression:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sum</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="n">d</span>
-</code></pre></div></div>
-
-<p>Since addition is a <em>left-associative</em> operator, this means the same thing as</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sum</span> <span class="o">=</span> <span class="p">(((</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span> <span class="o">+</span> <span class="n">d</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>This means we can scan the expression from left to right, accumulating a sum as we go, effectively like this:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">a</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">b</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">c</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">d</span>
-</code></pre></div></div>
-
-<p>Here, the <code class="language-plaintext highlighter-rouge">sum</code> acts as an <em>accumulator</em>.
-(Indeed, many early hardware architectures include an explicit register called an ‘accumulator’.)</p>
-
-<p>We often see this approach generalized in code:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-<span class="kt">int</span> <span class="n">array</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">42</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">19</span><span class="p">};</span>
-<span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-	<span class="n">sum</span> <span class="o">+=</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-<span class="n">printf</span><span class="p">(</span><span class="s">"sum = %d; average = %f</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">sum</span><span class="p">,</span> <span class="p">(</span><span class="kt">float</span><span class="p">)</span> <span class="n">sum</span> <span class="o">/</span> <span class="n">n</span><span class="p">);</span>
-</code></pre></div></div>
-
-<h3 id="precedence">Precedence</h3>
-
-<p>What if you have a mixture of operators, with precedence?</p>
-
-<p>Consider the following arithmetic expression:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sum</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">c</span> <span class="o">+</span> <span class="n">d</span>
-</code></pre></div></div>
-
-<p>Both addition and multiplication are <em>left-associative</em> operators, but multiplication has precedence over addition.
-Thus, we implicitly rewrite the above expression as follows:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sum</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">c</span><span class="p">))</span> <span class="o">+</span> <span class="n">d</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>or, in sequence,</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">a</span> 
-<span class="n">prod</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">b</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">c</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">prod</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">d</span>
-</code></pre></div></div>
-
-<p>Notice how we ‘step aside’ from the sum for a moment while we compute the product <code class="language-plaintext highlighter-rouge">b * c</code> … using an exactly analogous process.  <code class="language-plaintext highlighter-rouge">prod</code> is an accumulator for the product; it is initialized to the <em>multiplicative identity</em> (1) instead of the <em>additive identity</em> (0), for reasons I hope are obvious.
-But then we just multiply in each of the successive items, one at a time.</p>
-
-<p>This generalizes to longer expressions like</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sum</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">e</span> <span class="o">+</span> <span class="n">f</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="n">h</span> <span class="o">*</span> <span class="n">i</span>
-</code></pre></div></div>
-
-<p>becomes</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">a</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">b</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">prod</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">c</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">d</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">e</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">prod</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">f</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">prod</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">g</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">h</span>
-<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">i</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">prod</span>
-</code></pre></div></div>
-
-<p>Let’s add some indentation to make this a little easier to read:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="mi">1</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">a</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">b</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">prod</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="mi">1</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">c</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">d</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">e</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">prod</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="mi">1</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">f</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">prod</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="mi">1</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">g</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">h</span>
-	<span class="n">prod</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">i</span>
-<span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">prod</span>
-</code></pre></div></div>
-
-<p>Notice what I did with <code class="language-plaintext highlighter-rouge">f</code>, and that I <em>never add anything to <code class="language-plaintext highlighter-rouge">sum</code> other than <code class="language-plaintext highlighter-rouge">prod</code></em>.</p>
-
-<p>This structure should give you a hint about how you might write code to evaluate such expressions…
-if you have a <code class="language-plaintext highlighter-rouge">product</code> function to scan the expression left to right from a given starting point, accumulating a product of individual items until it sees a <code class="language-plaintext highlighter-rouge">+</code> or the end of the expression, you can then write a function <code class="language-plaintext highlighter-rouge">sum</code> that scans the expression left to right from the start, accumulating a sum of products by calling <code class="language-plaintext highlighter-rouge">product</code> at the start and after each <code class="language-plaintext highlighter-rouge">+</code>.</p>
-
-<h2 id="activity">Activity</h2>
-
-<p>In today’s <a href="activity.html">activity</a> your group will discuss how the above ideas relate to <code class="language-plaintext highlighter-rouge">and</code> an <code class="language-plaintext highlighter-rouge">or</code> operators in a query expression.</p>
+<p>Good luck!</p>
 
   </div>
 

@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Labs/Lab4/
+https://thayer.github.io/engs50/Notes/bash2/
 2
-21618
+41536
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Labs/Lab4/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Lab 4 - Crawler</title>
+  <title>More about Bash</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Labs/Lab4/">
+  <link rel="canonical" href="/engs50/Notes/bash2/">
 </head>
 
 
@@ -44,268 +44,545 @@ https://thayer.github.io/engs50/Labs/Lab4/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Lab 4 - Crawler</h1>
+    <h1 class="post-title">More about Bash</h1>
   </header>
 
   <div class="post-content">
-    <p><strong>Due Friday, April 27, 2018, at 10pm</strong></p>
+    <p>Don’t forget this week’s <a href="/engs50/Reading/#week-1">reading</a>.</p>
 
-<p>In this lab you’ll begin the Tiny Search Engine (TSE) by coding the Crawler according to the <a href="REQUIREMENTS.html">Crawler Requirements Spec</a> and the  <a href="DESIGN.html">Crawler Design Spec</a>.</p>
+<p>In this lecture, we continue our discussion of the Unix shell and its commands.</p>
 
-<ul id="markdown-toc">
-  <li><a href="#preparation" id="markdown-toc-preparation">Preparation</a></li>
-  <li><a href="#assignment" id="markdown-toc-assignment">Assignment</a></li>
-  <li><a href="#whatsubmit" id="markdown-toc-whatsubmit">Submission - what</a></li>
-  <li><a href="#howsubmit" id="markdown-toc-howsubmit">Submission - how</a>    <ul>
-      <li><a href="#extensions" id="markdown-toc-extensions">Extensions</a></li>
-    </ul>
-  </li>
-  <li><a href="#hints-and-tips" id="markdown-toc-hints-and-tips">Hints and tips</a>    <ul>
-      <li><a href="#libcs50" id="markdown-toc-libcs50">libcs50</a></li>
-      <li><a href="#markdown" id="markdown-toc-markdown">Markdown</a></li>
-      <li><a href="#testing-crawler" id="markdown-toc-testing-crawler">Testing Crawler</a></li>
-      <li><a href="#use-valgrind-and-gdb" id="markdown-toc-use-valgrind-and-gdb">Use valgrind and gdb</a></li>
-      <li><a href="#memory-allocation" id="markdown-toc-memory-allocation">Memory allocation</a></li>
-      <li><a href="#hashtable-of-url" id="markdown-toc-hashtable-of-url">Hashtable of URL</a></li>
-      <li><a href="#pseudocode" id="markdown-toc-pseudocode">Pseudocode</a></li>
-      <li><a href="#pagedirectory" id="markdown-toc-pagedirectory">pageDirectory</a></li>
-    </ul>
-  </li>
-</ul>
+<h2 id="goals">Goals</h2>
 
-<h2 id="preparation">Preparation</h2>
-
-<ol>
-  <li>
-    <p><em>Fork</em> a copy of our <a href="https://gitlab.cs.dartmouth.edu/CS50/tse">TSE starter kit</a> to make a new project in your Gitlab account; see instructions in the README there.
-Ensure the repo is <em>Private</em>.
-Give “Master” access to Professor Palmer (ccpalmer) and to head grader Haider Syed ( he may have two ids in Gitlab, use the one with “@h”).</p>
-  </li>
-  <li>
-    <p><em>Clone</em> the new project to a Git repository on your CS Unix account; again, see instructions in your fork’s README.</p>
-  </li>
-  <li>
-    <p>Edit the <code class="language-plaintext highlighter-rouge">README.md</code> file to remove the git instructions; a suggested template is at the bottom of the file. Include your name!</p>
-  </li>
-  <li>
-    <p>In the terminal, <strong>copy</strong> your <a href="Lab3/">Lab 3</a> sources (just <code class="language-plaintext highlighter-rouge">counters.[ch] set.[ch] hashtable.[ch]</code>) to the <code class="language-plaintext highlighter-rouge">libcs50</code> subdirectory in your brand-new repository; try <code class="language-plaintext highlighter-rouge">make</code> in that directory to ensure everything works.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">git add libcs50/*.[ch]; git commit -a; git push</code>.</p>
-  </li>
-  <li>
-    <p>Visit your repo on <a href="gitlab.cs.dartmouth.edu">Gitlab</a> and you should see the updated README and your new source files.
-Double-check the <a href="https://gitlab.cs.dartmouth.edu/help/public_access/public_access">visibility</a> of your repo to ensure it is <strong><em>Private</em></strong>.</p>
-  </li>
-</ol>
-
-<h2 id="assignment">Assignment</h2>
-
-<p>Write the <em>crawler</em>, first sub-system of the Tiny Search Engine.
-Please follow the <a href="/engs50/Resources/CodingStyle.html">CS50 coding style guidelines</a>, the <a href="REQUIREMENTS.html">Crawler Requirements Spec</a>, and the  <a href="DESIGN.html">Crawler Design Spec</a>.</p>
-
-<ol>
-  <li>
-    <p>Create a subdirectory <code class="language-plaintext highlighter-rouge">crawler</code>.</p>
-  </li>
-  <li>
-    <p>In that directory, write a program <code class="language-plaintext highlighter-rouge">crawler</code> that implements the Requirements Spec, leveraging your data structures.
-Please take special care that your crawler does not explore URLs that are not ‘internal’ according to <code class="language-plaintext highlighter-rouge">IsInternalURL()</code>.</p>
-  </li>
-  <li>
-    <p>In that directory, write a <code class="language-plaintext highlighter-rouge">Makefile</code> so you can build everything from the top-level directory by simply typing <code class="language-plaintext highlighter-rouge">make</code>, and clean up everything by typing <code class="language-plaintext highlighter-rouge">make clean</code>.
-To build <code class="language-plaintext highlighter-rouge">crawler</code> you will need to add <code class="language-plaintext highlighter-rouge">-lcurl</code> to include the <code class="language-plaintext highlighter-rouge">libcurl</code> library.</p>
-  </li>
-  <li>
-    <p>In that directory, write a <code class="language-plaintext highlighter-rouge">README.md</code> file to provide any special information about how to compile or use your crawler.
-This file is likely to be short.
-<em>You must use Markdown; see below.</em></p>
-  </li>
-  <li>
-    <p>In that directory, write a <code class="language-plaintext highlighter-rouge">IMPLEMENTATION.md</code> file to describe the implementation of your crawler.
-<em>You must use Markdown; see below.</em></p>
-  </li>
-  <li>
-    <p>Add a <code class="language-plaintext highlighter-rouge">TESTING.md</code> file in the <code class="language-plaintext highlighter-rouge">crawler</code> directory, telling the grader how you tested your crawler.
-(You may find it helpful to write a <code class="language-plaintext highlighter-rouge">bash</code> script to execute your crawler, and/or a <code class="language-plaintext highlighter-rouge">make test</code> target.) Read <a href="#testing-crawler">about testing</a> below.</p>
-  </li>
-  <li>
-    <p>As you create files and directories, add them to your git repository.
-<strong>Important:</strong> do not add any compiled files to git.
-In short: your repo should not contain any data files, core dumps, or files built with <code class="language-plaintext highlighter-rouge">make</code> and removed by <code class="language-plaintext highlighter-rouge">make clean</code>.
-Commit and push at least once a day.</p>
-  </li>
-</ol>
-
-<h2 id="whatsubmit">Submission - what</h2>
-
-<p>In this lab you shall add/edit these files in your repo:</p>
+<p>We plan to learn the following today:</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">README.md</code> (edited)</li>
-  <li><code class="language-plaintext highlighter-rouge">Makefile</code> (possibly edited)</li>
-  <li><code class="language-plaintext highlighter-rouge">crawler/</code>
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">Makefile</code></li>
-      <li><code class="language-plaintext highlighter-rouge">crawler.c</code></li>
-      <li><code class="language-plaintext highlighter-rouge">README.md</code></li>
-      <li><code class="language-plaintext highlighter-rouge">IMPLEMENTATION.md</code></li>
-      <li><code class="language-plaintext highlighter-rouge">TESTING.md</code></li>
-      <li><em>optional other files related to testing</em></li>
-    </ul>
-  </li>
-  <li><code class="language-plaintext highlighter-rouge">common/</code> <em>if you follow our tip/suggestion below</em>
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">pagedir.c</code></li>
-      <li><code class="language-plaintext highlighter-rouge">pagedir.h</code></li>
-    </ul>
-  </li>
-  <li><code class="language-plaintext highlighter-rouge">libcs50/</code>  <em>if you wish to use your Lab3 solution</em>
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">set.c</code></li>
-      <li><code class="language-plaintext highlighter-rouge">counters.c</code></li>
-      <li><code class="language-plaintext highlighter-rouge">hashtable.c</code></li>
-    </ul>
-  </li>
+  <li>Redirection and pipes</li>
+  <li>Special characters and quoting</li>
+  <li>Standard input, output, and error</li>
 </ul>
 
-<p><em>You shall NOT modify any of the code we provide in <code class="language-plaintext highlighter-rouge">libcs50</code></em>.</p>
-
-<p><em>You shall NOT include any data files produced by the crawler, any binary/object files produced by the compiler, backup files, core dumps etc.</em></p>
-
-<h2 id="howsubmit">Submission - how</h2>
-
-<p>When you are ready for final submission,</p>
+<p>We’ll do this activity in today’s class:</p>
 
 <ul>
-  <li><strong>Add</strong> all required files using an appropriate <code class="language-plaintext highlighter-rouge">git add</code> commandline.</li>
-  <li><strong>Commit</strong> all changes using an appropriate <code class="language-plaintext highlighter-rouge">git commit</code> commandline.</li>
-  <li><strong>Tag</strong>: <code class="language-plaintext highlighter-rouge">git tag lab4submit</code></li>
-  <li><strong>Push</strong>: <code class="language-plaintext highlighter-rouge">git push --tags</code> to ensure the tags are pushed to the remote.
-See <a href="/git/tags.html">more about tags</a>.</li>
+  <li>Sit with your group, and get to know your group mates.</li>
+  <li>Experiment with shell pipelines in this <a href="activity.html">Activity</a>.</li>
 </ul>
 
-<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="language-plaintext highlighter-rouge">lab4submit</code> and the files associated with that tagged commit include everything we’ll need to grade your lab.</p>
+<h3 id="class-scripts">Class scripts</h3>
 
-<p>We grade the version tagged <code class="language-plaintext highlighter-rouge">lab4submit</code> so it is safe for you to continue work (e.g., so you can start work on Lab 5), even if you commit or push.</p>
+<p>I recorded my Terminal windows from <a href="/engs50/Notes/bash2/script-flume.txt">flume</a> and <a href="/engs50/Notes/bash2/script-mac.txt">Mac</a>.</p>
 
-<p>We will clone your repo at 0h, 24h, 48h, and 72h after the original deadline.
-We will start grading when we first see one with tag <code class="language-plaintext highlighter-rouge">lab4submit</code>, and judge it late if that tag was added after the deadline.
-To avoid confusion, <em>please blitz <code class="language-plaintext highlighter-rouge">cs50 AT cs.dartmouth.edu</code> if you want a late submission to be graded instead of your on-time submission.</em></p>
+<h2 id="redirection-and-pipes">Redirection and pipes</h2>
 
-<p><strong><em>Your entire codebase must compile with <code class="language-plaintext highlighter-rouge">make</code> from the top-level directory and produce no compiler warnings.</em></strong>  If we find that your code will not compile, or has <strong>segmentation faults</strong>, we will send it back to you as soon as we can for repair; recall the <a href="/#crashes">grading policy</a>.</p>
+<p>To date we have seen Unix programs using default input and output -
+called <em>standard input</em> (stdin) and <em>standard output</em> (stdout) - the
+keyboard is the standard input and the display the standard output.
+The Unix shell is able to redirect both the input and output of
+programs.  As an example of output redirection consider the following.</p>
 
-<p>We will run your crawler on our own set of test data.</p>
-
-<p>We will run <code class="language-plaintext highlighter-rouge">valgrind</code> on your program to look for memory leaks; you will lose points for memory leaks or memory errors.
-<strong>Important</strong>: the <code class="language-plaintext highlighter-rouge">libcurl</code> library is known to leave some “still reachable” memory; these are not your fault and will not count against you.</p>
-
-<h3 id="extensions">Extensions</h3>
-
-<p>If you want to claim your 24h extension, create a file <code class="language-plaintext highlighter-rouge">EXTENSION</code> at the top-level directory of your repository.
-Don’t forget to <code class="language-plaintext highlighter-rouge">git push</code> <em>(before the deadline!)</em> so we will see the file.
-For example,</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">touch </span>EXTENSION
-<span class="nv">$ </span>git add EXTENSION
-<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"extension request"</span>
-<span class="nv">$ </span>git tag lab4submit     <span class="c"># add tag, as above</span>
-<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab, including tags</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">date</span> <span class="o">&gt;</span> listing
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-lR</span> public_html/ <span class="o">&gt;&gt;</span> listing
 </code></pre></div></div>
 
-<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="language-plaintext highlighter-rouge">lab4submit</code> and that its files include <code class="language-plaintext highlighter-rouge">EXTENSION</code>.</p>
+<p>The output redirection <code class="language-plaintext highlighter-rouge">&gt;</code> writes the output of <code class="language-plaintext highlighter-rouge">date</code> to the file
+called <code class="language-plaintext highlighter-rouge">listing</code>; that is, the ‘standard output’ of the <code class="language-plaintext highlighter-rouge">date</code> process
+has been directed to the file instead of the default, the display.
+Note that the <code class="language-plaintext highlighter-rouge">&gt;</code> operation created a file that did not exist before
+the output redirection command was executed.  Next, we append a
+recursive, long-format directory listing to the same file; by using
+the <code class="language-plaintext highlighter-rouge">&gt;&gt;</code> (double <code class="language-plaintext highlighter-rouge">&gt;</code>) we tell the shell to <em>append</em> to the file rather
+than overwriting the file.</p>
 
-<p>When you are ready to submit your code, remove <code class="language-plaintext highlighter-rouge">EXTENSION</code> as follows, <em>update your submission tag</em>, and push to Gitlab:</p>
+<p>Note that the <code class="language-plaintext highlighter-rouge">&gt;</code> or <code class="language-plaintext highlighter-rouge">&gt;&gt;</code> and their target filenames are <em>not</em>
+arguments to the command - the command simply writes to stdout, as it
+always does, but the shell has arranged for stdout to be directed to a
+file instead of the terminal.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git <span class="nb">rm </span>EXTENSION
-<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"ready for grading"</span>
-<span class="nv">$ </span>git push <span class="nt">--delete</span> origin lab4submit <span class="c"># remove the tag from remote</span>
-<span class="nv">$ </span>git tag <span class="nt">-f</span> lab4submit  <span class="c"># move the local tag forward to this commit</span>
-<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab remote, including tags</span>
+<p>The shell also supports input redirection.  This provides input to a
+program (rather than the keyboard).  Let’s create a file of prime
+numbers using output redirection.  The input to the <code class="language-plaintext highlighter-rouge">cat</code> command can
+come from the standard input (i.e., the keyboard).  We can instruct
+the shell to redirect the <code class="language-plaintext highlighter-rouge">cat</code> command’s output (stdout) to file
+named <code class="language-plaintext highlighter-rouge">primes</code>.  The numbers are input at the keyboard and <code class="language-plaintext highlighter-rouge">CTRL-D</code> is
+used to signal the end of the file (<code class="language-plaintext highlighter-rouge">EOF</code>).</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cat</span> <span class="o">&gt;</span> primes
+61
+53
+41
+2
+3
+11
+13
+18
+37
+5
+19
+23
+29
+31
+47
+53
+59
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span> 
 </code></pre></div></div>
 
-<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="language-plaintext highlighter-rouge">lab4submit</code>, that its files do <em>not</em> include <code class="language-plaintext highlighter-rouge">EXTENSION</code>, and its files include everything we’ll need to grade your lab.</p>
+<p>Input redirection <code class="language-plaintext highlighter-rouge">&lt;</code> tells the shell to use a file as input to the command rather than the keyboard.
+In the input redirection example below <code class="language-plaintext highlighter-rouge">primes</code> is used as input to <code class="language-plaintext highlighter-rouge">cat</code> which sends its standard output to the screen.</p>
 
-<h1 id="hints-and-tips">Hints and tips</h1>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cat</span> &lt; primes
+61
+53
+41
+2
+3
+11
+13
+18
+37
+5
+19
+23
+29
+31
+47
+53
+59
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
 
-<h3 id="libcs50">libcs50</h3>
+<p>Many Unix commands (e.g., <code class="language-plaintext highlighter-rouge">cat</code>, <code class="language-plaintext highlighter-rouge">sort</code>) allow you to provide input from stdin if you do not specify a file on the command line.
+For example, if you type <code class="language-plaintext highlighter-rouge">cat (CR)</code> (carriage return) then the command expects input from the standard input.</p>
 
-<p>We provide several modules in the <code class="language-plaintext highlighter-rouge">libcs50</code> directory, which compiles to a library <code class="language-plaintext highlighter-rouge">libcs50.a</code> you can link with your crawler.
-<em>You should not change any of our code.</em>
-You may drop in your <code class="language-plaintext highlighter-rouge">set.[ch]</code>, <code class="language-plaintext highlighter-rouge">counters.[ch]</code>, <code class="language-plaintext highlighter-rouge">hashtable.[ch]</code> files from Lab 3.
-If you’d prefer to use our version of <em>set</em>, <em>counters</em>, and <em>hashtable</em>, that’s totally fine; the starter kit includes a pre-compiled library you can use instead; see <code class="language-plaintext highlighter-rouge">libcs50/README.md</code>.</p>
-
-<p>Most of the modules in this directory are documented with a corresponding Markdown file.</p>
-
-<h3 id="markdown">Markdown</h3>
-
-<p>In this and subsequent labs, you must provide documentation files in Markdown format, that is, you should supply <code class="language-plaintext highlighter-rouge">README.md</code>, <code class="language-plaintext highlighter-rouge">IMPLEMENTATION.md</code>, and <code class="language-plaintext highlighter-rouge">TESTING.md</code>.
-The Markdown syntax provides very simple (and readable) markup for headings, lists, italics, bold, and code snippets.
-(This course website is written in Markdown.) See <a href="/engs50/Resources/#markdown">Markdown resources</a>.</p>
-
-<h3 id="testing-crawler">Testing Crawler</h3>
-
-<p>It is your responsibility to test your crawler and write about your approach in <code class="language-plaintext highlighter-rouge">TESTING.md</code>.
-Consider following some of the testing plan discussed in <a href="/crawler/">Lecture</a>.</p>
-
-<p>Some safe seeds you might test include</p>
-
-<ul>
-  <li>http://old-www.cs.dartmouth.edu/~cs50/data/tse/letters</li>
-  <li>http://old-www.cs.dartmouth.edu/~cs50/index.html</li>
-  <li>http://old-www.cs.dartmouth.edu/~cs50/data/tse/wikipedia</li>
-</ul>
+<p>Unix also supports a powerful ‘pipe’ operator for passing data between commands using the operator <code class="language-plaintext highlighter-rouge">|</code> (a vertical bar, usually located above the <code class="language-plaintext highlighter-rouge">\</code> key on your keyboard).
+Pipes connect commands that run as separate processes as data becomes available the processes are scheduled.</p>
 
 <blockquote>
-  <p>The first two are good at depths 0 and higher, but the Wikipedia case is likely too slow to run past maxDepth=2.</p>
+  <p>Pipes were invented by Doug McIlroy while he was working with Ken Thompson and Dennis Ritchie at AT&amp;T Bell Labs.
+(As I mentioned earlier, Doug has been an adjunct professor here at Dartmouth College for several years now.)  In this <a href="/engs50/Reading/DougMcIlroy.pdf">two-page interview</a>, at the middle of the third column, Doug tells how pipes were invented and the <code class="language-plaintext highlighter-rouge">|</code> character selected as the operator.
+Pay special attention to the next paragraph: the Dartmouth Time Sharing System had something similar, even earlier!</p>
 </blockquote>
 
-<p>You may point your crawler at any other CS user’s home page - but your seed URL must begin with <code class="language-plaintext highlighter-rouge">http://old-www.cs.dartmouth.edu/</code>.</p>
+<p>Pipes are a clever invention indeed, since the need for separate temporary files for sharing data between processes is not required.
+Because commands are implemented as processes, a program reading an empty pipe will be ``suspended’’ until there is data or information ready for it to read.
+There is no limit to the number of programs or commands in the pipeline.
+In our example below there are four programs in the pipeline all running simultaneously waiting on the input:</p>
 
-<p>For example, you might construct your own test files in your CS Unix account in a directory like <code class="language-plaintext highlighter-rouge">~/public_html/tse</code> and crawl the URL <code class="language-plaintext highlighter-rouge">http://old-www.cs.dartmouth.edu/~YOURUSERID/tse</code></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sort</span> <span class="nt">-n</span> primes | <span class="nb">uniq</span> | <span class="nb">grep</span> <span class="nt">-v</span> 18 | more
+2
+3
+5
+11
+13
+19
+23
+29
+31
+37
+41
+47
+53
+59
+61
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
 
-<h3 id="use-valgrind-and-gdb">Use valgrind and gdb</h3>
+<p>What is the difference between pipes and redirection?
+Basically, redirection (<code class="language-plaintext highlighter-rouge">&gt;</code>,<code class="language-plaintext highlighter-rouge">&gt;&gt;</code>,<code class="language-plaintext highlighter-rouge">&lt;</code>) is used to direct the stdout of command to a file, or from a file to the stdin of a command.
+Pipes (<code class="language-plaintext highlighter-rouge">|</code>) are used to redirect the stdout to the stdin of another command.
+This operator allows us to ‘glue’ together programs as ‘filters’ to process the plain text sent between them (<em>plain text</em> between the processes - a nice design decision).
+This supports the notion of reuse and allows us to build sophisticated programs quickly and simply.
+It’s another cool feature of Unix.</p>
 
-<p>In <a href="/debug/">Lecture</a> we learned how to use <code class="language-plaintext highlighter-rouge">valgrind</code> and <code class="language-plaintext highlighter-rouge">gdb</code>; make use of them.</p>
+<p>Notice three new commands above: <code class="language-plaintext highlighter-rouge">sort</code>, <code class="language-plaintext highlighter-rouge">uniq</code>, and <code class="language-plaintext highlighter-rouge">grep</code>.</p>
 
-<h3 id="memory-allocation">Memory allocation</h3>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">sort</code> reads lines from from stdin and outputs the lines in sorted order; here <code class="language-plaintext highlighter-rouge">-n</code> tells `sort to use numeric order (rather than alphabetical order);</li>
+  <li><code class="language-plaintext highlighter-rouge">uniq</code> removes duplicates, printing only one of a run of identical lines;</li>
+  <li><code class="language-plaintext highlighter-rouge">grep</code> prints lines matching a pattern (more generally, a <em>regular expression</em>); here, <code class="language-plaintext highlighter-rouge">-v</code> inverts this behavior: print lines that <em>do not</em> match the pattern.
+In this case, the pattern is simply <code class="language-plaintext highlighter-rouge">18</code> and <code class="language-plaintext highlighter-rouge">grep</code> does not print that number as it comes through.</li>
+</ul>
 
-<p>You may find the <code class="language-plaintext highlighter-rouge">memory.c</code> module useful.
-Its use is optional, but it is ready to use as part of library <code class="language-plaintext highlighter-rouge">libcs50.a</code>.</p>
+<p>And, as we saw last time, <code class="language-plaintext highlighter-rouge">more</code> pauses the output when it would scroll off the screen.</p>
 
-<p>In our Lab3 we tried to recover gracefully from memory-allocation failures.
-In the TSE application programs, we’ll be a bit more lazy: on NULL return from malloc/calloc you can print an error and exit with non-zero exit status.
-(You may find the <code class="language-plaintext highlighter-rouge">assertp()</code> function, defined by the  <code class="language-plaintext highlighter-rouge">memory</code> module, to be useful here.)</p>
+<p>Note that the original file - <code class="language-plaintext highlighter-rouge">primes</code> - is not changed by executing the command line above.
+Rather, the file is read in by the <code class="language-plaintext highlighter-rouge">sort</code> command and the data is manipulated as it is processed by each stage of the command pipe line.
+Because <code class="language-plaintext highlighter-rouge">sort</code> and <code class="language-plaintext highlighter-rouge">cat</code> are happy to read its input data from stdin, or from a file given as an argument, the following pipelines all achieve the same result:</p>
 
-<h3 id="hashtable-of-url">Hashtable of URL</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sort</span> <span class="nt">-n</span> &lt; primes       | <span class="nb">uniq</span> | <span class="nb">grep</span> <span class="nt">-v</span> 18 | more
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cat   </span>primes | <span class="nb">sort</span> <span class="nt">-n</span> | <span class="nb">uniq</span> | <span class="nb">grep</span> <span class="nt">-v</span> 18 | more
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cat</span> &lt; primes | <span class="nb">sort</span> <span class="nt">-n</span> | <span class="nb">uniq</span> | <span class="nb">grep</span> <span class="nt">-v</span> 18 | more
+</code></pre></div></div>
 
-<p>Our design calls for use of a Hashtable to store the URLs already seen.
-Our Hashtable implementation stores a <code class="language-plaintext highlighter-rouge">void*item</code> with each key… but if you’re just storing URLs (as keys), what item do you store?
-Our hashtable disallows NULL items.
-Suggestion: just pass a constant string as the item.</p>
+<p>Which do you think would be most efficient?</p>
 
-<h3 id="pseudocode">Pseudocode</h3>
+<p><strong>Another pipeline</strong>: How did I create that list of existing usernames, for Lab0?</p>
 
-<p>Your implementation does not need to follow our pseudocode; this is one reason why you need to write about your implementation choices in <code class="language-plaintext highlighter-rouge">IMPLEMENTATION.md</code>.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 1 /etc/passwd | <span class="nb">sort</span> <span class="o">&gt;</span> usernames.txt
+</code></pre></div></div>
 
-<p>Our pseudocode refers to a <code class="language-plaintext highlighter-rouge">pagefetcher</code>; note this is effectively <code class="language-plaintext highlighter-rouge">webage_fetch()</code>.
-<strong>Note that <code class="language-plaintext highlighter-rouge">webage_fetch()</code> inserts a 1-second delay after every fetch attempt</strong>; your Crawler thus gets this behavior for free.</p>
+<blockquote>
+  <p>See <code class="language-plaintext highlighter-rouge">man cut</code> to understand what the first command does.</p>
+</blockquote>
 
-<p>Our pseudocode refers to a <code class="language-plaintext highlighter-rouge">pagescanner</code>; yours should leverage <code class="language-plaintext highlighter-rouge">webage_getNextURL()</code>.</p>
+<p><strong>Another example</strong>: what is the most popular shell?
+Try each of these in turn:</p>
 
-<h3 id="pagedirectory">pageDirectory</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd | less
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd | <span class="nb">sort</span>
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd | <span class="nb">sort</span> | <span class="nb">uniq</span> <span class="nt">-c</span>
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd | <span class="nb">sort</span> | <span class="nb">uniq</span> <span class="nt">-c</span> | <span class="nb">sort</span> <span class="nt">-n</span>
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd | <span class="nb">sort</span> | <span class="nb">uniq</span> <span class="nt">-c</span> | <span class="nb">sort</span> <span class="nt">-nr</span>
+</code></pre></div></div>
 
-<p>The Crawler is supposed to determine whether the pathname provided as pageDirectory is indeed a directory, and is writable (meaning, you can create files there).
-How?
-The simplest method is to create a file there.
-If you construct a string <code class="language-plaintext highlighter-rouge">filename</code> that is the directory name, followed by a slash <code class="language-plaintext highlighter-rouge">'/'</code>, followed by a file name like <code class="language-plaintext highlighter-rouge">.crawler</code>, you could call <code class="language-plaintext highlighter-rouge">fopen(filename, "w")</code>; if it returns NULL (failure), then either the directory does not exist or is not writable.
-If it returns non-NULL (success), close the file.
-It’s fine to leave <code class="language-plaintext highlighter-rouge">.crawler</code> in the page directory.
-(Actually, the presence of this file will later help your indexer  confirm the pageDirectory is indeed a Crawler-produced directory.)</p>
+<h3 id="macos-tip">MacOS tip:</h3>
 
-<p><strong>Tip: think ahead</strong>, and put the code for writing webpages to the pageDirectory in a separate <code class="language-plaintext highlighter-rouge">pagedir</code> module, in the <code class="language-plaintext highlighter-rouge">common</code> directory.
-Write a <code class="language-plaintext highlighter-rouge">Makefile</code> that produces library <code class="language-plaintext highlighter-rouge">common/common.a</code>.
-Not required for Lab4 but you’ll end up needing to take this step in Lab5 anyway.</p>
+<p>There are three great commands you should know - they are not on Linux, because they interact with MacOS: <code class="language-plaintext highlighter-rouge">open</code>, <code class="language-plaintext highlighter-rouge">pbpaste</code>, <code class="language-plaintext highlighter-rouge">pbcopy</code>.</p>
+
+<p>You’ve already seen the <code class="language-plaintext highlighter-rouge">open</code> command, which on MacOS at the Terminal command line, will open a file for viewing in the relevant MacOS application; for example, for a photo file you might type <code class="language-plaintext highlighter-rouge">open photo.jpg</code> and see Preview launch and open that file; for an html file you might type <code class="language-plaintext highlighter-rouge">open index.html</code> and see Safari launch and render that page.</p>
+
+<p>The commands <code class="language-plaintext highlighter-rouge">pbpaste</code> and <code class="language-plaintext highlighter-rouge">pbcopy</code> are a great fit into many pipelines.
+The first command prints the MacOS ‘clipboard’ to its standard output, and the second copies its standard input into the MacOS clipboard.
+For example; select some text in a window somewhere, then <em>cmd-C</em> to copy it to the clipboard, then</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	pbpaste | wc
+</code></pre></div></div>
+<p>to count the lines, words, and characters in the clipboard.
+Or,</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	ls -l | pbcopy
+</code></pre></div></div>
+<p>saves the directory listing in the clipboard, where you might paste it into Piazza or an email message or some document.</p>
+
+<p>I’m not certain you can combine <code class="language-plaintext highlighter-rouge">pbpaste</code> and <code class="language-plaintext highlighter-rouge">pbcopy</code> on the same command line, however; if you wanted to <em>replace</em> the clipboard with its number of lines, you might try</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	pbpaste | wc -l | pbcopy
+</code></pre></div></div>
+<p>but be careful mixing those two commands.</p>
+
+<h2 id="standard-input-output-and-error">Standard input, output and error</h2>
+
+<p>As we learned above, every process (a running program) has a <em>standard input</em> (abbreviated
+to <code class="language-plaintext highlighter-rouge">stdin</code>) and a <em>standard output</em> (<code class="language-plaintext highlighter-rouge">stdout</code>). 
+The shell sets <code class="language-plaintext highlighter-rouge">stdin</code> to the keyboard by default, but the command
+line can tell the shell to redirect <code class="language-plaintext highlighter-rouge">stdin</code> using <code class="language-plaintext highlighter-rouge">&lt;</code> or a pipe.  The
+shell sets <code class="language-plaintext highlighter-rouge">stdout</code> to the display by default, but the command line
+can tell the shell to redirect <code class="language-plaintext highlighter-rouge">stdout</code> using <code class="language-plaintext highlighter-rouge">&gt;</code> or <code class="language-plaintext highlighter-rouge">&gt;&gt;</code>, or to a
+pipe.</p>
+
+<p>Each process also has a <em>standard error</em> (<code class="language-plaintext highlighter-rouge">stderr</code>), which most
+programs use for printing error messages.  The separation of <code class="language-plaintext highlighter-rouge">stdout</code>
+and <code class="language-plaintext highlighter-rouge">stderr</code> is important when <code class="language-plaintext highlighter-rouge">stdin</code> is redirected to a file or
+pipe, because normal output can flow into the file or pipe while error
+messages reach the user on the screen.</p>
+
+<p>Inside the running process these three streams are represented with
+numeric <em>file descriptors</em>:</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">stdin</code></li>
+  <li><code class="language-plaintext highlighter-rouge">stdout</code></li>
+  <li><code class="language-plaintext highlighter-rouge">stderr</code></li>
+</ol>
+
+<p>You can tell the shell to redirect using these numbers; <code class="language-plaintext highlighter-rouge">&gt;</code> is
+shorthand for <code class="language-plaintext highlighter-rouge">1&gt;</code> and <code class="language-plaintext highlighter-rouge">&lt;</code> is shorthand for <code class="language-plaintext highlighter-rouge">0&lt;</code>.  You can thus
+redirect the standard error (file descriptor 2) with the symbol <code class="language-plaintext highlighter-rouge">2&gt;</code>.
+Suppose I was logged in as <code class="language-plaintext highlighter-rouge">dfk</code> and wanted to make a list of the web
+files <code class="language-plaintext highlighter-rouge">index.html</code> anywhere in the <code class="language-plaintext highlighter-rouge">cs50</code> account’s home directory
+tree.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find ~cs50 <span class="nt">-name</span> index.html <span class="o">&gt;</span> pages
+find: <span class="sb">`</span>/net/class/cs50/Archive/src<span class="s1">': Permission denied
+find: `/net/class/cs50/.emacs.d'</span>: Permission denied
+find: <span class="sb">`</span>/net/class/cs50/private/<span class="s1">': Permission denied
+[engs50@mc ~]$ 
+</span></code></pre></div></div>
+
+<p>I redirected the output of <code class="language-plaintext highlighter-rouge">find</code> to a file called <code class="language-plaintext highlighter-rouge">pages</code> - and
+indeed that file filled with useful information - but <code class="language-plaintext highlighter-rouge">find</code> printed
+its error messages to the screen so I could still see them.  Suppose I
+wanted to capture those errors in a file too:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find ~cs50 <span class="nt">-name</span> index.html <span class="o">&gt;</span> pages 2&gt; errors
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
+<p>The file <code class="language-plaintext highlighter-rouge">errors</code> contains the error messages we saw earlier.</p>
+
+<p>As another alternative, we could ignore the error output entirely by
+sending it to a place where all characters go and never return!</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find ~cs50 <span class="nt">-name</span> index.html <span class="o">&gt;</span> pages 2&gt; /dev/null
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
+<p>The file called <code class="language-plaintext highlighter-rouge">/dev/null</code> is a special kind of file - it’s not a file at all,
+actually, it’s a ‘device’ that simply discards anything written to it.
+(If you read from it, it appears to be an empty file.)</p>
+
+<h2 id="special-characters">Special characters</h2>
+
+<p>There are a number of special characters interpreted by the shell -
+spaces, tabs, wildcard (‘globbing’) characters for filename expansion,
+redirection symbols, and so forth.  Special characters have special
+meaning and cannot be used as regular characters because the shell
+interprets them in a special manner.  These special characters
+include:</p>
+
+<p><code class="language-plaintext highlighter-rouge">&amp; ; | * ?  ` " ' [ ] ( ) $ &lt; &gt; { } # / \ ! ~</code></p>
+
+<p>We have already used several of these special characters.
+Don’t try to memorize them at this stage.
+Through use, they will become second nature.
+We will just give some examples of the ones we have not discussed so far.</p>
+
+<h2 id="quoting">Quoting</h2>
+
+<p>If you need to use one of these special characters as a regular
+character, you can tell the shell not to interpret it by escaping or
+quoting it.  To <em>escape</em> a single special character, precede it with a
+backslash <code class="language-plaintext highlighter-rouge">\</code>; earlier we saw how to escape the character <code class="language-plaintext highlighter-rouge">*</code> with
+<code class="language-plaintext highlighter-rouge">\*</code>.  To escape multiple special characters (as in <code class="language-plaintext highlighter-rouge">**</code>), quote each:
+<code class="language-plaintext highlighter-rouge">\*\*</code>.  You can also <em>quote</em> using single quotation marks such as
+<code class="language-plaintext highlighter-rouge">'**'</code> or double quotation marks such as <code class="language-plaintext highlighter-rouge">"**"</code> - but these have
+subtlety different behavior.  You might use this form when quoting a
+filename with embedded spaces: <code class="language-plaintext highlighter-rouge">"Homework assignment"</code>.</p>
+
+<p>You will often need to pass special characters as part of arguments to
+commands and other programs - for example, an argument that represents
+a pattern to be interpreted by the command; as happens often with
+<code class="language-plaintext highlighter-rouge">find</code> and <code class="language-plaintext highlighter-rouge">grep</code>.</p>
+
+<p>There is a situation where single quotes work differently than double
+quotes.  If you use a pair of single quotes around a shell variable
+substitution (like <code class="language-plaintext highlighter-rouge">$USER</code>), the variable’s value will not be
+substituted, whereas it would be substituted within double quotes:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$LOGNAME</span><span class="s2"> uses the </span><span class="nv">$SHELL</span><span class="s2"> shell and his home directory is </span><span class="nv">$HOME</span><span class="s2">."</span>
+cs50 uses the /bin/bash shell and his home directory is /net/class/cs50.
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="s1">'$LOGNAME uses the $SHELL shell and his home directory is $HOME.'</span>
+<span class="nv">$LOGNAME</span> uses the <span class="nv">$SHELL</span> shell and his home directory is <span class="nv">$HOME</span><span class="nb">.</span>
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p><strong><em>Example 1.</em></strong>
+Double-quotes are especially important in shell scripts, because the
+variables involved might have been user input (a command-line argument
+or a keyboard input) or might have be a file name or output of a
+command; such variables should <em>always</em> be quoted when substituted,
+because spaces (and other special characters) embedded in the value of
+the variable can cause confusion.  Thus:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">directoryName</span><span class="o">=</span><span class="s2">"Homework three"</span>
+...
+<span class="nb">mkdir</span> <span class="s2">"</span><span class="nv">$directoryName</span><span class="s2">"</span>
+<span class="nb">mkdir</span> <span class="nv">$directoryName</span>
+</code></pre></div></div>
+
+<p>Try it!</p>
+
+<p><strong><em>Example 2.</em></strong>
+Escapes and quoting can pass special characters and patterns passed to
+commands.</p>
+
+<p>Suppose I have a list of email addresses, one per line.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> Eric Chen &lt;eric.t.chen.17@dartmouth.edu&gt;
+ Rui Liu &lt;Rui.Liu.GR@dartmouth.edu&gt;
+ Taylor Hardin &lt;Taylor.A.Hardin.GR@dartmouth.edu&gt;
+ Elena N. Horton &lt;Elena.N.Horton.18@dartmouth.edu&gt;
+ Jinnan Ge &lt;Jinnan.Ge.TH@dartmouth.edu&gt;
+ Mauricio Esquivel Rogel &lt;Mauricio.Esquivel.Rogel.18@dartmouth.edu&gt;
+ James Edwards &lt;James.G.Edwards.18@dartmouth.edu&gt;
+ Emily J. Lin &lt;Emily.J.Lin.18@dartmouth.edu&gt;
+ John Cardwell &lt;John.R.Cardwell.18@dartmouth.edu&gt;
+ John Kotz &lt;John.P.Kotz.19@dartmouth.edu&gt;
+ Joel J. Katticaran &lt;joel.j.katticaran.ug@dartmouth.edu&gt;
+ Kaya M. Thomas &lt;Kaya.M.Thomas.17@dartmouth.edu&gt;
+ Trevor L. Davis &lt;trevor.l.davis.18@dartmouth.edu&gt;
+ Thomas D. Kim &lt;Thomas.D.Kim.19@dartmouth.edu&gt;
+ Kyle Dotterrer &lt;kyle.dotterrer.18@dartmouth.edu&gt;
+</code></pre></div></div>
+
+<p>Some email programs, or websites, require these to be comma-separated.
+If I have the above text in my clipboard, I can change those newline characters to commas:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>pbpaste | <span class="nb">tr</span> <span class="se">\\</span>n ,
+Eric Chen &lt;eric.t.chen.17@dartmouth.edu&gt;, Rui Liu &lt;Rui.Liu.GR@dartmouth.edu&gt;, Taylor Hardin &lt;Taylor.A.Hardin.GR@dartmouth.edu&gt;, Elena N. Horton &lt;Elena.N.Horton.18@dartmouth.edu&gt;, Jinnan Ge &lt;Jinnan.Ge.TH@dartmouth.edu&gt;, Mauricio Esquivel Rogel &lt;Mauricio.Esquivel.Rogel.18@dartmouth.edu&gt;, James Edwards &lt;James.G.Edwards.18@dartmouth.edu&gt;, Emily J. Lin &lt;Emily.J.Lin.18@dartmouth.edu&gt;, John Cardwell &lt;John.R.Cardwell.18@dartmouth.edu&gt;, John Kotz &lt;John.P.Kotz.19@dartmouth.edu&gt;, Joel J. Katticaran &lt;joel.j.katticaran.ug@dartmouth.edu&gt;, Kaya M. Thomas &lt;Kaya.M.Thomas.17@dartmouth.edu&gt;, Trevor L. Davis &lt;trevor.l.davis.18@dartmouth.edu&gt;, Thomas D. Kim &lt;Thomas.D.Kim.19@dartmouth.edu&gt;, Kyle Dotterrer &lt;kyle.dotterrer.18@dartmouth.edu&gt; 
+</code></pre></div></div>
+
+<blockquote>
+  <p>On Unix a single special character called ‘newline’ is what <em>defines</em> the end of one line and the beginning of the next.
+A common syntax for the newline character, in programming languages,
+is <code class="language-plaintext highlighter-rouge">\n</code>.  But the <code class="language-plaintext highlighter-rouge">\</code> is special, in bash, so we need to escape it,
+um, with <code class="language-plaintext highlighter-rouge">\</code>; thus we have <code class="language-plaintext highlighter-rouge">\\n</code>.</p>
+</blockquote>
+
+<p>The <code class="language-plaintext highlighter-rouge">tr</code> command filters <code class="language-plaintext highlighter-rouge">stdin</code> to <code class="language-plaintext highlighter-rouge">stdout</code>, translates each instance
+of the character given in the first argument (<code class="language-plaintext highlighter-rouge">\\n</code>) to the character
+given in the second argument (<code class="language-plaintext highlighter-rouge">,</code>).  Here, <code class="language-plaintext highlighter-rouge">tr</code> spit out the
+translated input - on one very long line that does not end with a
+newline.  I can then copy-paste that result into the pesky web
+browser.</p>
+
+<p>Outlook and Microsoft tools want <em>semicolons</em>, not commas; sigh.
+But the semicolon is also special to bash; so we must escape it too:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">tr</span> <span class="se">\\</span>n <span class="se">\;</span>
+</code></pre></div></div>
+
+<p>On MacOS I can connect the MacOS “Clipboard” to this tool as follows:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>pbpaste | <span class="nb">tr</span> <span class="se">\\</span>n <span class="se">\;</span> | pbcopy
+</code></pre></div></div>
+<p>great!
+copy the list of addresses to the clipboard, type that command in the shell, and now the clipboard contains a semicolon-separated list of addresses.</p>
+
+<p><strong><em>Example 3.</em></strong>
+An even more powerful filtering tool - the stream editor called
+<code class="language-plaintext highlighter-rouge">sed</code> - allows you to transform occurrences of one or more patterns in
+the input file(s):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nb">sed </span>pattern <span class="o">[</span>file]...  
+</code></pre></div></div>
+
+<p>For example,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cat</span> .forward
+ David Kotz &lt;kotz@cs&gt;
+ Eric Chen &lt;eric.t.chen.17@dartmouth.edu&gt;
+ Rui Liu &lt;Rui.Liu.GR@dartmouth.edu&gt;
+ Taylor Hardin &lt;Taylor.A.Hardin.GR@dartmouth.edu&gt;
+ Elena N. Horton &lt;Elena.N.Horton.18@dartmouth.edu&gt;
+ Jinnan Ge &lt;Jinnan.Ge.TH@dartmouth.edu&gt;
+ Mauricio Esquivel Rogel &lt;Mauricio.Esquivel.Rogel.18@dartmouth.edu&gt;
+ James Edwards &lt;James.G.Edwards.18@dartmouth.edu&gt;
+ Emily J. Lin &lt;Emily.J.Lin.18@dartmouth.edu&gt;
+ John Cardwell &lt;John.R.Cardwell.18@dartmouth.edu&gt;
+ John Kotz &lt;John.P.Kotz.19@dartmouth.edu&gt;
+ Joel J. Katticaran &lt;joel.j.katticaran.ug@dartmouth.edu&gt;
+ Kaya M. Thomas &lt;Kaya.M.Thomas.17@dartmouth.edu&gt;
+ Trevor L. Davis &lt;trevor.l.davis.18@dartmouth.edu&gt;
+ Thomas D. Kim &lt;Thomas.D.Kim.19@dartmouth.edu&gt;
+ Kyle Dotterrer &lt;kyle.dotterrer.18@dartmouth.edu&gt;
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="c"># remove myself, and excess white space</span>
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sed</span> <span class="nt">-e</span> /kotz@cs/d <span class="nt">-e</span> <span class="s1">'s/\t/ /g'</span> <span class="nt">-e</span> <span class="s1">'s/  */ /g'</span>  .forward
+ Eric Chen &lt;eric.t.chen.17@dartmouth.edu&gt;
+ Rui Liu &lt;Rui.Liu.GR@dartmouth.edu&gt;
+ Taylor Hardin &lt;Taylor.A.Hardin.GR@dartmouth.edu&gt;
+ Elena Horton &lt;Elena.N.Horton.18@dartmouth.edu&gt;
+ Jinnan Ge &lt;Jinnan.Ge.TH@dartmouth.edu&gt;
+ Mauricio Esquivel Rogel &lt;Mauricio.Esquivel.Rogel.18@dartmouth.edu&gt;
+ James Edwards &lt;James.G.Edwards.18@dartmouth.edu&gt;
+ Emily Lin &lt;Emily.J.Lin.18@dartmouth.edu&gt;
+ John Cardwell &lt;John.R.Cardwell.18@dartmouth.edu&gt;
+ John Kotz &lt;John.P.Kotz.19@dartmouth.edu&gt;
+ Joel Katticaran &lt;joel.j.katticaran.ug@dartmouth.edu&gt;
+ Kaya Thomas &lt;Kaya.M.Thomas.17@dartmouth.edu&gt;
+ Trevor Davis &lt;trevor.l.davis.18@dartmouth.edu&gt;
+ Thomas Kim &lt;Thomas.D.Kim.19@dartmouth.edu&gt;
+ Kyle Dotterrer &lt;kyle.dotterrer.18@dartmouth.edu&gt;
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="c"># remove myself, remove names, make comma-sep list of addresses</span>
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sed</span> <span class="nt">-e</span> /kotz@cs/d <span class="nt">-e</span> <span class="s1">'s/.*&lt;//'</span> <span class="nt">-e</span> <span class="s1">'s/&gt;.*/,/'</span>  .forward
+eric.t.chen.17@dartmouth.edu,
+Rui.Liu.GR@dartmouth.edu,
+Taylor.A.Hardin.GR@dartmouth.edu,
+Elena.N.Horton.18@dartmouth.edu,
+Jinnan.Ge.TH@dartmouth.edu,
+Mauricio.Esquivel.Rogel.18@dartmouth.edu,
+James.G.Edwards.18@dartmouth.edu,
+Emily.J.Lin.18@dartmouth.edu,
+John.R.Cardwell.18@dartmouth.edu,
+John.P.Kotz.19@dartmouth.edu,
+joel.j.katticaran.ug@dartmouth.edu,
+Kaya.M.Thomas.17@dartmouth.edu,
+trevor.l.davis.18@dartmouth.edu,
+Thomas.D.Kim.19@dartmouth.edu,
+kyle.dotterrer.18@dartmouth.edu,
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>The above uses the <code class="language-plaintext highlighter-rouge">-e</code> switch to <code class="language-plaintext highlighter-rouge">sed</code>, which allows one to list more than one pattern on the same command.</p>
+
+<p>A few quick notes about sed’s patterns:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">d</code> deletes lines matching the pattern</li>
+  <li><code class="language-plaintext highlighter-rouge">p</code> prints lines matching the pattern (useful with <code class="language-plaintext highlighter-rouge">-n</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">s</code> substitutes text for matches to the pattern.</li>
+</ul>
+
+<p>Patterns are actually <a href="http://sed.sourceforge.net/sedfaq3.html#s3.1.1">regular expressions</a>; I use some above.</p>
+
+<p><strong><em>Example 4.</em></strong></p>
+
+<p>I saved a list of students enrolled in CS50 in the file <code class="language-plaintext highlighter-rouge">~cs50/demo/students.txt</code>.
+Each line is of the form <code class="language-plaintext highlighter-rouge">First.M.Last.18@Dartmouth.edu;</code>.</p>
+
+<p>Let’s suppose you all decide to move to Harvard.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sed </span>s/Dartmouth/Harvard/ demo/students.txt
+...
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sed</span> <span class="nt">-e</span> s/Dartmouth/Harvard/ <span class="nt">-e</span> <span class="s1">'s/\.[0-9][0-9]//'</span> <span class="nt">-e</span> <span class="s1">'s/;$//'</span> demo/students.txt
+...
+</code></pre></div></div>
+
+<p>The second form removes the dot and two-digit class number, and the
+trailing semicolon.  Notice how I quoted those patterns from the
+shell, and even escaped the dot from sed’s normal meaning (dot matches
+any character) so sed would look for a literal dot in that position.
+The dollar <code class="language-plaintext highlighter-rouge">$</code> constrains the semicolon match to happen at the end of
+the line.</p>
+
+<p>Here’s another fun pipe: count the number of students from each class
+(leveraging the class numbers in email addresses):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">tr</span> <span class="nt">-c</span> <span class="nt">-d</span> 0-9<span class="se">\\</span>n &lt; demo/students.txt | <span class="nb">sed</span> <span class="s1">'s/^$/other/'</span>  | <span class="nb">sort</span>  | <span class="nb">uniq</span> <span class="nt">-c</span> | <span class="nb">sort</span> <span class="nt">-nr</span>
+     27 18
+     22 19
+      9 17
+      5 other
+      1 16
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>See <code class="language-plaintext highlighter-rouge">man sed</code> or the <a href="http://sed.sourceforge.net/sedfaq.html">sed FAQ</a> for more info.
+You’ll want to learn a bit about <em>regular expressions</em>, which are used to describe patterns in sed’s commands; 
+see <a href="http://sed.sourceforge.net/sedfaq3.html#s3.1.1">sed regexp info</a>.</p>
+
+<h2 id="compressing-and-archiving-files">Compressing and archiving files</h2>
+
+<p>It is often useful to bundle several files into a compressed <em>archive</em> file.
+You may have encountered files like this on the Internet - such as <code class="language-plaintext highlighter-rouge">files.zip</code>, <code class="language-plaintext highlighter-rouge">something.tar</code>, or <code class="language-plaintext highlighter-rouge">somethin-else.tgz</code>.
+Each packs together several files - including directories, creation dates, access permissions, as well as file contents - into one single file.
+This is a convenient way to transfer large collections of files.</p>
+
+<p>On Unix it is most common to use the <code class="language-plaintext highlighter-rouge">tar</code> utility (short for tape archive - from back when we used tapes) to create an archive of all the files and directories listed in the arguments and name it to something appropriate.
+We often ask <code class="language-plaintext highlighter-rouge">tar</code> to compress the resulting archive  too.</p>
+
+<p>Given a directory <code class="language-plaintext highlighter-rouge">stuff</code>, you can create (<code class="language-plaintext highlighter-rouge">c</code>) a compressed tar archive (aka, a “tarball”), and then list (<code class="language-plaintext highlighter-rouge">t</code>) its contents.
+The <code class="language-plaintext highlighter-rouge">f</code> refers to a file and the <code class="language-plaintext highlighter-rouge">z</code> refers to compression.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">mkdir </span>stuff
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="o">&gt;</span> stuff/x
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">tar </span>cfz stuff.tgz stuff
+ 98.8%
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">tar </span>tfz stuff.tgz
+stuff/
+stuff/x
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>The command leaves the original directory and files intact.
+Notice that <code class="language-plaintext highlighter-rouge">tar</code> has an unconventional syntax for its switches - there is no dash <code class="language-plaintext highlighter-rouge">-</code> before them.</p>
+
+<p>To unpack the archive,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">tar </span>xfz stuff.tgz
+</code></pre></div></div>
+
+<p>In short, <code class="language-plaintext highlighter-rouge">c</code> for create, <code class="language-plaintext highlighter-rouge">t</code> for type (list), <code class="language-plaintext highlighter-rouge">x</code> for extract.
+The <code class="language-plaintext highlighter-rouge">f</code> implies that the next argument is the tarball file name.
+The <code class="language-plaintext highlighter-rouge">z</code> indicates that the tarball should be compressed.
+By convention, a tarball filename ends in <code class="language-plaintext highlighter-rouge">.tar</code> if not compressed, <code class="language-plaintext highlighter-rouge">.tgz</code> if compressed.</p>
 
   </div>
 

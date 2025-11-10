@@ -1,8 +1,8 @@
 CC       = gcc
 CFLAGS   = -Wall -pedantic -std=c11 -g \
-           -I.. \
-           -I../utils/module/module3/queue \
-           -I../utils/module/module3/hash
+		   -I.. \
+		   -I../utils/module/module3/queue \
+		   -I../utils/module/module3/hash
 LDFLAGS  = -L../lib
 LDLIBS   = -lutils -lcurl
 PAGEDIR  := /workspaces/modules/tse/pagedir
@@ -11,8 +11,16 @@ crawler: ../lib/libutils.a crawler.o
 	$(CC) -o $@ crawler.o $(LDFLAGS) $(LDLIBS)
 
 crawler.o: crawler.c ../webpage.h \
-                     ../utils/module/module3/queue/queue.h \
-                     ../utils/module/module3/hash/hash.h
+					 ../utils/module/module3/queue/queue.h \
+					 ../utils/module/module3/hash/hash.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+tcrawler: ../lib/libutils.a tcrawler.o
+	$(CC) -o $@ tcrawler.o $(LDFLAGS) $(LDLIBS)
+
+tcrawler.o: tcrawler.c ../webpage.h \
+					   ../utils/module/module3/queue/queue.h \
+					   ../utils/module/module3/hash/hash.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 counts: crawler $(PAGEDIR)
@@ -30,4 +38,4 @@ counts: crawler $(PAGEDIR)
 
 
 clean:
-	rm -f crawler *.o
+	rm -f crawler tcrawler *.o

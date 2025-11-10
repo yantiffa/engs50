@@ -9,7 +9,6 @@
  * 
  */
 
-#ifndef _LHASH_H_
 #define _LHASH_H_
 
 #include <pthread.h>

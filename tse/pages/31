@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/unittest/
+https://thayer.github.io/engs50/Labs/Lab1/
 2
-23701
+11751
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/unittest/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Unit testing</title>
+  <title>Lab 1 - Bash</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/unittest/">
+  <link rel="canonical" href="/engs50/Labs/Lab1/">
 </head>
 
 
@@ -44,234 +44,175 @@ https://thayer.github.io/engs50/Notes/unittest/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Unit testing</h1>
+    <h1 class="post-title">Lab 1 - Bash</h1>
   </header>
 
   <div class="post-content">
-    <p>The goal of effective unit testing is to isolate each functional part of the system and to demonstrate that each of those parts is working properly.</p>
+    <p><strong>Due Sunday, April 2, at 11:00pm</strong></p>
 
-<p>A short online reference is Jeff Canna’s <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>.
-Although he is talking mostly about Java, his insights on unit testing are superb.</p>
+<p>This first lab is relatively quick, and should get you up to speed working with the command line, basic shell commands, an editor, and a small shell program.</p>
 
-<blockquote>
-  <p>“Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.” – Jeff Canna, <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>.</p>
-</blockquote>
-
-<blockquote>
-  <p>“Unit tests are written from the developer’s perspective and focus on particular methods of the class under test.” – Jeff Canna, <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>.</p>
-</blockquote>
-
-<p>Use these guidelines when writing unit tests (from Jeff Canna, <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>):</p>
-
-<ul>
-  <li>“Write the unit test before writing code for class it tests.</li>
-  <li>“Capture code comments in unit tests.</li>
-  <li>“Test all the public methods that perform an “interesting” function (that is, not getters and setters, unless they do their getting and setting in some unique way).</li>
-  <li>“Put each test case in the same package as the class it’s testing to gain access to package and protected members.</li>
-  <li>“Avoid using domain-specific objects in unit tests.”</li>
+<ul id="markdown-toc">
+  <li><a href="#materials" id="markdown-toc-materials">Materials</a></li>
+  <li><a href="#preparation" id="markdown-toc-preparation">Preparation</a></li>
+  <li><a href="#assignment" id="markdown-toc-assignment">Assignment</a></li>
+  <li><a href="#what-to-hand-in-and-how" id="markdown-toc-what-to-hand-in-and-how">What to hand in, and how</a></li>
+  <li><a href="#bursting-an-html-file-into-many-sonnets" id="markdown-toc-bursting-an-html-file-into-many-sonnets">Bursting an html file into many sonnets</a></li>
 </ul>
 
-<h3 id="unit-testing-of-our-binary-tree">Unit testing of our binary tree</h3>
+<h2 id="materials">Materials</h2>
 
-<p>Today’s Terminal <a href="/engs50/Notes/unittest/script.txt">script</a> is available.</p>
-
-<p>Unzip the <a href="/engs50/Examples/trees.zip">tree examples file</a>. The tree9 example
-demonstrated a binary-tree data structure. Here we enhance it to become treeA (to a computer scientist, <code class="language-plaintext highlighter-rouge">A</code> comes next after <code class="language-plaintext highlighter-rouge">9</code>).</p>
-
-<p>Look at treeA/tree.c and its Makefile and you’ll notice three things:</p>
+<p>You will need these materials for this assignment.</p>
 
 <ul>
-  <li>The code now has a <code class="language-plaintext highlighter-rouge">main()</code> function at the bottom of the file.
-It is protected inside <code class="language-plaintext highlighter-rouge">#ifdef UNIT_TEST ... #endif</code> so it is only compiled-in when we want to compile a unit test.</li>
-  <li>Preceding <code class="language-plaintext highlighter-rouge">main()</code> is an <code class="language-plaintext highlighter-rouge">#include "unittest.h"</code> to pick up several <em>preprocessor macros</em>, which we explain below.</li>
-  <li>The <code class="language-plaintext highlighter-rouge">Makefile</code> now has a <code class="language-plaintext highlighter-rouge">unittest</code> target, which builds a distinct executable, and a <code class="language-plaintext highlighter-rouge">unit</code> target, which runs it.</li>
+  <li><em>Alice in Wonderland</em>, which you will find as plaintext in file <code class="language-plaintext highlighter-rouge">alice-gutenberg.txt</code> on canvas.
+    <blockquote>
+      <p>Credit: <a href="http://www.gutenberg.org/ebooks/11">Project Gutenberg</a></p>
+    </blockquote>
+  </li>
+  <li>Shakespeare’s sonnets, which you will find as plaintext files,
+are available in the tar file <code class="language-plaintext highlighter-rouge">sonnets.tar</code> on canvas. This file unpacks into a
+subdirectory <code class="language-plaintext highlighter-rouge">sonnets</code>.
+    <blockquote>
+      <p>Credit: <a href="http://www.gutenberg.org/ebooks/1041">Project Gutenberg</a></p>
+    </blockquote>
+  </li>
 </ul>
 
+<p>Curious how the <code class="language-plaintext highlighter-rouge">sonnets</code> directory from Gutenberg’s <a href="/engs50/Labs/Lab1/sonnets.html"><code class="language-plaintext highlighter-rouge">sonnets.html</code></a> file?
+Look at the bottom of this page.</p>
+
+<h2 id="preparation">Preparation</h2>
+
+<p>Set up for your work in this course, if you have not already:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd</span>
+<span class="nv">$ </span><span class="nb">mkdir</span> <span class="nt">-p</span> cs50/labs/lab1
+<span class="nv">$ </span><span class="nb">chmod </span>go-rwx cs50
+<span class="nv">$ </span><span class="nb">cd </span>cs50/labs/lab1
+</code></pre></div></div>
+
+<p>These commands create a directory <code class="language-plaintext highlighter-rouge">~/cs50/labs/lab1</code>, prevent others
+from peeking at your work, and change the working directory to <code class="language-plaintext highlighter-rouge">lab1</code>
+so you’re ready for the work below.</p>
+
+<h2 id="assignment">Assignment</h2>
+
+<ol>
+  <li>
+    <p>Write a single bash command/pipeline that will extract the text of
+<em>Alice in Wonderland</em> into a file <code class="language-plaintext highlighter-rouge">alice.txt</code> in your <code class="language-plaintext highlighter-rouge">lab1</code>
+directory.  (Note that the provided file has header and footer
+material added by Project Gutenberg.  We want only the stuff Lewis
+Carroll wrote.)</p>
+  </li>
+  <li>
+    <p>Write a single bash command/pipeline that will read <code class="language-plaintext highlighter-rouge">alice.txt</code> and
+print a crude table of contents.</p>
+  </li>
+  <li>
+    <p>Write a single bash command/pipeline that will read <code class="language-plaintext highlighter-rouge">alice.txt</code> and
+print the words, in order, exactly one word per line, into
+<code class="language-plaintext highlighter-rouge">alicewords.txt</code>.  (A <em>word</em> is a sequence of letters.)</p>
+  </li>
+  <li>
+    <p>Write a single bash command/pipeline that will read
+<code class="language-plaintext highlighter-rouge">alicewords.txt</code> and print the number of times the word “Alice”
+appears, regardless of how it is capitalized.</p>
+  </li>
+  <li>
+    <p>Write a single bash command/pipeline that will read
+<code class="language-plaintext highlighter-rouge">alicewords.txt</code> and print the number of times the word “wonder”
+appears, regardless of how it is capitalized; be careful not to
+count other words!</p>
+  </li>
+  <li>
+    <p>Write a single bash command/pipeline that will read
+<code class="language-plaintext highlighter-rouge">alicewords.txt</code> and print the top-10 most-common words, regardless
+of capitalization.</p>
+  </li>
+  <li>Write a single bash command/pipeline that will read <code class="language-plaintext highlighter-rouge">alicewords.txt</code> and print the number of unique words, regardless of capitalization, that are not <a href="https://en.wikipedia.org/wiki/Stop_words">stop words</a>.
+Use the sorted list of stop words in <code class="language-plaintext highlighter-rouge">stopwords.txt</code> (available on canvas).
+    <blockquote>
+      <p>We’re going to keep things simple, here; the words “account”, “accounts”, and “accounting” are all unique words for our purposes, though a fancier solution would <em>stem</em> them all to “account”.
+Given our definition of <em>word</em>, above, the word “account’s” would appear in <code class="language-plaintext highlighter-rouge">alicewords.txt</code> as “account” and “s”, and the latter will be stripped out as a stopword.</p>
+
+      <p>You may find <code class="language-plaintext highlighter-rouge">comm</code> useful here.</p>
+    </blockquote>
+  </li>
+  <li>Write a bash script called <code class="language-plaintext highlighter-rouge">shake.sh</code> that allows the user to search for a word in all of Shakespeare’s sonnets.
+    <ul>
+      <li>For each matching sonnet, the script prints one line: the sonnet number, a colon, a space, the first line of the sonnet, then elipses.</li>
+      <li>If the user provides too few or too many arguments, it should print “usage: shake.sh searchword” and exit with status 1.</li>
+      <li>If the script cannot find the <code class="language-plaintext highlighter-rouge">sonnets</code> directory in the expected location, it should print “cannot find sonnets directory” and exit with status 2.</li>
+      <li>Write three test cases; write each test’s command in a separate single-line file <code class="language-plaintext highlighter-rouge">shaketest#</code>.
+Run each test and save its output in a separate file, i.e., <code class="language-plaintext highlighter-rouge">bash shaketest1 &gt; shaketest1.out</code>.</li>
+    </ul>
+  </li>
+</ol>
+
 <blockquote>
-  <p>The <code class="language-plaintext highlighter-rouge">unittest</code> target is unusual in that it explicitly mentions dependency on <code class="language-plaintext highlighter-rouge">test.c</code>.
-Normally Make automatically recognizes the dependency between <code class="language-plaintext highlighter-rouge">.o</code> files and <code class="language-plaintext highlighter-rouge">.c</code> files, so we rarely see rules with dependency on <code class="language-plaintext highlighter-rouge">.c</code> files.
-Here, because there is no <code class="language-plaintext highlighter-rouge">unittest.c</code>, we always build <code class="language-plaintext highlighter-rouge">unittest</code> from <code class="language-plaintext highlighter-rouge">tree.c</code> with a special <code class="language-plaintext highlighter-rouge">-D</code> flag and do not use <code class="language-plaintext highlighter-rouge">tree.o</code>; we must explicitly list all the pieces that go into building <code class="language-plaintext highlighter-rouge">unitest</code>.</p>
+  <p>For example,</p>
+
+  <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./shake.sh spring
+CII:   My love is strengthen'd, though more weak in seeming;...
+CIV:   To me, fair friend, you never can be old,...
+I:   From fairest creatures we desire increase,...
+LIII:   What is your substance, whereof are you made,...
+LXIII:   Against my love shall be as I am now,...
+XCVIII:   From you have I been absent in the spring,...
+$ ./shake.sh computer
+$
+</code></pre></div>  </div>
+  <p>How many hits will you get if you shake <code class="language-plaintext highlighter-rouge">love</code>? :-)</p>
 </blockquote>
 
-<p><strong><em>Preprocessor macros.</em></strong></p>
+<h2 id="what-to-hand-in-and-how">What to hand in, and how</h2>
 
-<p>The unit test makes heavy use of some <em>macros</em>, which are recognized and textually replaced by the C preprocessor before the C compiler even runs.
-They are so useful I’ve put them in a separate <code class="language-plaintext highlighter-rouge">unittest.h</code> file, and textually include them in <code class="language-plaintext highlighter-rouge">test.c</code> when <code class="language-plaintext highlighter-rouge">UNIT_TEST</code> has been defined.
-I show the core of <code class="language-plaintext highlighter-rouge">unittest.h</code> below.</p>
+<p>For the command/pipeline questions, write all your answers in a single file <code class="language-plaintext highlighter-rouge">commands.txt</code>.
+<em>Include each command and its output.</em></p>
 
-<p>These are <em>macros.</em>
-Note how I define fragments of code with each <code class="language-plaintext highlighter-rouge">#define</code>; the first two even take parameters.
-When scanning C code, the preprocessor does <em>textual substitution</em> for each defined symbol - it does not evaluate the code at all, it just substitutes the remainder of the line (after the symbol and after a space) into the C program wherever it sees that symbol, optionally inserting the parameter wherever it appears in the macro body.
-Because each definition must appear on one “line”, I had to use a <em>line continuation</em> character (backslash in the last character of the line) to let me format the definitions in a human-readable way.
-I lined up the backslashes so they all look neat.</p>
+<p>When finished, you should have the following files:</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// each test should start by setting the result count to zero</span>
-<span class="cp">#define START_TEST_CASE(name) int _failures=0; char *_testname = (name);
-</span>
-<span class="c1">// Check a condition; if false, print warning message.</span>
-<span class="c1">// e.g., EXPECT(dict-&gt;start == NULL).</span>
-<span class="c1">// note: the preprocessor </span>
-<span class="c1">//   converts __LINE__ into line number where this macro was used, and</span>
-<span class="c1">//   converts "#x" into a string constant for arg x.</span>
-<span class="cp">#define EXPECT(x)                                               \
-  if (!(x)) {                                                   \
-    _failures++;                                                \
-    printf("Fail %s Line %d: [%s]\n", _testname, __LINE__, #x); \
-  }
-</span>
-<span class="c1">// return the result count at the end of a test</span>
-<span class="cp">#define END_TEST_CASE                                                   \
-  if (_failures == 0) {                                                 \
-    printf("PASS test %s\n\n", _testname);                              \
-  } else {                                                              \
-    printf("FAIL test %s with %d errors\n\n", _testname, _failures);    \
-  }
-</span>
-<span class="cp">#define TEST_RESULT (_failures)
-</span></code></pre></div></div>
-
-<p>The preprocessor defines a special macro <code class="language-plaintext highlighter-rouge">__LINE__</code> that is set to the line number of the original source file, as each source line is processed; this is great for printing out the line number where our test case failed.</p>
-
-<p>The preprocessor also has special syntax <code class="language-plaintext highlighter-rouge">#parameter</code> that substitutes a C string constant for the text of the parameter.
-You can see it right at the end of the <code class="language-plaintext highlighter-rouge">EXPECT</code> macro.
-Thus, <code class="language-plaintext highlighter-rouge">EXPECT(tree != NULL)</code> will produce code that ends with <code class="language-plaintext highlighter-rouge">"tree != NULL");</code> enabling us to print the line number <em>and</em> the condition that failed.
-You can’t do that with C, only with the preprocessor!</p>
-
-<p><em>Warning: I strongly discourage the use of preprocessor macros.</em>
-There are times, however, where they are the right tool for the job, and this is one of those times.</p>
-
-<p>The macros are meant to be used for constructing small unit tests like this one:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">/////////////////////////////////////</span>
-<span class="c1">// create and validate an empty tree</span>
-<span class="kt">int</span> <span class="nf">test_newtree0</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="n">START_TEST_CASE</span><span class="p">(</span><span class="s">"newtree0"</span><span class="p">);</span>
-  <span class="n">tree_t</span> <span class="o">*</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree_new</span><span class="p">();</span>
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree</span><span class="o">-&gt;</span><span class="n">root</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
-
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"hello"</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
-
-  <span class="n">tree_delete</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">count_net</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
-
-  <span class="n">END_TEST_CASE</span><span class="p">;</span>
-  <span class="k">return</span> <span class="n">TEST_RESULT</span><span class="p">;</span>
-<span class="p">}</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-1</span>
+alice.txt
+alicewords.txt
+commands.txt
+shake.sh
+shaketest1
+shaketest1.out
+shaketest2
+shaketest2.out
+shaketest3
+shaketest3.out
 </code></pre></div></div>
 
-<p>In the above test, I create a new (empty) tree, try to find something in it, and delete the tree.
-Notice, though, that I actually peek <em>inside</em> the <code class="language-plaintext highlighter-rouge">struct tree</code> to verify that all its members are set correctly.</p>
+<h2 id="bursting-an-html-file-into-many-sonnets">Bursting an html file into many sonnets</h2>
 
-<p>Note, too, how I used those new macros - using <code class="language-plaintext highlighter-rouge">START_TEST_CASE()</code> to give the test a name and initialize everything, <code class="language-plaintext highlighter-rouge">EXPECT()</code> to indicate the conditions I expect to be true, <code class="language-plaintext highlighter-rouge">END_TEST_CASE</code> to print the summary and clean up, and <code class="language-plaintext highlighter-rouge">return TEST_RESULT</code> to provide a return value for this function.
-Here’s how that code looks after running it through the preprocessor with <code class="language-plaintext highlighter-rouge">gcc -DUNIT_TEST -E tree.c</code>:</p>
+<p>This section is brought to you by <em>curiosity</em>.</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">test_newtree0</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="kt">int</span> <span class="n">_failures</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="kt">char</span> <span class="o">*</span><span class="n">_testname</span> <span class="o">=</span> <span class="p">(</span><span class="s">"newtree0"</span><span class="p">);;</span>
-  <span class="n">tree_t</span> <span class="o">*</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree_new</span><span class="p">();</span>
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">tree</span> <span class="o">!=</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">)))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">244</span><span class="p">,</span> <span class="s">"tree != NULL"</span><span class="p">);</span> <span class="p">};</span>
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">tree</span><span class="o">-&gt;</span><span class="n">root</span> <span class="o">==</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">)))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">245</span><span class="p">,</span> <span class="s">"tree-&gt;root == NULL"</span><span class="p">);</span> <span class="p">};</span>
+<p>How was the files in the <code class="language-plaintext highlighter-rouge">sonnets</code> directory produced from Gutenberg’s
+<a href="/engs50/Labs/Lab1/sonnets.html">sonnets.html</a> file?  A little <code class="language-plaintext highlighter-rouge">sed</code> and a little <code class="language-plaintext highlighter-rouge">awk</code>:</p>
 
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"hello"</span><span class="p">)</span> <span class="o">==</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">)))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">247</span><span class="p">,</span> <span class="s">"tree_find(tree, </span><span class="se">\"</span><span class="s">hello</span><span class="se">\"</span><span class="s">) == NULL"</span><span class="p">);</span> <span class="p">};</span>
-
-  <span class="n">tree_delete</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">));</span>
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">count_net</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="s">"count_net() == 0"</span><span class="p">);</span> <span class="p">};</span>
-
-  <span class="k">if</span> <span class="p">(</span><span class="n">_failures</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="n">printf</span><span class="p">(</span><span class="s">"PASS test %s</span><span class="se">\n\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">);</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="n">printf</span><span class="p">(</span><span class="s">"FAIL test %s with %d errors</span><span class="se">\n\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="n">_failures</span><span class="p">);</span> <span class="p">};</span>
-  <span class="k">return</span> <span class="p">(</span><span class="n">_failures</span><span class="p">);</span>
-<span class="p">}</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir </span>sonnets
+<span class="nb">sed</span> <span class="se">\</span>
+ <span class="nt">-e</span> <span class="s1">'1,/^\*\*\* START/d'</span> <span class="se">\</span>
+ <span class="nt">-e</span> <span class="s1">'/^End of Project Gutenberg/,$d'</span> <span class="se">\</span>
+ <span class="nt">-e</span> <span class="s1">'s/&lt;br \/&gt;//'</span> <span class="se">\</span>
+ <span class="nt">-e</span> <span class="s1">'s/&amp;nbsp;/ /g'</span> <span class="se">\</span>
+ <span class="nt">-e</span> <span class="s1">'/&lt;\/p&gt;/d'</span> <span class="se">\</span>
+ <span class="nt">-e</span> <span class="s1">'/&lt;\/h3&gt;/d'</span> <span class="se">\</span>
+ <span class="nt">-e</span> <span class="s1">'/class="poem"/d'</span> <span class="se">\</span>
+ <span class="nt">-e</span> <span class="s1">'/&lt;pre&gt;/d'</span> <span class="se">\</span>
+ <span class="nt">-e</span> <span class="s1">'/^$/d'</span> sonnets.html <span class="se">\</span>
+| <span class="nb">awk</span> <span class="s1">'\
+ /&lt;h3&gt;/ {printing=0; header=1; next;}\
+ header {sonnet="sonnets/" $1; print sonnet; printing=1; header=0; next;}\
+ printing {print &gt; sonnet}'</span>
 </code></pre></div></div>
 
-<p>If you look closely, you can see the original bits of code (like <code class="language-plaintext highlighter-rouge">tree_delete(tree, NULL)</code> (with <code class="language-plaintext highlighter-rouge">NULL</code> expanded!) as well as the expanded <code class="language-plaintext highlighter-rouge">EXPECT</code> and other macros.</p>
-
-<p>Then the <code class="language-plaintext highlighter-rouge">main()</code> program runs a series of unit tests, and prints an error if any of them failed:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span>
-<span class="nf">main</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
-<span class="p">{</span>
-  <span class="kt">int</span> <span class="n">failed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_newtree0</span><span class="p">();</span>
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_newtree1</span><span class="p">();</span>
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_treeleft</span><span class="p">();</span>
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_treefind</span><span class="p">();</span>
-
-  <span class="k">if</span> <span class="p">(</span><span class="n">failed</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">printf</span><span class="p">(</span><span class="s">"FAIL %d test cases</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">failed</span><span class="p">);</span>
-    <span class="k">return</span> <span class="n">failed</span><span class="p">;</span>
-  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="n">printf</span><span class="p">(</span><span class="s">"PASS all test cases</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Here’s what the output looks like when everything passes:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ make unit
-gcc -Wall -pedantic -std=c11 -ggdb    -c -o memory.o memory.c
-gcc -Wall -pedantic -std=c11 -ggdb  -DUNIT_TEST tree.c memory.o -o unittest
-./unittest
-PASS test newtree0
-
-PASS test newtree1
-
-PASS test treeleft
-
-  ann(1)
-   bob(2)
-    cheri(3)
- dave(4)
-PASS test treefind
-
-PASS all test cases
-</code></pre></div></div>
-
-<p>To see what it looks like when a failure occurs, I could either break the tree code (which I’d rather not do!) or break the test code; I’ll do the latter by changing one line</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"abcd"</span><span class="p">)</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>to</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"abcd"</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>and run the test again:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ make -k unit
-gcc -Wall -pedantic -std=c11 -ggdb  -DUNIT_TEST tree.c memory.o -o unittest
-./unittest
-PASS test newtree0
-
-Fail newtree1 Line 271: [tree_find(tree, "abcd") == NULL]
-FAIL test newtree1 with 1 errors
-
-PASS test treeleft
-
-  ann(1)
-   bob(2)
-    cheri(3)
- dave(4)
-PASS test treefind
-
-FAIL 1 test cases
-make: *** [unit] Error 1
-</code></pre></div></div>
-
-<p>Notice how Make exited with error; that’s because <code class="language-plaintext highlighter-rouge">unittest</code> exited with non-zero status: note the code at end of <code class="language-plaintext highlighter-rouge">main()</code>.</p>
-
-<h2 id="cunit-test-framework">CUnit test framework</h2>
-
-<p>Although we don’t have time to study any professional frameworks, there are several C unit testing frameworks available on the Internet: <a href="https://libcheck.github.io/check/">Check</a> and <a href="http://cunit.sourceforge.net/">CUnit</a>.
-Here’s an <a href="http://cunit.sourceforge.net/example.html">example</a> using CUnit.</p>
-
-<h2 id="activity">Activity</h2>
-
-<p>In today’s <a href="activity.html">activity</a> your group will design a unit test for one of our other modules.</p>
-
+<p>You don’t need to learn <code class="language-plaintext highlighter-rouge">awk</code> and you will not need it for this
+assignment.  But it’s a interesting language!</p>
 
   </div>
 

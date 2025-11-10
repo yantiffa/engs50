@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Labs/Lab3/
+https://thayer.github.io/engs50/Notes/bash1/
 2
-43432
+44883
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Labs/Lab3/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Lab 3 - Data structures in C</title>
+  <title>Introduction to Bash</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Labs/Lab3/">
+  <link rel="canonical" href="/engs50/Notes/bash1/">
 </head>
 
 
@@ -44,444 +44,624 @@ https://thayer.github.io/engs50/Labs/Lab3/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Lab 3 - Data structures in C</h1>
+    <h1 class="post-title">Introduction to Bash</h1>
   </header>
 
   <div class="post-content">
-    <p><strong>Due Friday, April 20, at 10pm</strong></p>
-
-<p>In this lab you’ll code a set of data structures that will support the needs of the Tiny Search Engine (TSE).</p>
-
-<ul id="markdown-toc">
-  <li><a href="#assignment" id="markdown-toc-assignment">Assignment</a>    <ul>
-      <li><a href="#about-the-data-structures" id="markdown-toc-about-the-data-structures">About the data structures</a></li>
-      <li><a href="#bag" id="markdown-toc-bag">bag</a></li>
-      <li><a href="#set" id="markdown-toc-set">set</a></li>
-      <li><a href="#counters" id="markdown-toc-counters">counters</a></li>
-      <li><a href="#hashtable" id="markdown-toc-hashtable">hashtable</a></li>
-      <li><a href="#general-notes" id="markdown-toc-general-notes">General notes</a></li>
-    </ul>
-  </li>
-  <li><a href="#hints" id="markdown-toc-hints">Hints</a></li>
-  <li><a href="#what-to-hand-in-and-how" id="markdown-toc-what-to-hand-in-and-how">What to hand in, and how</a>    <ul>
-      <li><a href="#submitting-your-lab" id="markdown-toc-submitting-your-lab">Submitting your lab</a></li>
-    </ul>
-  </li>
-</ul>
-
-<p>In this lab you will develop some general-purpose data structures that, with modular design, can be re-used for other labs - most notably, the Tiny Search Engine.</p>
-
-<p>Grading will focus on <a href="/engs50/Resources/CodingStyle.html">CS50 coding style</a> - including consistent formatting, selection of identifier names, and use of meaningful comments - in addition to correctness and testing.</p>
-
-<p><strong><em>Your C code must compile without producing any compiler warnings.</em></strong>  You will lose points if the compiler produces warnings when using our CS50-standard compiler flags.</p>
-
-<p><strong><em>If your submitted code fails to compile, or triggers a segmentation fault,</em></strong> we’ll notify you and give you an opportunity to repair and resubmit.
-(See <em><a href="/index.html#crashes">programs that crash</a>.</em>) Write defensive code: each function should check its pointer parameters for NULL, and take some appropriate (safe) action.</p>
-
-<h2 id="assignment">Assignment</h2>
-
-<p>Obtain our <a href="starter">starter kit</a>, which implements the <code class="language-plaintext highlighter-rouge">bag</code> module and includes the <em>readlinep</em> and <em>memory</em> module. Your assignment is to add three new modules, each of which defines a different data structure.</p>
-
-<ul>
-  <li>(30 points) <em><code class="language-plaintext highlighter-rouge">set</code></em></li>
-  <li>(30 points) <em><code class="language-plaintext highlighter-rouge">counters</code></em></li>
-  <li>(40 points) <em><code class="language-plaintext highlighter-rouge">hashtable</code></em></li>
-</ul>
-
-<p>You can copy the starter kit to your own work directory on the CS department systems:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># assuming you've logged into a CS system</span>
-<span class="nb">mkdir</span> <span class="nt">-p</span> ~/cs50/labs/lab3
-<span class="nb">cp</span> <span class="nt">-r</span> ~cs50/public_html/Labs/Lab3/starter/<span class="k">*</span> ~/cs50/labs/lab3/
-</code></pre></div></div>
-
-<p>or to your Mac using <code class="language-plaintext highlighter-rouge">scp</code>:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>scp <span class="nt">-r</span> username@flume:~cs50/public_html/Labs/Lab3/starter lab3
-</code></pre></div></div>
-
-<h3 id="about-the-data-structures">About the data structures</h3>
-
-<p>The specific data structures are defined in the sections below.</p>
-
-<p>In the table below, we compare these data structures with the two we explored in class.
-Most of these data structures allow you to store a collection of “items”.
-Both the <code class="language-plaintext highlighter-rouge">set</code> and <code class="language-plaintext highlighter-rouge">hashtable</code> are examples of an abstract data structure called a <em>dictionary</em>, which provide methods like <code class="language-plaintext highlighter-rouge">insert(key, item)</code> and <code class="language-plaintext highlighter-rouge">item = retrieve(key)</code>, where the <code class="language-plaintext highlighter-rouge">key</code> allows the structure to distinguish among the items it stores.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: left">Behavior</th>
-      <th style="text-align: left"><code class="language-plaintext highlighter-rouge">list</code></th>
-      <th style="text-align: left"><code class="language-plaintext highlighter-rouge">bag</code></th>
-      <th style="text-align: left"> </th>
-      <th style="text-align: left"><code class="language-plaintext highlighter-rouge">set</code></th>
-      <th style="text-align: left"><code class="language-plaintext highlighter-rouge">counters</code></th>
-      <th><code class="language-plaintext highlighter-rouge">hashtable</code></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: left">stores an <em>item</em></td>
-      <td style="text-align: left">yes</td>
-      <td style="text-align: left">yes</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left">yes</td>
-      <td style="text-align: left">no</td>
-      <td>yes</td>
-    </tr>
-    <tr>
-      <td style="text-align: left">uses a <em>key</em></td>
-      <td style="text-align: left">no</td>
-      <td style="text-align: left">no</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left">yes</td>
-      <td style="text-align: left">yes</td>
-      <td>yes</td>
-    </tr>
-    <tr>
-      <td style="text-align: left">keeps items in order</td>
-      <td style="text-align: left">yes</td>
-      <td style="text-align: left">no</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left">no</td>
-      <td style="text-align: left">no</td>
-      <td>no</td>
-    </tr>
-    <tr>
-      <td style="text-align: left">retrieval</td>
-      <td style="text-align: left">first item</td>
-      <td style="text-align: left">any item</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left">by key</td>
-      <td style="text-align: left">by key</td>
-      <td>by key</td>
-    </tr>
-    <tr>
-      <td style="text-align: left">insertion of duplicates</td>
-      <td style="text-align: left">allowed</td>
-      <td style="text-align: left">allowed</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left">error</td>
-      <td style="text-align: left">increment count</td>
-      <td>error</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Notice that</p>
-
-<ul>
-  <li>a <code class="language-plaintext highlighter-rouge">list</code> keeps <em>items</em> in order, but a <code class="language-plaintext highlighter-rouge">bag</code> or a <code class="language-plaintext highlighter-rouge">set</code> does not.</li>
-  <li>a <code class="language-plaintext highlighter-rouge">set</code> and <code class="language-plaintext highlighter-rouge">hashtable</code> allow you to retrieve a specific <em>item</em> (indicated by its <em>key</em>) whereas a <code class="language-plaintext highlighter-rouge">bag</code> might return any <em>item</em>.</li>
-  <li>because the <code class="language-plaintext highlighter-rouge">bag</code> and <code class="language-plaintext highlighter-rouge">list</code> don’t distinguish among <em>items</em> they store, they can hold duplicates; the others cannot.</li>
-  <li>the <code class="language-plaintext highlighter-rouge">counters</code> data structure maintains a set of counters, each identified by a <em>key</em>, but it stores no <em>items</em>.
-Instead, it keeps a counter for each key. Attempting to insert a duplicate <em>key</em> results in an increment of the counter.</li>
-</ul>
-
-<h3 id="bag">bag</h3>
-
-<p>A <code class="language-plaintext highlighter-rouge">bag</code> is an unordered collection of <em>items</em>.
-The <code class="language-plaintext highlighter-rouge">bag</code> starts empty, grows as the caller adds one <em>item</em> at a time, and shrinks as the caller extracts one <em>item</em> at a time.
-It could be empty, or could contain hundreds of <em>items</em>.
-<em>Items</em> are indistinguishable, so the <em>extract</em> function is free to return any <em>item</em> from the <code class="language-plaintext highlighter-rouge">bag</code>.</p>
-
-<p>The starter kit includes our <code class="language-plaintext highlighter-rouge">bag</code> module, which contains:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">bag.c</code> implements a bag of <code class="language-plaintext highlighter-rouge">void*</code>, and exports <strong>exactly</strong> the following functions through <code class="language-plaintext highlighter-rouge">bag.h</code>:</li>
-</ul>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* Create a new (empty) bag; return NULL if error. */</span>
-<span class="n">bag_t</span> <span class="o">*</span><span class="nf">bag_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
-
-<span class="cm">/* Add new item to the bag; a NULL bag is ignored; a NULL item is ignored. */</span>
-<span class="kt">void</span> <span class="nf">bag_insert</span><span class="p">(</span><span class="n">bag_t</span> <span class="o">*</span><span class="n">bag</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
-
-<span class="cm">/* Return any data item from the bag; return NULL if bag is NULL or empty. */</span>
-<span class="kt">void</span> <span class="o">*</span><span class="nf">bag_extract</span><span class="p">(</span><span class="n">bag_t</span> <span class="o">*</span><span class="n">bag</span><span class="p">);</span>
-
-<span class="cm">/* Print the whole bag; provide the output file and func to print each item.
- * If fp==NULL; do nothing. If bag==NULL, print (null).
- * If itemprint==NULL, print nothing for each item.
- */</span>
-<span class="kt">void</span> <span class="nf">bag_print</span><span class="p">(</span><span class="n">bag_t</span> <span class="o">*</span><span class="n">bag</span><span class="p">,</span> <span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">,</span>
-               <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">itemprint</span><span class="p">)(</span><span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">));</span>
-
-<span class="cm">/* Iterate over the whole bag; call the given function on each item,
- * passing both the item and an argument. Ignore if NULL bag or NULL itemfunc.
- */</span>
-<span class="kt">void</span> <span class="nf">bag_iterate</span><span class="p">(</span><span class="n">bag_t</span> <span class="o">*</span><span class="n">bag</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span>
-                 <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">itemfunc</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">)</span> <span class="p">);</span>
-
-<span class="cm">/* Delete the whole bag; ignore NULL bag.
- * Provide a function that will delete each item (may be NULL).
- */</span>
-<span class="kt">void</span> <span class="nf">bag_delete</span><span class="p">(</span><span class="n">bag_t</span> <span class="o">*</span><span class="n">bag</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">itemdelete</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">)</span> <span class="p">);</span>
-</code></pre></div></div>
-
-<h3 id="set">set</h3>
-
-<p>A <code class="language-plaintext highlighter-rouge">set</code> maintains an unordered collection of <em>(key,item)</em> pairs; any given <em>key</em> can only occur in the <code class="language-plaintext highlighter-rouge">set</code> once.
-It starts out empty and grows as the caller inserts new <em>(key,item)</em> pairs.
-The caller can retrieve <em>items</em> by asking for their <em>key</em>, but cannot remove or update pairs.
-Items are distinguished by their <em>key</em>.</p>
-
-<p>Your <code class="language-plaintext highlighter-rouge">set.c</code> should implement a <code class="language-plaintext highlighter-rouge">set</code> of <code class="language-plaintext highlighter-rouge">void*</code> with <code class="language-plaintext highlighter-rouge">char*</code> <em>keys</em>, and export <strong>exactly</strong> the following functions through <code class="language-plaintext highlighter-rouge">set.h</code>:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* Create a new (empty) set; return NULL if error. */</span>
-<span class="n">set_t</span> <span class="o">*</span><span class="nf">set_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
-
-<span class="cm">/* Insert item, identified by a key (string), into the given set.
- * The key string is copied for use by the set.
- * Return false if key exists, any parameter is NULL, or error;
- * return true iff new item was inserted.
- */</span>
-<span class="n">bool</span> <span class="nf">set_insert</span><span class="p">(</span><span class="n">set_t</span> <span class="o">*</span><span class="n">set</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
-
-<span class="cm">/* Return the item associated with the given key;
- * return NULL if set is NULL, key is NULL, or key is not found.
- */</span>
-<span class="kt">void</span> <span class="o">*</span><span class="nf">set_find</span><span class="p">(</span><span class="n">set_t</span> <span class="o">*</span><span class="n">set</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span>
-
-<span class="cm">/* Print the whole set; provide the output file and func to print each item.
- * Ignore if NULL fp. Print (null) if NULL set.
- * Print a set with no items if NULL itemprint.
-*/</span>
-<span class="kt">void</span> <span class="nf">set_print</span><span class="p">(</span><span class="n">set_t</span> <span class="o">*</span><span class="n">set</span><span class="p">,</span> <span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">,</span>
-               <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">itemprint</span><span class="p">)(</span><span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">)</span> <span class="p">);</span>
-
-<span class="cm">/* Iterate over all items in the set, in undefined order.
- * Call the given function on each item, with (arg, key, item).
- * If set==NULL or itemfunc==NULL, do nothing.
- */</span>
-<span class="kt">void</span> <span class="nf">set_iterate</span><span class="p">(</span><span class="n">set_t</span> <span class="o">*</span><span class="n">set</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span>
-                 <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">itemfunc</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">)</span> <span class="p">);</span>
-
-<span class="cm">/* Delete the whole set; ignore NULL set.
- * Provide a function that will delete each item (may be NULL).
- */</span>
-<span class="kt">void</span> <span class="nf">set_delete</span><span class="p">(</span><span class="n">set_t</span> <span class="o">*</span><span class="n">set</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">itemdelete</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">)</span> <span class="p">);</span>
-</code></pre></div></div>
-
-<h3 id="counters">counters</h3>
-
-<p>A <em>counter set</em> is a <code class="language-plaintext highlighter-rouge">set</code> of counters, each distinguished by an integer <em>key</em>.
-It’s a <code class="language-plaintext highlighter-rouge">set</code> - each <em>key</em> can only occur once in the <code class="language-plaintext highlighter-rouge">set</code> - but instead of storing <em>(key,item)</em> pairs, it tracks a <code class="language-plaintext highlighter-rouge">counter</code> for each <em>key</em>.
-It starts empty.
-Each time <code class="language-plaintext highlighter-rouge">counters_add</code> is called on a given <em>key</em>, that <em>key</em>’s <code class="language-plaintext highlighter-rouge">counter</code> is incremented.
-The current <code class="language-plaintext highlighter-rouge">counter</code> value can be retrieved by asking for the relevant <em>key</em>.</p>
-
-<p>Your <code class="language-plaintext highlighter-rouge">counters.c</code> should implement a set of integer counters with <code class="language-plaintext highlighter-rouge">int</code> <em>keys</em> (where <em>keys</em> must be non-negative) and export <strong>exactly</strong> the following functions through <code class="language-plaintext highlighter-rouge">counters.h</code>:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* Create a new (empty) counter structure; return NULL if error. */</span>
-<span class="n">counters_t</span> <span class="o">*</span><span class="nf">counters_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
-
-<span class="cm">/* Increment the counter indicated by key; key must be &gt;= 0.
- * If the key does not yet exist, create a counter for it and initialize to 1.
- * Ignore if ctrs is NULL or key is negative.
- */</span>
-<span class="kt">void</span> <span class="nf">counters_add</span><span class="p">(</span><span class="n">counters_t</span> <span class="o">*</span><span class="n">ctrs</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">key</span><span class="p">);</span>
-
-<span class="cm">/* Return current value of counter associated with the given key;
- * return 0 if ctrs is NULL or if key is not found.
- */</span>
-<span class="kt">int</span> <span class="nf">counters_get</span><span class="p">(</span><span class="n">counters_t</span> <span class="o">*</span><span class="n">ctrs</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">key</span><span class="p">);</span>
-
-<span class="cm">/* Set the current value of counter associated with the given key;
- * If the key does not yet exist, create a counter for it and initialize to
- * the given value. Ignore if ctrs is NULL, if key &lt; 0, or count &lt; 0.
- */</span>
-<span class="kt">void</span> <span class="nf">counters_set</span><span class="p">(</span><span class="n">counters_t</span> <span class="o">*</span><span class="n">ctrs</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">key</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">);</span>
-
-<span class="cm">/* Print all counters; provide the output file.
- * Ignore if NULL fp. Print (null) if NULL ctrs.
- */</span>
-<span class="kt">void</span> <span class="nf">counters_print</span><span class="p">(</span><span class="n">counters_t</span> <span class="o">*</span><span class="n">ctrs</span><span class="p">,</span> <span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">);</span>
-
-<span class="cm">/* Iterate over all counters in the set (in undefined order):
- * call itemfunc for each item, with (arg, key, count).
- * If ctrs==NULL or itemfunc==NULL, do nothing.
- */</span>
-<span class="kt">void</span> <span class="nf">counters_iterate</span><span class="p">(</span><span class="n">counters_t</span> <span class="o">*</span><span class="n">ctrs</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span>
-                      <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">itemfunc</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">key</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">));</span>
-
-<span class="cm">/* Delete the whole counters. ignore NULL ctrs. */</span>
-<span class="kt">void</span> <span class="nf">counters_delete</span><span class="p">(</span><span class="n">counters_t</span> <span class="o">*</span><span class="n">ctrs</span><span class="p">);</span>
-</code></pre></div></div>
-
-<h3 id="hashtable">hashtable</h3>
-
-<p>A <code class="language-plaintext highlighter-rouge">hashtable</code> is a <code class="language-plaintext highlighter-rouge">set</code> of <em>(key,item)</em> pairs.
-It acts just like a <code class="language-plaintext highlighter-rouge">set</code>, but is far more efficient for large collections.</p>
-
-<p>Your <code class="language-plaintext highlighter-rouge">hashtable.c</code> should implement a <code class="language-plaintext highlighter-rouge">set</code> of <code class="language-plaintext highlighter-rouge">void*</code> with <code class="language-plaintext highlighter-rouge">char*</code> <em>keys</em>, and export <em>exactly</em> the following functions through <code class="language-plaintext highlighter-rouge">hashtable.h</code>:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* Create a new (empty) hashtable; return NULL if error. */</span>
-<span class="n">hashtable_t</span> <span class="o">*</span><span class="nf">hashtable_new</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">num_slots</span><span class="p">);</span>
-
-<span class="cm">/* Insert item, identified by key (string), into the given hashtable.
- * The key string is copied for use by the hashtable.
- * Return false if key exists in ht, any parameter is NULL, or error;
- * return true iff new item was inserted.
- */</span>
-<span class="n">bool</span> <span class="nf">hashtable_insert</span><span class="p">(</span><span class="n">hashtable_t</span> <span class="o">*</span><span class="n">ht</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
-
-<span class="cm">/* Return the item associated with the given key;
- * return NULL if hashtable is NULL, key is NULL, key is not found.
- */</span>
-<span class="kt">void</span> <span class="o">*</span><span class="nf">hashtable_find</span><span class="p">(</span><span class="n">hashtable_t</span> <span class="o">*</span><span class="n">ht</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span>
-
-<span class="cm">/* Print the whole table; provide the output file and func to print each item.
- * Ignore if NULL fp. Print (null) if NULL ht.
- * Print a table with no items if NULL itemprint.
- */</span>
-<span class="kt">void</span> <span class="nf">hashtable_print</span><span class="p">(</span><span class="n">hashtable_t</span> <span class="o">*</span><span class="n">ht</span><span class="p">,</span> <span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">,</span>
-                     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">itemprint</span><span class="p">)(</span><span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">));</span>
-
-<span class="cm">/* Iterate over all items in the table; in undefined order.
- * Call the given function on each item, with (arg, key, item).
- * If ht==NULL or itemfunc==NULL, do nothing.
- */</span>
-<span class="kt">void</span> <span class="nf">hashtable_iterate</span><span class="p">(</span><span class="n">hashtable_t</span> <span class="o">*</span><span class="n">ht</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span>
-               <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">itemfunc</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">)</span> <span class="p">);</span>
-
-<span class="cm">/* Delete the whole hashtable; ignore NULL ht.
- * Provide a function that will delete each item (may be NULL).
- */</span>
-<span class="kt">void</span> <span class="nf">hashtable_delete</span><span class="p">(</span><span class="n">hashtable_t</span> <span class="o">*</span><span class="n">ht</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">itemdelete</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">item</span><span class="p">)</span> <span class="p">);</span>
-</code></pre></div></div>
-
-<p>The starter kit provides code for the hash function.</p>
-
-<h3 id="general-notes">General notes</h3>
-
-<ul>
-  <li>Your modules must implement <em>exactly</em> the above interface.
-Do not modify those function prototypes.</li>
-  <li>If you need helper functions or data types (likely <code class="language-plaintext highlighter-rouge">struct</code> types), those should be defined within your <code class="language-plaintext highlighter-rouge">module.c</code> and marked <code class="language-plaintext highlighter-rouge">static</code> so they are not visible to users of the module.</li>
-  <li>Your modules must print <em>nothing</em> (except, of course, in the <code class="language-plaintext highlighter-rouge">xxx_print()</code> function).
-If you want to add debugging <code class="language-plaintext highlighter-rouge">printf</code>s, they must be protected by something like <code class="language-plaintext highlighter-rouge">#ifdef DEBUG</code> or <code class="language-plaintext highlighter-rouge">#ifdef TEST</code>.
-(You can see some examples in <code class="language-plaintext highlighter-rouge">bag.c</code> where we’ve protected some debugging code with <code class="language-plaintext highlighter-rouge">#ifdef MEMTEST</code>, and a spot in the <code class="language-plaintext highlighter-rouge">bag/Makefile</code> that controls that flag from the compiler command line.)</li>
-  <li>Your modules must have no global variables.</li>
-  <li>Your modules must have no <code class="language-plaintext highlighter-rouge">main()</code> function; as modules, they are meant to be used by other programs.
-Recall how the module defined by <code class="language-plaintext highlighter-rouge">bag.c</code> and <code class="language-plaintext highlighter-rouge">bag.h</code> is used by a test program <code class="language-plaintext highlighter-rouge">bagtest.c</code>.</li>
-  <li>Your modules store <code class="language-plaintext highlighter-rouge">void*</code> items; this type is C’s way of describing a “pointer to anything”.
-The caller (user of your module) must pass a pointer (address of some item) to your code; your data structure holds that pointer, and later returns it to the caller in response to an ‘extract’ or ‘find’ operation.
-Your module doesn’t know, or doesn’t care, what kind of things the items are.
-Your module doesn’t allocate memory for items, free memory for items, or copy items - it just tracks the <em>pointer</em> to the item.</li>
-  <li>For all modules, the <em>caller</em> is responsible for the <em>item</em> pointer, which must be allocated (somehow) by the caller.
-The modules’ <code class="language-plaintext highlighter-rouge">_delete</code> function (like a destructor) allows the caller to provide a custom <code class="language-plaintext highlighter-rouge">itemdelete</code> function that knows how to free any memory consumed by an item.</li>
-  <li>For this reason, the caller must avoid inserting the same item (same address) multiple times; later, the <code class="language-plaintext highlighter-rouge">itemdelete</code> method would be called multiple times on that item… which could lead to trouble.</li>
-  <li>Both <code class="language-plaintext highlighter-rouge">set</code> and <code class="language-plaintext highlighter-rouge">hashtable</code> work with string-type keys.
-When adding a new item with <code class="language-plaintext highlighter-rouge">set_insert()</code> or <code class="language-plaintext highlighter-rouge">hashtable_insert()</code>, both modules make their own copy of the string - presumably in memory allocated by <code class="language-plaintext highlighter-rouge">malloc()</code>.
-(The module is then responsible for this memory - and later freeing it - just like any other memory it allocates.)  This ‘copy’ semantic is convenient for the caller, who need not worry about how to allocate and manage the key string after inserting it into the set or hashtable.</li>
-  <li>You may assume that a non-NULL <code class="language-plaintext highlighter-rouge">key</code> is a proper C string; that is, it is null-terminated.</li>
-  <li>You may use the <em>memory</em> module - or use the native <code class="language-plaintext highlighter-rouge">malloc</code> and <code class="language-plaintext highlighter-rouge">free</code>, and you
-may use <code class="language-plaintext highlighter-rouge">valgrind</code> - or not.
-However, we will be checking your code for memory leaks.</li>
-  <li>Your modules must each have a <code class="language-plaintext highlighter-rouge">Makefile</code> to compile and test the module code.</li>
-  <li>Your directory for module <code class="language-plaintext highlighter-rouge">x</code> must, therefore, have an <code class="language-plaintext highlighter-rouge">xtest.c</code> program.</li>
-</ul>
-
-<h2 id="hints">Hints</h2>
-
-<p>You are encouraged to follow the style and layout of the <code class="language-plaintext highlighter-rouge">bag</code> module when developing new modules.</p>
-
-<p>You can also learn a lot from our <a href="/engs50/Examples/trees">binary trees</a> example.
-You are welcome to copy snippets of code from this (or any other) CS50 example code as long as you add a comment indicating you’ve done so.</p>
-
-<p>We suggest implementing the <code class="language-plaintext highlighter-rouge">set</code> and <code class="language-plaintext highlighter-rouge">counters</code> as simplified linked lists, much like we did for <code class="language-plaintext highlighter-rouge">bag</code>.
-Each should be a separate implementation because they differ in detail and semantics.</p>
-
-<p>Your <code class="language-plaintext highlighter-rouge">hashtable</code> module, on the other hand, should make use of the <code class="language-plaintext highlighter-rouge">set</code> data structure.
-Indeed, your hashtable will be an array of pointers to sets.
-Allocating an array of pointers can be tricky; consider these <a href="array-allocate.html">tips</a>.</p>
-
-<p><strong><em>Linked lists</em></strong> were demonstrated in <a href="/engs50/Examples/names6.c">names6.c</a>, although for a specialized case; you will need to generalize.
-They were also covered in CS10; see the <a href="http://www.cs.dartmouth.edu/~tjp/cs10/notes6.php">notes</a>.</p>
-
-<p><strong><em>Hashtables were also covered in CS10:</em></strong>
-<a href="http://www.cs.dartmouth.edu/~tjp/cs10/notes11.php">notes</a>,
-<a href="/engs50/Labs/Lab3/cs10-hashtables.pdf">slides</a>.</p>
-
-<h2 id="what-to-hand-in-and-how">What to hand in, and how</h2>
-
-<p>Make sure to compile and test your solutions on one of the <a href="http://www.cs.dartmouth.edu/~wbc/suditour/011/index.html">CS Linux systems</a> before submission.
-If you choose to develop your solutions on some other system, you are responsible to ensure that the work you submit runs correctly on a CS system — which is where where we will test it!</p>
-
-<p>Indeed, you must place your solutions in your <code class="language-plaintext highlighter-rouge">cs50/labs/lab3</code> directory on the department Linux servers.
-(If you worked on your laptop, use <code class="language-plaintext highlighter-rouge">scp</code> to copy files from your laptop to the server.)</p>
-
-<p>In addition to your code, each of the four subdirectories of <code class="language-plaintext highlighter-rouge">lab3</code> must include two simple text files:</p>
-
-<ol>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">README</code>,
-      which describes how your program should be compiled and executed, along with an explanation of any assumptions you made about the assignment.
-See the <a href="starter/bag/README.md">README.md</a> for the <code class="language-plaintext highlighter-rouge">bag</code> module.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">TESTING</code>,
-     which describes how you tested the program, including any test inputs, test programs, and test scripts; these test files should be included in your submission.
-See the <a href="starter/bag/TESTING.md">TESTING.md</a> for the <code class="language-plaintext highlighter-rouge">bag</code> module in the starter kit.</p>
-  </li>
-</ol>
+    <p>Don’t forget this week’s <a href="/engs50/Reading/#week-1">reading</a>.</p>
+
+<p>In this note, we discuss the Unix shell and its commands.  The
+‘shell’ is a <em>command-line interpreter</em> and invokes kernel-level
+commands.  It also can be used as a <em>programming language</em> to design
+your own commands.  We’ll come to shell programming in a future
+note.</p>
+
+<p>We do not recommend that you buy a book about Unix or the shell; there
+are some very good references and free-access online books – see the
+<a href="/engs50/Resources">resources page</a> – and we have selected some
+interesting and useful <a href="/engs50/Reading">readings</a>.</p>
+
+<p>If you need help on the meaning or syntax of any Unix shell command
+you can use the manual (man) pages on a Unix system (see below) or the
+<a href="http://www.computerhope.com/unix.htm#04">web unix commands</a>.  Just
+keep in mind that some commands’ syntax varies a bit across Unix
+flavors, so when in doubt, check the man page on the system you’re
+using.</p>
+
+<h2 id="unix-philosophy">Unix Philosophy</h2>
+
+<p>In their book <em>Program Design in the Unix Environment</em> (1984), Rob
+Pike and Brian Kernighan put it this way:</p>
 
 <blockquote>
-  <p>These examples are written in <a href="/engs50/Resources/index.html#markdown">Markdown</a> format; hence the filename extension <code class="language-plaintext highlighter-rouge">.md</code>.
-You’ll need to use Markdown in later labs, so now’s a great time to learn.
-In this lab, the use of Markdown is optional.</p>
+  <p>``Much of the power of the Unix operating system comes from a style
+of program design that makes programs easy to use and, more
+important, easy to combine with other programs. This style has been
+called the use of software tools, and depends more on how the
+programs fit into the programming environment and how they can be
+used with other programs than on how they are designed
+internally. This style was based on the use of tools: using
+programs separately or in combination to get a job done, rather than
+doing it by hand, by monolithic self-sufficient subsystems, or by
+special-purpose, one-time programs.’’</p>
 </blockquote>
 
-<p>Think of your audience for each file:</p>
+<h3 id="historical-note---unix">Historical note - Unix</h3>
+
+<p><a href="https://en.wikipedia.org/wiki/Unix">Unix</a> was developed at Bell 
+Labs in the 1970s by a group led by 
+<a href="https://en.wikipedia.org/wiki/Douglas_McIlroy">Doug McIlroy</a>.</p>
+
+<blockquote>
+  <p>``This is the Unix philosophy: Write programs that do one thing and do it well.
+Write programs to work together.
+Write programs to handle text streams, because that is a universal interface.’’
+— Doug McIlroy</p>
+</blockquote>
+
+<h2 id="goals">Goals</h2>
+
+<p>We plan to cover the following topics in this note.</p>
 
 <ul>
-  <li>the <code class="language-plaintext highlighter-rouge">README</code> file is written for the user of your module.
-For example, <a href="starter/bag/README.md">bag/README.md</a> refers to the interface (<code class="language-plaintext highlighter-rouge">bag.h</code>) and describe any assumptions, implementation details, or compilation instructions (basically, <code class="language-plaintext highlighter-rouge">make bag.o</code>).</li>
-  <li>the <code class="language-plaintext highlighter-rouge">TESTING</code> file is written for your grader.
-For example, <a href="starter/bag/TESTING.md">bag/TESTING.md</a> describes how we tested <code class="language-plaintext highlighter-rouge">bag.c</code>, by referring to <code class="language-plaintext highlighter-rouge">bagtest.c</code> and including the results of a test run in <code class="language-plaintext highlighter-rouge">bagtest.out</code>.
-If your test requires some input files, include those data files in your submission and refer to them in your <code class="language-plaintext highlighter-rouge">TESTING</code> file.
-(In the solution, the Makefile generates the necessary input files by downloading them from the web.)</li>
+  <li>The shell</li>
+  <li>The file system</li>
 </ul>
 
-<p>Your <code class="language-plaintext highlighter-rouge">lab3</code> directory must contain the following:</p>
+<h2 id="the-shell">The shell</h2>
+
+<h3 id="commands-switches-arguments">Commands, switches, arguments</h3>
+
+<p>The shell is the Unix command-line interpreter.  It provides an
+interface between the user and the kernel and executes programs called
+‘commands’.  For example, if a user enters <code class="language-plaintext highlighter-rouge">ls </code>then the shell
+executes the <code class="language-plaintext highlighter-rouge">ls</code> command, which actually executes a program stored in
+the file <code class="language-plaintext highlighter-rouge">/bin/ls</code>.  The shell can also execute other programs
+including scripts (text files interpreted by a program like python or
+bash) and compiled programs (e.g., written in C).  Even your own
+programs – once marked ‘executable’ – become commands you can run
+from the shell!</p>
+
+<p>You will get by in the course by becoming familiar with a subset of
+the Unix commands; don’t let yourself be overwhelmed by the presence
+of hundreds of commands.  You will probably be regularly using 2-3
+dozen of them by the end of the term.</p>
+
+<p>Unix has often been criticized for being very terse (it’s rumored that
+its designers were bad typists).  Many commands have short, cryptic
+names and vowels are a rarity:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk, cat, cp, cd, chmod, echo, find, grep, ls, mv, rm, tr, sed, comm
+</code></pre></div></div>
+
+<p>We will learn to use all of these commands and more.</p>
+
+<p>Unix command output is also very terse - the default action on success
+is silence.  Only errors are reported, and error messages are often
+terse.  Unix commands are often termed ‘tools’ or ‘utilities’, because
+they are meant to be simple tools that you can combine in novel ways.</p>
+
+<p>Instructions entered in response to the shell prompt are interpreted
+first by the shell - expanding any variable references, filename
+wildcards, or special syntax.  Thus, the shell can rewrite the command
+line; then, it expects the command line to have the following syntax:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nb">command</span> <span class="o">[</span>arg1]...
+</code></pre></div></div>
+
+<p>The brackets <code class="language-plaintext highlighter-rouge">[ ]</code> indicate that the arguments are optional, and the
+notation above means that there are zero or more arguments.  Arguments
+are separated by white space.  Many commands can be executed with or
+without arguments.  Others require arguments, or a certain number of
+arguments, (e.g., <code class="language-plaintext highlighter-rouge">cp sort.c anothersort.c</code>) to work correctly.  If
+none are supplied, they will provide some error message in return.
+Another part of the Unix philosophy is to avoid an explosion in the
+number of commands by having most commands support various <em>options</em>
+(sometimes called <em>flags</em> or <em>switches</em>), which modify the actions of
+the commands.</p>
+
+<p>For example, let’s use the <code class="language-plaintext highlighter-rouge">ls</code> command and the <code class="language-plaintext highlighter-rouge">-l</code> option switch to
+list in long format the file <code class="language-plaintext highlighter-rouge">filename.c</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nb">ls</span> <span class="nt">-l</span> filename.c
+</code></pre></div></div>
+
+<p>Switches are often single characters preceded by a hyphen (e.g.,
+<code class="language-plaintext highlighter-rouge">-l</code>).  Most commands accept switches in any order, though they
+generally must appear before all the real arguments (usually
+filenames).  In the case of the <code class="language-plaintext highlighter-rouge">ls</code> example below, the command
+arguments represent file or directory names.  The options modify the
+operation of the command and are usually operated on by the program
+invoked by the shell rather than the shell itself.</p>
+
+<p>Unix programs always receive a list of arguments, containing at least
+one argument, which is always the command name itself.  So, for <code class="language-plaintext highlighter-rouge">ls</code>
+that first argument would be “<code class="language-plaintext highlighter-rouge">ls</code>”.  The first argument is referred
+to as argument 0, “the zero-th argument”.  In our <code class="language-plaintext highlighter-rouge">ls</code> example,
+argument 1 is <code class="language-plaintext highlighter-rouge">-l</code> and argument 2 is <code class="language-plaintext highlighter-rouge">filename.c</code>.  Some commands also
+accept their switches grouped together.  For example, the following
+switches to <code class="language-plaintext highlighter-rouge">ls</code> are identical:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nb">ls</span> <span class="nt">-tla</span> foople<span class="k">*</span>
+    ...
+    <span class="nb">ls</span> <span class="nt">-t</span> <span class="nt">-l</span> <span class="nt">-a</span> foople<span class="k">*</span>
+</code></pre></div></div>
+
+<p>The shell parses the words or tokens (command name and arguments) you
+type on the command line, and asks the kernel to execute the program
+corresponding to that command; the interpretation of the arguments (as
+switches, filenames, or something else) is determined by that program.</p>
+
+<p>Typically, the shell processes the complete line after a carriage
+return is entered and then goes off to find the program that the
+command line specified.  If the command is a pathname, whether
+relative (e.g., <code class="language-plaintext highlighter-rouge">./mycommand</code>) or absolute (e.g., <code class="language-plaintext highlighter-rouge">/bin/ls</code> or
+<code class="language-plaintext highlighter-rouge">~engs50/mycommand</code>), the shell simply executes the program in that
+file.  If the command is not a pathname, the shell searches through a
+list of directories in your “path”, which is defined by the shell
+variable called <code class="language-plaintext highlighter-rouge">PATH</code>.</p>
+
+<h2 id="shells-path">Shell’s ‘Path’</h2>
+
+<p>Take a look at your <code class="language-plaintext highlighter-rouge">PATH</code> by asking the shell to substitute its value
+(<code class="language-plaintext highlighter-rouge">$PATH</code>) and pass it as an argument to the <code class="language-plaintext highlighter-rouge">echo</code> command:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$PATH</span>
+/usr/lib64/qt-3.3/bin:/usr/lib64/ccache:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/net/class/engs50/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/java/j2sdk/bin:/usr/local/bin:/usr/local/bin/X11:.
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>Note that in general the output from the commands shown in this note
+demonstrate notional output. You will not see exactly the same
+information portrayed if you execute the same commands. Shell prompts
+show you the current user, machine, and location e.g.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="err">$</span>
+</code></pre></div></div>
+
+<p>is a shell prompt ($) for user “engs50” on machine “mc” with the shell
+currently in the users home directory (~).</p>
+
+<p>So where does the <code class="language-plaintext highlighter-rouge">ls</code> command executed above reside in the Unix directory hierarchy?
+Let’s use another command to find out.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>which <span class="nb">ls
+ls </span>is aliased to <span class="sb">`</span><span class="nb">ls</span> <span class="nt">-F</span><span class="s1">'
+ls is /usr/bin/ls
+ls is /bin/ls
+ls is /usr/bin/ls
+[engs50@mc ~]$ 
+</span></code></pre></div></div>
+
+<p>The first line of response says that <code class="language-plaintext highlighter-rouge">ls</code> is “aliased”.  This is a
+shell feature; the shell allows us to define “aliases”, which act just
+like commands but are actually just a textual substitution of a
+command name (the alias) to some other string (in this case, <code class="language-plaintext highlighter-rouge">ls -F</code>).
+Thus, any time I type <code class="language-plaintext highlighter-rouge">ls blah blah</code>, it treats it as if I had typed
+<code class="language-plaintext highlighter-rouge">ls -F blah blah</code>.  The <code class="language-plaintext highlighter-rouge">-F</code> option tells <code class="language-plaintext highlighter-rouge">ls</code> to add a trailing
+symbol to some names in its output; it adds a <code class="language-plaintext highlighter-rouge">/</code> to the names of
+directories, a <code class="language-plaintext highlighter-rouge">@</code> to the names of symbolic links (um, that’s another
+conversation), and some other even specialized cases.</p>
+
+<p>Of course, the shell then still needs to resolve <code class="language-plaintext highlighter-rouge">ls</code>.  It then
+searches the <code class="language-plaintext highlighter-rouge">PATH</code> to find an executable file with that name; in this
+case, it appears that <code class="language-plaintext highlighter-rouge">ls</code> exists in both <code class="language-plaintext highlighter-rouge">/usr/bin</code> and in <code class="language-plaintext highlighter-rouge">/bin</code>.
+The shell will execute the first one, because it is found first in the
+PATH.  Below you can see the effect of running <code class="language-plaintext highlighter-rouge">ls</code> (the alias) and
+<code class="language-plaintext highlighter-rouge">/bin/ls</code> (the raw command, without the <code class="language-plaintext highlighter-rouge">-F</code>).</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls
+</span>Archive/  private/  proc-log  public_html/  resources/	web@
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>/bin/ls
+Archive  private  proc-log  public_html  resources  web
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<h2 id="viewing-files">Viewing files</h2>
+
+<p>You can see the contents of any file with the <code class="language-plaintext highlighter-rouge">cat</code> command, so named because it concatenates all the files listed as arguments, printing one after the other.
+For very long files, though, the output will quickly scroll off your terminal.</p>
+
+<p>Less Is More: The  <code class="language-plaintext highlighter-rouge">less</code> and <code class="language-plaintext highlighter-rouge">more</code> commands are handy for quickly looking at files.
+The syntax is <code class="language-plaintext highlighter-rouge">less filename</code> and <code class="language-plaintext highlighter-rouge">more filename</code>.
+Take a look at the <code class="language-plaintext highlighter-rouge">man</code> pages to get the details of each.
+Similarly, <code class="language-plaintext highlighter-rouge">head</code> and <code class="language-plaintext highlighter-rouge">tail</code> display a number of lines (selectable via switches, of course) at the beginning and end of a file, respectively.</p>
+
+<p>See what these do: <code class="language-plaintext highlighter-rouge">cat /etc/passwd</code>, <code class="language-plaintext highlighter-rouge">head /etc/passwd</code>, <code class="language-plaintext highlighter-rouge">tail /etc/passwd</code>, <code class="language-plaintext highlighter-rouge">more /etc/passwd</code>, and <code class="language-plaintext highlighter-rouge">less /etc/passwd</code>.
+The file <code class="language-plaintext highlighter-rouge">/etc/passwd</code> lists all the accounts on the system, and information about each account.</p>
+
+<h2 id="editing-files">Editing files</h2>
+
+<p>Long before there were windows and graphical displays, or even
+screens, there were text editors.  Two are in common use on Unix
+system today: <code class="language-plaintext highlighter-rouge">emacs</code> and <code class="language-plaintext highlighter-rouge">vi</code>.  Actually, there is an
+expanded/improved version of <code class="language-plaintext highlighter-rouge">vi</code> called <code class="language-plaintext highlighter-rouge">vim</code>, which is quite
+popular.</p>
+
+<p>I strongly recommend emacs if you are planning to take Engs62 – our
+embedded systems course, since the Xilinx vivado tool chain provides
+an Emacs mode for editing. Also, you will find that many emacs
+commands are available in bash for working at the command line.</p>
+
+<p>You should try both and become comfortable with at least one.  Yes,
+it’s tempting to use an external graphical editor (like Sublime), but
+it is frequently the case when working with embedded systems and/or
+servers that there simply is not a graphical user interface; in these
+cases you <em>must</em> use a text-only editor so you should get used
+to it now.</p>
+
+<p>See /engs50/Resources/#editors for some resources that can help you
+learn <code class="language-plaintext highlighter-rouge">emacs</code> or <code class="language-plaintext highlighter-rouge">vim</code>. I’ve provided a 15 min – “Learn Emacs Fast”
+video to help.</p>
+
+<h2 id="unix-file-system">Unix file system</h2>
+
+<p>The Unix file system is a <em>hierarchical file system</em>.  The file system
+consists of a very small number of different file <em>types</em>.  The two
+most common types are <em>files</em> and <em>directories</em>.</p>
+
+<p>A directory (akin to a folder on a MacOS or Windows computer) contains
+the names and locations of all files and directories below it.  A
+directory always contains two special files <code class="language-plaintext highlighter-rouge">.</code> (dot) and <code class="language-plaintext highlighter-rouge">..</code> (dot
+dot); <code class="language-plaintext highlighter-rouge">.</code> represents the directory itself, and <code class="language-plaintext highlighter-rouge">..</code> represents the
+directory’s parent.  In the following, I make a new directory, change
+my current working directory to be that new directory, create a new
+file in that directory, and use <code class="language-plaintext highlighter-rouge">ls</code> to explore the contents of the
+new directory and its parent.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">mkdir test</span>
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cd test</span>
+<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">echo </span>hello <span class="o">&gt;</span> somefile
+<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-a</span>
+./  ../  somefile
+<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">ls 
+</span>somefile
+<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">ls</span> <span class="nb">.</span>
+somefile
+<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">ls</span> ..
+Archive/  private/  proc-log  public_html/  resources/	<span class="nb">test</span>/  web@
+<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>Directory names are separated by a <em>forward</em> slash <code class="language-plaintext highlighter-rouge">/</code>, forming
+pathnames.  A <em>pathname</em> is a filename that includes some or all of
+the directories leading to the file; an <em>absolute pathname</em> is
+relative to the root (<code class="language-plaintext highlighter-rouge">/</code>) directory and begins with a <code class="language-plaintext highlighter-rouge">/</code>, in the
+first example below, whereas a <em>relative pathname</em> is relative to the
+current working directory, as in the second example below.  Notice
+that a relative pathname can also use <code class="language-plaintext highlighter-rouge">.</code> or <code class="language-plaintext highlighter-rouge">..</code>, as in the third
+example below.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls</span> /net/class/engs50/public_html/Labs/<span class="k">*</span>
+/net/class/engs50/public_html/Labs/index.html
+/net/class/engs50/public_html/Labs/Lab0-Preliminaries.html
+/net/class/engs50/public_html/Labs/usernames.txt
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls </span>public_html/Resources/<span class="k">*</span>
+public_html/Resources/DougMcIlroy.pdf
+public_html/Resources/Homebrew0.png
+public_html/Resources/Homebrew1.png
+public_html/Resources/Homebrew.html
+public_html/Resources/index.html
+public_html/Resources/RC13972-C-Programming.docx
+public_html/Resources/RC13972-C-Programming.pdf
+public_html/Resources/StartingSublime.pdf
+public_html/Resources/toomey-unix.pdf
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls</span> ../cs10/public_html/
+azul.css    help.html	   lab/       oldindex.html  software.html
+exams/	    indexBAK.html  lectures/  sa/	     syllabus.html
+exams.html  index.html	   old/       schedule.html
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>As implied by the shell prompt, the current working directory is
+<code class="language-plaintext highlighter-rouge">~engs50</code>, which is shorthand for “the home directory of user
+<code class="language-plaintext highlighter-rouge">engs50</code>”, which happens to be the directory at path
+<code class="language-plaintext highlighter-rouge">/net/class/engs50</code>.</p>
+
+<h3 id="moving-around-the-file-system">Moving around the file system</h3>
+
+<p>The “change directory” command (<code class="language-plaintext highlighter-rouge">cd</code>) allows us to move around the
+Unix directory hierarchy, that is, to change our “current working
+directory” from which all relative filenames and pathnames will be
+resolved.  Let’s combine <code class="language-plaintext highlighter-rouge">pwd</code>, <code class="language-plaintext highlighter-rouge">ls</code>, and <code class="language-plaintext highlighter-rouge">cd</code> to move around the
+local directories that are rooted at <code class="language-plaintext highlighter-rouge">/net/class/engs50</code>.  Remember that
+<code class="language-plaintext highlighter-rouge">~</code> refers to the home directory and <code class="language-plaintext highlighter-rouge">..</code> refers to the parent
+directory.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">mkdir test</span>
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cd test</span>
+<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">ls</span>
+<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">cd</span> ..
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cd </span>public_html/
+<span class="o">[</span>engs50@mc ~/public_html]<span class="nv">$ </span><span class="nb">ls
+</span>css/	    Labs/      Logistics/  Reading/    Schedule.pdf
+index.html  Notes/  Project/    Resources/  Schedule.xlsx
+<span class="o">[</span>engs50@mc ~/public_html]<span class="nv">$ </span><span class="nb">cd </span>Resources/
+<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls
+</span>DougMcIlroy.pdf  Homebrew.html		     RC13972-C-Programming.pdf
+Homebrew0.png	 index.html		     StartingSublime.pdf
+Homebrew1.png	 RC13972-C-Programming.docx  toomey-unix.pdf
+<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">cd</span> ../..
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls
+</span>Archive/  private/  proc-log  public_html/  resources/	<span class="nb">test</span>/  web@
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>The shell prompt is helpfully tracking the current working directory as we move.</p>
+
+<h3 id="listing-and-globbing-files">Listing and globbing files</h3>
+
+<p>Here are a popular set of switches you can use with <code class="language-plaintext highlighter-rouge">ls</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-l list in long format (as we have been doing)
+-a list all entries (including `dot` files, which are normally hidden)
+-t sort by modification time (latest first)
+-r list in reverse order (alphabetical or time)
+-R list the directory and its subdirectories recursively
+</code></pre></div></div>
+
+<p>The shell also interprets certain special characters like <code class="language-plaintext highlighter-rouge">*</code>, <code class="language-plaintext highlighter-rouge">?</code>,
+and <code class="language-plaintext highlighter-rouge">[]</code>; <code class="language-plaintext highlighter-rouge">*</code> matches zero or more characters, <code class="language-plaintext highlighter-rouge">?</code> matches one
+character, and <code class="language-plaintext highlighter-rouge">[]</code> matches one character from the set (or range) of
+characters listed within the brackets:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cd </span>public_html/Resources/
+<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls
+</span>DougMcIlroy.pdf  Homebrew.html		     RC13972-C-Programming.pdf
+Homebrew0.png	 index.html		     StartingSublime.pdf
+Homebrew1.png	 RC13972-C-Programming.docx  toomey-unix.pdf
+<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls</span> <span class="k">*</span>.pdf
+DougMcIlroy.pdf		   StartingSublime.pdf
+RC13972-C-Programming.pdf  toomey-unix.pdf
+<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls </span>H<span class="k">*</span>
+Homebrew0.png  Homebrew1.png  Homebrew.html
+<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls</span> <span class="k">*</span>-<span class="k">*</span>
+RC13972-C-Programming.docx  RC13972-C-Programming.pdf  toomey-unix.pdf
+<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls </span>Homebrew<span class="k">*</span>.<span class="k">*</span>
+Homebrew0.png  Homebrew1.png  Homebrew.html
+<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls </span>Homebrew?.<span class="k">*</span>
+Homebrew0.png  Homebrew1.png
+<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls </span>Homebrew[0-9].png
+Homebrew0.png  Homebrew1.png
+<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<h3 id="hidden-files">Hidden files</h3>
+<p>The <code class="language-plaintext highlighter-rouge">ls</code> program normally does not list any files whose filename begins with <code class="language-plaintext highlighter-rouge">.</code>  There is nothing special about these files, except <code class="language-plaintext highlighter-rouge">.</code> and <code class="language-plaintext highlighter-rouge">..</code>, as far as Unix is concerned.
+It’s simply a convention - files whose names begin with <code class="language-plaintext highlighter-rouge">.</code> are to be considered ‘hidden’, and thus not listed by <code class="language-plaintext highlighter-rouge">ls</code> or matched with by the shell’s <code class="language-plaintext highlighter-rouge">*</code> globbing character.
+Home directories, in particular, include many ‘hidden’ (but important!) files.
+The <code class="language-plaintext highlighter-rouge">-a</code> switch tells <code class="language-plaintext highlighter-rouge">ls</code> to list “all” files, including those that begin with a dot (aka, the hidden files).</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls
+</span>Archive/  private/  public_html/  resources/  web@
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-a</span>
+./   Archive/	    .bash_logout   .bashrc    .environset  private/	public_html/  .ssh/  .viminfo  web@
+../  .bash_history  .bash_profile  .emacs.d/  .forward	   .procmailrc	resources/    .vim/  .vimrc
+</code></pre></div></div>
+
+<p>to see just the dot files, let’s get clever with the shell’s glob characters:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-ad</span> .??<span class="k">*</span>
+.bash_history  .bash_profile  .emacs.d/    .forward	.ssh/  .viminfo
+.bash_logout   .bashrc	      .environset  .procmailrc	.vim/  .vimrc
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>All of these “dot files” (or “dot directories”) are important to one program or another:</p>
 
 <ul>
-  <li>Five subdirectories:
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">bag</code> with <code class="language-plaintext highlighter-rouge">Makefile</code>, <code class="language-plaintext highlighter-rouge">bagtest.c</code>, <code class="language-plaintext highlighter-rouge">bag.c</code>, <code class="language-plaintext highlighter-rouge">bag.h</code>.</li>
-      <li><code class="language-plaintext highlighter-rouge">set</code> with <code class="language-plaintext highlighter-rouge">Makefile</code>, <code class="language-plaintext highlighter-rouge">settest.c</code>, <code class="language-plaintext highlighter-rouge">set.c</code>, <code class="language-plaintext highlighter-rouge">set.h</code>, <code class="language-plaintext highlighter-rouge">README</code>, <code class="language-plaintext highlighter-rouge">TESTING</code></li>
-      <li><code class="language-plaintext highlighter-rouge">counters</code> with <code class="language-plaintext highlighter-rouge">Makefile</code>, <code class="language-plaintext highlighter-rouge">counterstest.c</code>, <code class="language-plaintext highlighter-rouge">counters.c</code>, <code class="language-plaintext highlighter-rouge">counters.h</code>, <code class="language-plaintext highlighter-rouge">README</code>, <code class="language-plaintext highlighter-rouge">TESTING</code></li>
-      <li><code class="language-plaintext highlighter-rouge">hashtable</code> with <code class="language-plaintext highlighter-rouge">Makefile</code>, <code class="language-plaintext highlighter-rouge">hashtabletest.c</code>, <code class="language-plaintext highlighter-rouge">hashtable.c</code>, <code class="language-plaintext highlighter-rouge">hashtable.h</code>, <code class="language-plaintext highlighter-rouge">README</code>, <code class="language-plaintext highlighter-rouge">TESTING</code></li>
-      <li><code class="language-plaintext highlighter-rouge">common</code> directory with contents inherited from our starter kit</li>
-    </ul>
-  </li>
-  <li>Each <code class="language-plaintext highlighter-rouge">README</code> (or <code class="language-plaintext highlighter-rouge">README.md</code>) explains any assumptions and acknowledges any limitations.</li>
-  <li>Each <code class="language-plaintext highlighter-rouge">TESTING</code> (or <code class="language-plaintext highlighter-rouge">TESTING.md</code>) shows how you tested the module.</li>
-  <li>Include any special input files you used for testing.</li>
+  <li><code class="language-plaintext highlighter-rouge">.bash_history</code> - used by bash to record a history of the commands you’ve typed</li>
+  <li><code class="language-plaintext highlighter-rouge">.bash_logout</code> - executed by bash when you log out</li>
+  <li><code class="language-plaintext highlighter-rouge">.bash_profile</code> - executed by bash when you log in</li>
+  <li><code class="language-plaintext highlighter-rouge">.bashrc</code> - executed by bash whenever you start a new shell</li>
+  <li><code class="language-plaintext highlighter-rouge">.emacs.d/</code> - a directory used by emacs text editor</li>
+  <li><code class="language-plaintext highlighter-rouge">.environset</code> - a Dartmouth-specific thing; read by .bashrc</li>
+  <li><code class="language-plaintext highlighter-rouge">.forward</code> - tells Mail where to forwad your email</li>
+  <li><code class="language-plaintext highlighter-rouge">.procmailrc</code> - for handling email with <code class="language-plaintext highlighter-rouge">procmail</code></li>
+  <li><code class="language-plaintext highlighter-rouge">.ssh/</code> - directory used by inbound ssh connections</li>
+  <li><code class="language-plaintext highlighter-rouge">.vim/</code> - a directory used by vim text editor</li>
+  <li><code class="language-plaintext highlighter-rouge">.viminfo</code> - used by vim text editor</li>
+  <li><code class="language-plaintext highlighter-rouge">.vimrc</code> - used by vim text editor</li>
 </ul>
 
-<h4 id="submitting-your-lab">Submitting your lab</h4>
-<p>Before the deadline, run</p>
+<h3 id="bash-shell-startup-files">Bash shell startup files</h3>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~cs50/labs/submit 3
+<p>The <code class="language-plaintext highlighter-rouge">bash</code> shell looks for several files in your home directory:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">.bash_profile</code> - executed by bash when you log in</li>
+  <li><code class="language-plaintext highlighter-rouge">.bashrc</code> - executed by bash whenever you start a new shell</li>
+  <li><code class="language-plaintext highlighter-rouge">.bash_logout</code> - executed by bash when you log out</li>
+  <li><code class="language-plaintext highlighter-rouge">.bash_history</code> - used by bash to record a history of the commands you’ve typed</li>
+</ul>
+
+<p>The <code class="language-plaintext highlighter-rouge">.bashrc</code> file is especially important, because <code class="language-plaintext highlighter-rouge">bash</code> reads it
+every time you start a new <code class="language-plaintext highlighter-rouge">bash</code> shell, that is, when you log in,
+when you start a new interactive shell, or when you run a new bash
+script.  (In contrast, <code class="language-plaintext highlighter-rouge">.bash_profile</code> is only read when you login.)
+In each case,<code class="language-plaintext highlighter-rouge">bash</code> reads the files and executes the commands therein.
+Thus, you can configure your <code class="language-plaintext highlighter-rouge">bash</code> experience by having it declare
+some variables, define some aliases, and set up some personal
+favorites.</p>
+
+<h2 id="locating-files">Locating files</h2>
+
+<p>Many times you want to find a file but do not know where it is in the
+directory tree (Unix directory structure is a tree - rooted at the <code class="language-plaintext highlighter-rouge">/</code>
+directory) .  The <code class="language-plaintext highlighter-rouge">find</code> command can walk a file hierarchy:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find <span class="nb">.</span> <span class="nt">-name</span> DougMcIlroy.pdf <span class="nt">-print</span>
+./public_html/Resources/DougMcIlroy.pdf
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find public_html <span class="nt">-iname</span> reading <span class="nt">-print</span>
+public_html/Reading
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find public_html <span class="nt">-type</span> d <span class="nt">-print</span>
+public_html
+public_html/Logistics
+public_html/Resources
+public_html/Labs
+public_html/Project
+public_html/Notes
+public_html/css
+public_html/Reading
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find public_html <span class="nt">-name</span> <span class="se">\*</span>.html <span class="nt">-print</span>
+public_html/Logistics/index.html
+public_html/Resources/index.html
+public_html/Resources/Homebrew.html
+public_html/Labs/index.html
+public_html/Labs/Lab0-Preliminaries.html
+public_html/Project/index.html
+public_html/Notes/01-gettingstarted.html
+public_html/Notes/index.html
+public_html/index.html
+public_html/Reading/index.html
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find public_html <span class="nt">-name</span> <span class="se">\*</span>.png <span class="nt">-mtime</span> <span class="nt">-1</span> <span class="nt">-print</span>
+public_html/Resources/Homebrew1.png
+public_html/Resources/Homebrew0.png
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
 </code></pre></div></div>
-<p>Make sure it confirms success.
-If you need to update your submission, run the same command again; it will overwrite the prior submission with the current contents of your <code class="language-plaintext highlighter-rouge">lab3</code> directory.</p>
 
-<p><strong><em>If you wish to use one of your 24-hour extensions,</em></strong> run this command <em>before the deadline</em>:</p>
+<p>The first example searches directory <code class="language-plaintext highlighter-rouge">.</code> to find a file by a specific
+name and prints its pathname.  The second example used <code class="language-plaintext highlighter-rouge">-iname</code> (case
+insensitive search) instead of <code class="language-plaintext highlighter-rouge">-name</code> (which is case sensitive) to
+search <code class="language-plaintext highlighter-rouge">public_html</code> for the “reading” directory.  The third example
+searches <code class="language-plaintext highlighter-rouge">public_html</code> for any directories (<code class="language-plaintext highlighter-rouge">-type d</code>) and prints
+their pathnames.  The fourth example uses a wildcard <code class="language-plaintext highlighter-rouge">*</code> to print
+pathnames of files whose name matches a pattern; the backslash <code class="language-plaintext highlighter-rouge">\</code> is
+there to prevent the shell from interpreting the <code class="language-plaintext highlighter-rouge">*</code>, allowing it to
+be part of the argument to <code class="language-plaintext highlighter-rouge">find</code>, which interprets that character
+itself.  The fifth example combines two factors, to print pathnames of
+files whose name matches <code class="language-plaintext highlighter-rouge">*.png</code> and whose modication time <code class="language-plaintext highlighter-rouge">mtime</code> is
+less than one day <code class="language-plaintext highlighter-rouge">-1</code> in the past.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~cs50/labs/submit 3 extension
+<h2 id="our-top-commands">Our top commands</h2>
+
+<p>We’ve explored almost four dozen shell commands, below (those with *asterisk will be introduced later).
+You’ll often need only about half of them.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nb">alias
+
+    cat</span>, <span class="nb">cd</span>, <span class="nb">chmod</span>, <span class="nb">comm</span>, <span class="nb">cp</span>, <span class="nb">cut
+
+    date
+
+    echo</span>, emacs, <span class="nb">expr</span>, <span class="nb">exit
+
+    </span>file, find
+
+    gcc, gdb<span class="k">*</span>, git<span class="k">*</span>, <span class="nb">grep
+
+    head
+
+    </span>less, <span class="nb">logout</span>, lpr, <span class="nb">ls
+
+    </span>make<span class="k">*</span>, man, <span class="nb">mkdir</span>, more, <span class="nb">mv
+
+    </span>open <span class="o">(</span>MacOS<span class="o">)</span>
+
+    pbpaste, pbcopy <span class="o">(</span>MacOS<span class="o">)</span>
+
+    <span class="nb">pwd
+
+    rm</span>, <span class="nb">rmdir
+
+    </span>scp, <span class="nb">sed</span>, <span class="nb">sort</span>, ssh
+
+    <span class="nb">tail</span>, <span class="nb">tar</span>, <span class="nb">touch</span>, <span class="nb">tr
+
+    uniq
+
+    </span>whereis, which
+
+    vi, vim
 </code></pre></div></div>
-<p>This command deletes any submission you may have made previously, and leaves a single file “extension” there as an indication you are requesting an extension.
-When you are later ready to submit your work, do so as above:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~cs50/labs/submit 3
+<h1 id="historical-note">Historical note</h1>
+
+<p>Recall we mentioned “teletypes” in the first lecture.  <strong>It was <em>at
+Dartmouth</em> that a teletype was actually used to interact with a remote
+computer</strong> - the first ever long-distance terminal, decades before the
+Internet.</p>
+
+<p><img src="/engs50/Notes/bash1/history-Stibitz1.jpg" alt="Stibitz plaque" /></p>
+
+<h2 id="navigating-within-man-pages">Navigating within man pages</h2>
+
+<p>You may have found the <code class="language-plaintext highlighter-rouge">man</code> system to be a little challenging to navigate.
+There is a message that is displayed at the very bottom of the screen when you first enter the command that you might have missed (most people do):</p>
+
+<pre><code class="language-man">Manual page xxx(n) line 1 (press h for help or q to quit)
+</code></pre>
+
+<p>If you enter ‘<code class="language-plaintext highlighter-rouge">h</code>’ to see the help you will find many more commands than you’re likely to ever use when reading <code class="language-plaintext highlighter-rouge">man</code> pages.
+This is because the man-page reader is actually the <code class="language-plaintext highlighter-rouge">less</code> command of Unix.
+I tend to use only a few:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">f</code> or <em>space</em> (the spacebar) advances to the next screenful,</li>
+  <li><code class="language-plaintext highlighter-rouge">b</code> goes back to the previous screenful,</li>
+  <li><code class="language-plaintext highlighter-rouge">e</code> or down-arrow advances one more line,</li>
+  <li><code class="language-plaintext highlighter-rouge">y</code> or up-arrow goes back one line,</li>
+  <li><code class="language-plaintext highlighter-rouge">/</code> allows one to type a search phrase and hit return,</li>
+  <li><code class="language-plaintext highlighter-rouge">q</code> quits <code class="language-plaintext highlighter-rouge">man</code>, and returns to the shell prompt.</li>
+</ul>
+
+<h2 id="there-are-shells-shells-and-more-shells">There are shells, shells, and more shells</h2>
+
+<p>There are a number of shells available to a Unix user – so which one do you select?
+The most common shells are:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">sh</code> : the original shell, known as the Bourne Shell,</li>
+  <li><code class="language-plaintext highlighter-rouge">csh</code>, <code class="language-plaintext highlighter-rouge">tcsh</code> : well-known and widely used derivatives of the Bourne shell,</li>
+  <li><code class="language-plaintext highlighter-rouge">ksh</code> : the Korn shell, and</li>
+  <li><code class="language-plaintext highlighter-rouge">bash</code> : the Bourne Again SHell, developed by GNU, is the most popular shell used for Linux.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">bash</code> is the default shell for new Unix accounts in our department.</p>
+
+<p>The basic shell operation is as follows.  The shell parses the command
+line; the first word on the line is the command name.  If the command
+is an alias, it substitutes the alias text and again identifies the
+command.  If the command is one built-in to the shell (there are a
+few, like <code class="language-plaintext highlighter-rouge">cd</code>, <code class="language-plaintext highlighter-rouge">echo</code>, <code class="language-plaintext highlighter-rouge">pwd</code>, and <code class="language-plaintext highlighter-rouge">which</code>) it performs that command’s
+action.  Otherwise, the shell looks for the executable file that
+matches that program name by searching directories listed in the
+<code class="language-plaintext highlighter-rouge">PATH</code> variable.  The shell then starts that program as a new process
+and passes any options and arguments to the program.  A <em>process</em> is a
+running program.  You can see a list of your processes with the
+command <code class="language-plaintext highlighter-rouge">ps</code>.</p>
+
+<h2 id="file-type">File type</h2>
+
+<p>Unix itself imposes almost no constraints or interpretation on the
+contents of files - the only common case is that of a compiled,
+executable program: it has to be in a very specific binary format for
+the operating system (Unix) to execute it.  All other files are used
+by some program or another, and it’s up to those programs to interpret
+the contents as they see fit.  The great power of Unix, and the common
+shell commands, is that any file can be read by any program; the most
+common format are plain-text (ASCII) files that are formatted as a
+series of “lines” delimited by “newline” characters (\n, known by its
+ASCII code 012).</p>
+
+<p>If you are unsure about the contents of a file (text, binary,
+compressed, Unix executabe, some format specific a certain
+application, etc.).  The <code class="language-plaintext highlighter-rouge">file</code> command is useful; it makes an attempt
+to judge the format of the file.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>file downloaded
+downloaded: POSIX <span class="nb">tar </span>archive
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>file fig1
+fig1: GIF image data, version 87a, 440 x 306
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>file trash.tar.gz
+trash.tar.gz: <span class="nb">gzip </span>compressed data, from Unix
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>file public_html/Schedule.<span class="k">*</span>
+public_html/Schedule.pdf:  PDF document, version 1.3
+public_html/Schedule.xlsx: Microsoft Excel 2007+
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>file /bin/ls
+/bin/ls: ELF 64-bit LSB shared object, x86-64, version 1 <span class="o">(</span>SYSV<span class="o">)</span>, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, <span class="k">for </span>GNU/Linux 2.6.32, BuildID[sha1]<span class="o">=</span>0ac5c509289d650534ce80cdbf5b72744b5c5f3d, stripped
+<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
 </code></pre></div></div>
-
-<p>This overwrites any prior submission - even the extension request.
-(Thus, if you submit before the deadline, you effectively ‘cancel’ your request for an extension.) We will grade the first submission present at 0h, 24h, 48h, or 72h after the original deadline.
-To avoid confusion, <strong><em>please blitz <code class="language-plaintext highlighter-rouge">cs50 AT cs.dartmouth.edu</code> if you want a late submission to be graded instead of your on-time submission.</em></strong></p>
 
   </div>
 

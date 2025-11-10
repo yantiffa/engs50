@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Labs/Lab2/
+https://thayer.github.io/engs50/Notes/intro/
 2
-33369
+31558
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Labs/Lab2/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Lab 2 - C and Bash</title>
+  <title>Welcome to Engs50 (CS50)!</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Labs/Lab2/">
+  <link rel="canonical" href="/engs50/Notes/intro/">
 </head>
 
 
@@ -44,702 +44,470 @@ https://thayer.github.io/engs50/Labs/Lab2/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Lab 2 - C and Bash</h1>
+    <h1 class="post-title">Welcome to Engs50 (CS50)!</h1>
   </header>
 
   <div class="post-content">
-    <p>This second lab is focused on three small C programs, and a regression-testing bash script.
-They start easy and get progressively more difficult.</p>
+    <p>This note discusses the aim and schedule of the course, and takes a
+brief look at Unix, C programming, and computer architecture.</p>
 
-<ul id="markdown-toc">
-  <li><a href="#reminder" id="markdown-toc-reminder">Reminder</a></li>
-  <li><a href="#preparation" id="markdown-toc-preparation">Preparation</a></li>
-  <li><a href="#assignment" id="markdown-toc-assignment">Assignment</a></li>
-  <li><a href="#regresssh" id="markdown-toc-regresssh">regress.sh</a></li>
-  <li><a href="#chillc" id="markdown-toc-chillc">chill.c</a></li>
-  <li><a href="#wordsc" id="markdown-toc-wordsc">words.c</a></li>
-  <li><a href="#histoc" id="markdown-toc-histoc">histo.c</a>    <ul>
-      <li><a href="#representing-a-histogram" id="markdown-toc-representing-a-histogram">Representing a histogram</a></li>
-    </ul>
-  </li>
-  <li><a href="#what-to-hand-in-and-how" id="markdown-toc-what-to-hand-in-and-how">What to hand in, and how</a></li>
-</ul>
+<h2 id="the-course">The course</h2>
 
-<h2 id="reminder">Reminder</h2>
+<p>The aim of this course is to develop the necessary systems programming
+skills in C and Unix as a foundation to tackle the design,
+implementation, and integration of a large software project working in
+small teams.  The challenge of the course is to quickly get people up
+to speed so there is sufficient time to get into the details of a
+complex software design project.  The first part of the course serves
+to develop design, programming and other systems skills such as
+source-code management, testing, and debugging.  The second part of
+the course is all about the project and team work.  Good team work
+will lead to success.  That’s the message.</p>
 
-<p>Grading will focus on <a href="/engs50/Resources/CodingStyle.html">CS50 coding style</a> - including consistent formatting, selection of identifier names, and use of meaningful comments - in addition to correctness and testing.</p>
+<p>A note about Unix/Linux: Unix came first.  All of the others,
+including BSD, MacOS, and all the variants of Linux, are derivations
+of that original effort.  While we use Ubuntu Linux on the M210
+machines, you may elect to use your own copy of Linux or the Unix that
+Mac OSX is based on.  Except when it <em>really</em> matters, I use the term
+Unix to refer to them all.</p>
 
-<p><strong><em>Your C code must compile without producing any compiler warnings.</em></strong>  You will lose points if the compiler produces warnings when using our CS50-standard compiler flags.</p>
-
-<p><strong><em>If your submitted code fails to compile, or triggers a segmentation fault,</em></strong> we’ll notify you and give you an opportunity to repair and resubmit.
-(See <em><a href="/index.html#crashes">programs that crash</a>.</em>)</p>
-
-<h2 id="preparation">Preparation</h2>
-
-<p>Set up four directories for this lab:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd</span>
-<span class="nv">$ </span><span class="nb">mkdir</span> <span class="nt">-p</span> cs50/labs/lab2
-<span class="nv">$ </span><span class="nb">cd </span>cs50/labs/lab2
-<span class="nv">$ </span><span class="nb">mkdir </span>regress chill histo words
-</code></pre></div></div>
-
-<h2 id="assignment">Assignment</h2>
-
-<p>Please follow the <a href="/engs50/Resources/CodingStyle.html">CS50 coding style</a>.</p>
-
-<p>Design, write, document, and <strong>fully test</strong> the following three separate C programs and one bash script.</p>
-
-<p><strong><em>Point breakdown:</em></strong></p>
+<p>The syllabus in a nutshell:</p>
 
 <ul>
-  <li>(25 points) regress.sh</li>
-  <li>(25 points) chill.c</li>
-  <li>(25 points) words.c</li>
-  <li>(25 points) histo.c</li>
+  <li>Unix: shell, commands, shell programming;</li>
+  <li>C: structure, arrays, pointers, dynamic memory, files;</li>
+  <li>Programming tools: gcc (GNU compiler), make (maintain groups of programs), gdb (GNU debugger), git (source code management), valgrind (profiling and memory leak checker).</li>
+  <li>Software development methodology: design, implement, unit test/debug, integration, demo, maintenance.</li>
+  <li>Programming: building a search engine (crawler, indexer, query engine).</li>
+  <li>Team project: it’s a surprise!</li>
 </ul>
 
-<h2 id="regresssh">regress.sh</h2>
+<p>The course includes several Unix shell and C programming assignments
+listed under Modules on Canvas. There are no lectures; all the lecture
+material is on videos for easy reference. Class time is devoted to
+working programming problems individually in Module 1 and in teams for
+the remainder of the course.</p>
 
-<p><em>Regression testing</em> is important to any quality software-development
-process.  As a software project evolves, each new revision is tested
-against a thorough suite of test cases to ensure that the new revision
-still performs correctly where it had before.  As new functionality is
-added, new tests are added to the suite.</p>
+<p>Please take note of the <a href="/engs50/Reading">reading assigned</a>
+each week.  I will list the reading week by week, rather than lecture
+by lecture, to give you some flexibility – but please do the reading,
+you’ll find it to be interesting and valuable!</p>
 
-<p>Write a bash script <code class="language-plaintext highlighter-rouge">regress.sh</code> to perform regression testing.  Its
-command line looks like</p>
+<h2 id="logistics">Logistics</h2>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./regress.sh dirname testfilename...
-</code></pre></div></div>
-<ul>
-  <li>where <code class="language-plaintext highlighter-rouge">dirname</code> is the name of a directory containing test results, and</li>
-  <li>where each <code class="language-plaintext highlighter-rouge">testfilename</code> is the name of a file containing bash command(s) for one test case.</li>
-</ul>
+<p>Read the <a href="">Logistics</a> information.</p>
 
-<p>The script verifies the validity of its arguments (exit with non-zero status on any error):</p>
+<p><strong>About communication:</strong> be sure to track Canvas for announcements and updates.</p>
 
-<ul>
-  <li>there must be at least two arguments;</li>
-  <li>if something by the name <code class="language-plaintext highlighter-rouge">dirname</code> exists, it must be a directory;</li>
-  <li>each <code class="language-plaintext highlighter-rouge">testfilename</code> must be a regular file and be readable.</li>
-</ul>
+<p><strong>About engagement:</strong> you will learn more from this course if you are
+actively engaged, where <em>engagement = preparation + participation.</em>
+Read the lecture notes and weekly reading, practice at home, and
+participate with your team mates.</p>
 
-<p>After checking its arguments, the script creates new directory whose name has the form YYYYMMDD.HHMMSS, representing the current date and time, in the current directory.
-(For example, <code class="language-plaintext highlighter-rouge">20170402.143702</code>.) If any error, exit with non-zero status.</p>
+<p><strong>About the programming:</strong> <em>There is a significant amount
+of programming in this course, requiring
+a considerable time commitment on the part of the student.</em></p>
 
-<p>The script then runs each test case with bash, redirecting stdin from <code class="language-plaintext highlighter-rouge">/dev/null</code>, producing four files for each case:</p>
+<p>You will need to be well organized to complete all the programming
+assignments and project.  Start each lab early.  It will be
+challenging, but we hope it will be fun!</p>
 
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">YYYYMMDD.HHMMSS/testfilename.test</code> - a copy of <code class="language-plaintext highlighter-rouge">testfilename</code></li>
-  <li><code class="language-plaintext highlighter-rouge">YYYYMMDD.HHMMSS/testfilename.status</code> - the exit status of <code class="language-plaintext highlighter-rouge">bash testfilename</code></li>
-  <li><code class="language-plaintext highlighter-rouge">YYYYMMDD.HHMMSS/testfilename.stdout</code> - the stdout from <code class="language-plaintext highlighter-rouge">bash testfilename</code></li>
-  <li><code class="language-plaintext highlighter-rouge">YYYYMMDD.HHMMSS/testfilename.stderr</code> - the stderr from <code class="language-plaintext highlighter-rouge">bash testfilename</code></li>
-</ul>
+<p><strong>About the project</strong>:
+You will be assigned to a team and given about three weeks to complete
+a large project requiring strong collaboration and a problem-solving
+mindset.  Each member is responsible for contributing to the overall
+system design, implementation, testing, integration, and
+documentation.  The goal of this activity is to help you develop the
+confidence, skills, and habits necessary to write large computer
+programs while part of a multi-person team.  You will become
+conversant in software engineering paradigms, such as source code
+control with <code class="language-plaintext highlighter-rouge">git</code> and other open source tools that ease the software
+development process.  In addition, you will develop vital skills in
+self-directed learning, problem solving, and communication.  The
+project concludes with a demo and a review of your design and
+implementation.</p>
 
-<p>If the directory <code class="language-plaintext highlighter-rouge">dirname</code> <em>does not exist,</em> YYYYMMDD.HHMMSS is renamed <code class="language-plaintext highlighter-rouge">dirname</code>.
-Exit 0 if success, non-zero if any error.</p>
+<p>In the first few Modules we cover Unix, the shell, and shell
+programming.  This is not meant to be a detailed presentation of the
+Unix OS and its programming tools – it would require a whole term to
+cover all that material in detail.  We need to know enough about Unix
+and its tools to be able to navigate our way around the system, write
+some basic shell scripts, and use its programming tools.</p>
 
-<p>If the directory <code class="language-plaintext highlighter-rouge">dirname</code> <em>already exists,</em> YYYYMMDD.HHMMSS is compared with <code class="language-plaintext highlighter-rouge">dirname</code> to provide a brief listing of any differences - or the simple statement “no differences”.
-Exit 0 if no differences, non-zero if differences.</p>
+<p>It is important that you use these notes as a starting point, but like
+any budding engineer you need to do some experimenting and read up on
+the details.  You need to go on the web and find information if there
+are gaps in your knowledge, and then come see the instructor or TAs
+for help if you’re still stuck.  There are many references on the
+<a href="/engs50/Resources">Resources</a> page.</p>
 
-<p>In typical usage, the first time the developer runs <code class="language-plaintext highlighter-rouge">regress.sh</code>, the script creates a directory by name <code class="language-plaintext highlighter-rouge">dirname</code>; in subsequent runs, it compares the new test results with those from the prior run.
-Over time, directories YYYYMMDD.HHMMSS accumulate, providing a historical record of test results.</p>
+<p><strong>Caveat</strong>: Please take note that the notes will not always be
+detailed.  You will need to augment these notes with your own comments
+and by using the references and reading assignments so you can dive
+deeper into the topic.</p>
 
-<h4 class="no_toc" id="exit">exit</h4>
+<h2 id="the-command-line">The command line</h2>
 
-<p>Non-zero if any error, or any differences from the earlier <code class="language-plaintext highlighter-rouge">dirname</code> directory.</p>
+<p><a href="/engs50/Notes/intro/script.txt">shell examples.</a></p>
 
-<p>Zero if <code class="language-plaintext highlighter-rouge">dirname</code> created successfully, or there were no differences from an existing <code class="language-plaintext highlighter-rouge">dirname</code>.</p>
+<p>Unix was originally developed for computers with hardwired
+‘terminals’, each of which was basically an electronic typewriter - a
+printer with a keyboard.  There were no graphical displays, and the
+concepts of ‘windows’ and ‘mouse’ had not yet been invented.  To
+interact with the computer, the user types on the keyboard, and the
+computer echos the keystrokes on the paper.  (See the <a href="#historical-note">historical
+note</a> below.  The system is controlled by typing
+‘commands’, most of which print results for the user to see.  The
+interaction occurs over the ‘command line’.</p>
 
-<h4 class="no_toc" id="example">Example</h4>
+<p>Modern Unix systems support rich graphical user interfaces, but under
+the hood they all support the command line.  In this class, I will
+demonstrate everything using the MacOS command line, accessed via the
+MacOS application called <code class="language-plaintext highlighter-rouge">Terminal</code>.  If you have a Mac, you can
+follow along.  If you use Windows, consider installing Linux on your
+laptop (either ‘dual boot’ or ‘virtual machine’).  But all of us can
+(and will) also use the Thayer M210 machines.</p>
 
-<p>Suppose we used <code class="language-plaintext highlighter-rouge">regress.sh</code> to support development of the <code class="language-plaintext highlighter-rouge">shake.sh</code> solution.
-The directory contains the script and four test files, each with a one-line command.
-(Here <code class="language-plaintext highlighter-rouge">regress.sh</code> is elsewhere in the PATH.) We start out by listing the four test cases, then run <code class="language-plaintext highlighter-rouge">regress.sh</code> twice, then add a test case, then change a test case.
-Finally, we test some erroneous cases.</p>
+<p>When I open a new Terminal window on my Mac, I can type Unix commands
+at the ‘prompt’.  This prompt is from the ‘shell’ – a program – that
+interprets your command line and runs a program representing each
+command.  Your prompt may look different - the shell allows users to
+customize prompts and you’ll see a few formats in the examples below.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[lab2]$ ls
-shake.sh*	test0		test1		test2		test3
-[lab2]$ cat test?
-cat shake.sh
-./shake.sh
-./shake.sh love
-./shake.sh computer
-[lab2]$ regress.sh base test?
-20170402.143657
-saved test results in base
-[lab2]$ regress.sh base test?
-20170402.143702
-comparing 20170402.143702 with base...
-no differences.
-[lab2]$ echo ./shake.sh two words &gt; test4
-[lab2]$ regress.sh base test?
-20170402.143721
-comparing 20170402.143721 with base...
-Only in 20170402.143721: test4.status
-Only in 20170402.143721: test4.stderr
-Only in 20170402.143721: test4.stdout
-Only in 20170402.143721: test4.test
-[lab2]$ echo ./shake.sh rose &gt; test2
-[lab2]$ cat test?
-cat shake.sh
-./shake.sh
-./shake.sh rose
-./shake.sh computer
-./shake.sh two words
-[lab2]$ regress.sh base test?
-20170402.143806
-comparing 20170402.143806 with base...
-Files base/test2.stdout and 20170402.143806/test2.stdout differ
-Files base/test2.test and 20170402.143806/test2.test differ
-Only in 20170402.143806: test4.status
-Only in 20170402.143806: test4.stderr
-Only in 20170402.143806: test4.stdout
-Only in 20170402.143806: test4.test
-[lab2]$ ls
-20170402.143702/        shake.sh*               test3
-20170402.143721/        test0                   test4
-20170402.143806/        test1
-base/                   test2
-[lab2]$
-######## now some error cases
-[lab2]$ regress.sh
-usage: regress.sh dirname testfilename...
-[lab2]$ regress.sh base
-usage: regress.sh dirname testfilename...
-[lab2]$ regress.sh test?
-first argument ('test0') is not a directory
-[lab2]$ regress.sh /base test?
-20170402.144605
-mv: rename 20170402.144605 to /base: Permission denied
-failed to save test results in /base; they remain in 20170402.144605
-[lab2]$ regress.sh base testing
-test case 'testing' is not a file (or not readable)
-[lab2]$ regress.sh base base
-test case 'base' is not a file (or not readable)
-[lab2]$ chmod -r test?
-[lab2]$ regress.sh base test?
-test case 'test0' is not a file (or not readable)
-[lab2]$
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>MacBook ~]<span class="nv">$ </span><span class="nb">ls
+</span>Applications/           Movies/                 bin/
+Creative Cloud Files/   Music/                  cs50@
+Desktop/                Pictures/               lib/
+Documents/              Pictures personal/      projects/
+Downloads/              Public/                 public_html/
+Dropbox/                Scans/                  repositories/
+Google Drive/           Shared@                 src/
+Library/                Sites/
+<span class="o">[</span>MacBook ~]<span class="nv">$ </span><span class="nb">echo </span>Hello CS50
+Hello CS50
+<span class="o">[</span>MacBook ~]<span class="nv">$ </span>
 </code></pre></div></div>
 
-<p>Note above how we use the bash globbing syntax <code class="language-plaintext highlighter-rouge">?</code> to indicate a wildcard that matches any single character; thus, <code class="language-plaintext highlighter-rouge">test?</code> expands to</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>test0 test1 test2 test3 test4
+<p>The <code class="language-plaintext highlighter-rouge">ls</code> command is the “list directory contents” command.
+The <code class="language-plaintext highlighter-rouge">echo</code> command is like a print statement - it echos its arguments back.</p>
+
+<p>Most commands quickly produce some output and then exit.  Some will
+run too long - perhaps printing too much output; you can stop (kill)
+the command, forcing it to exit, by typing control-C <code class="language-plaintext highlighter-rouge">^C</code> at the
+keyboard.  One silly program, <code class="language-plaintext highlighter-rouge">yes</code>, just prints an infinite sequence
+of <code class="language-plaintext highlighter-rouge">y</code> characters until you kill it:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>DFK:~] <span class="nb">yes
+</span>y
+y
+y
+^C
+<span class="o">[</span>DFK:~]
 </code></pre></div></div>
 
-<p>Note how <code class="language-plaintext highlighter-rouge">test0</code> simply prints the current copy of <code class="language-plaintext highlighter-rouge">shake.sh</code>, which adds nicely to the historic record.</p>
+<p>Some commands ask for your input, and continue to read input until they read an “end of file” (EOF); you can cause the program to detect an EOF by typing control-D <code class="language-plaintext highlighter-rouge">^D</code> at the beginning of an input line.
+Below I typed three lines of text, the <code class="language-plaintext highlighter-rouge">^D</code> at the start of the fourth input line, to the <code class="language-plaintext highlighter-rouge">cat</code> program:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>mail kotz@cs
+Subject: Hello from cs50
+This is an email message from me to kotz@cs.
+I can end the message by typing ctrl-D.
+bye!
+EOT
+<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
+</code></pre></div></div>
+
+<p>Here, when we typed ctrl-D the <code class="language-plaintext highlighter-rouge">mail</code> program detected an end of file (EOF) on its input (i.e., the keyboard), then printed <code class="language-plaintext highlighter-rouge">EOT</code> and exited.
+Moments later, the mail message landed in my inbox.</p>
+
+<p>Notice the difference between <code class="language-plaintext highlighter-rouge">^C</code> and <code class="language-plaintext highlighter-rouge">^D</code>; the former kills the program immediately, whereas the latter causes it to detect EOF when it next reads input from the keyboard.</p>
+
+<h2 id="logging-into-a-remote-machine-using-ssh">Logging into a remote machine using <code class="language-plaintext highlighter-rouge">ssh</code></h2>
+
+<p>Thayer operates a set of Linux machines called
+hubN.thayer.dartmouth.edu where N is a number between 1 and 16. You
+can use these to practice using ssh, but use the M210 machines for
+verifying your labs before you hand them in your labs.</p>
+
+<p>I’ll login in from my Mac using the <strong>s</strong>ecure <strong>sh</strong>ell (<code class="language-plaintext highlighter-rouge">ssh</code>) Unix command.
+The <code class="language-plaintext highlighter-rouge">ssh</code> command establishes a secure channel and uses public-key cryptography to authenticate the remote computer and the user.</p>
 
 <blockquote>
-  <p>The name of test files is not important to <code class="language-plaintext highlighter-rouge">regress.sh</code>, but a development team may want to agree on a naming convention.
-For example, suppose you chose to name them all with extension <code class="language-plaintext highlighter-rouge">.test</code>.
-If you had saved the first run of <code class="language-plaintext highlighter-rouge">regress.sh</code> in a directory named <code class="language-plaintext highlighter-rouge">base</code>, you could then run future tests as</p>
-
-  <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./regress.sh base *.test
-</code></pre></div>  </div>
+  <p>The <code class="language-plaintext highlighter-rouge">ssh</code> command replaces the archaic <code class="language-plaintext highlighter-rouge">telnet</code> (remote communications with another computer) and <code class="language-plaintext highlighter-rouge">rlogin</code> (remote login) because they lack security.
+The <code class="language-plaintext highlighter-rouge">ssh</code> command is exclusively used, these days, because your session is encrypted when it’s transmitted over the network, rather than being sent in clear text.</p>
 </blockquote>
 
-<p>Just to be clear, each testfile contains bash command(s), and your
-<code class="language-plaintext highlighter-rouge">regress.sh</code> script should execute those commands by running bash and
-providing <code class="language-plaintext highlighter-rouge">testfilename</code> as an argument.  (Recall how we did the test
-cases for <code class="language-plaintext highlighter-rouge">shake.sh</code>.)  But you should run each test only <em>once</em>
-within any given run of <code class="language-plaintext highlighter-rouge">regress.sh</code> – not only is that more
-efficient, it’s possible that the commands within some test files
-might actually not be amenable to being run multiple times (e.g., if
-they have side effects like creating or removing files).</p>
+<p>Below, I remotely log in as user <code class="language-plaintext highlighter-rouge">kotz</code> to the server named <code class="language-plaintext highlighter-rouge">flume</code> by giving its full IP name - <code class="language-plaintext highlighter-rouge">flume.cs.dartmouth.edu</code>.</p>
 
-<p>It’s easily possible to redirect the stdin, stdout, and stderr, all in
-one run of a test - and to catch the exit status of that run.</p>
-
-<h4 class="no_toc" id="assumptions">Assumptions</h4>
-
-<p>Please expect that dirname names a directory that could be anywhere -
-not necessarily a subdirectory of the current working directory.
-(This assumption should not complicate your work.)</p>
-
-<p>Please assume that the testfilenames name files that <em>are</em> in the
-current directory.  (In principle, we should support testfiles from
-anywhere, but it’s a bit trickier; this assumption simplifies your
-work.  Your script need not validate the assumption - just assume it.)</p>
-
-<p>Please <em>do not assume</em> that the script itself, regress.sh, is in the
-current working directory.  (This assumption should not complicate
-your work.)</p>
-
-<h4 class="no_toc" id="hints">Hints</h4>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>MacBook ~]<span class="nv">$ </span>ssh <span class="nt">-l</span> kotz flume.cs.dartmouth.edu
+Last login: Fri Jan 27 13:25:26 2017 from 10.31.126.2
+<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">ls
+</span>cs50/  old/  public_html/
+<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">ls </span>cs50
+labs/
+<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">ls </span>cs50/labs
+<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">logout
+</span>Connection to flume.cs.dartmouth.edu closed.
+<span class="o">[</span>MacBook ~]<span class="nv">$ </span>
+</code></pre></div></div>
 
 <blockquote>
-  <p>Check out the <code class="language-plaintext highlighter-rouge">date</code> command and its <code class="language-plaintext highlighter-rouge">+</code> option.</p>
-
-  <p>Check out the <code class="language-plaintext highlighter-rouge">diff --brief</code> command form.</p>
-
-  <p>Check out the <code class="language-plaintext highlighter-rouge">shift</code> built-in bash command and this <a href="/engs50/Examples/shifter.sh">example SHIFTING file</a>.</p>
+  <p>It is also possible to connect to a remote Linux server using X-windows, an early form of graphical user interface that has the capability to run applications on a remote server but put the windows on your local computer.
+I won’t be using X in this course, but you may wish to explore the option.</p>
 </blockquote>
 
-<h2 id="chillc">chill.c</h2>
+<p>There are hundreds of Unix commands – but you probably only need a few dozen to get by.
+Each Unix command has a short abbreviated command name (e.g., LiSt directory (ls) or Secure SHell (ssh)) and its associated syntax that typically includes various arguments, and options; typically, these options (or <em>switches</em> as they are also known) are either a single letter preceded by a hyphen (e.g., <code class="language-plaintext highlighter-rouge">-l</code>) or one or more words preceded by two hyphens (e.g., <code class="language-plaintext highlighter-rouge">--verbose</code>).
+For example, the format of an <code class="language-plaintext highlighter-rouge">ssh</code> command line looks like this:</p>
 
-<p>Write a program to calculate “wind chill” based on the current
-temperature and wind speed.  The standard formula for this calculation
-is:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	ssh <span class="o">[</span>options] <span class="o">[</span>user@] <span class="nb">hostname</span> <span class="o">[</span><span class="nb">command</span><span class="o">]</span>
+</code></pre></div></div>
 
-<pre><code class="language-Matlab">    Wind Chill = 35.74 + 0.6215T - 35.75(V^0.16) + 0.4275T(V^0.16)
+<p>In <code class="language-plaintext highlighter-rouge">ssh -l kotz flume.cs.dartmouth.edu</code>, the switch <code class="language-plaintext highlighter-rouge">-l</code> informs the <code class="language-plaintext highlighter-rouge">ssh</code> command that the username of the user logging in is kotz.
+(Alternately, I could have used the form <code class="language-plaintext highlighter-rouge">ssh kotz@flume.cs.dartmouth.edu</code>).</p>
+
+<p>This is a good time to look at the formatting of these command help texts.
+The <code class="language-plaintext highlighter-rouge">[ ]</code> are used to denote optional things, like</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[command]
+</code></pre></div></div>
+
+<p>while the things outside of the <code class="language-plaintext highlighter-rouge">[ ]</code> , like <code class="language-plaintext highlighter-rouge">hostname</code>, must be specified.</p>
+
+<h2 id="getting-information-using-the-online-manual-man">Getting Information using the online manual (man)</h2>
+
+<p>If you want the detailed syntax of a Unix command you can use the manual command followed by the command, as in <code class="language-plaintext highlighter-rouge">man ssh</code> which produced the following:</p>
+
+<pre><code class="language-man">    SSH(1)                    BSD General Commands Manual                   SSH(1)
+
+    NAME
+         ssh -- OpenSSH SSH client (remote login program)
+
+    SYNOPSIS
+         ssh [-1246AaCfgKkMNnqsTtVvXxYy] [-b bind_address] [-c cipher_spec]
+             [-D [bind_address:]port] [-e escape_char] [-F configfile] [-I pkcs11] 
+             [-i identity_file] [-L [bind_address:]port:host:hostport] [-l login_name]
+             [-m mac_spec] [-O ctl_cmd] [-o option] [-p port] 
+                [-R [bind_address:]port:host:hostport] [-S ctl_path]
+             [-W host:port] [-w local_tun[:remote_tun]] [user@]hostname [command]
+
+    DESCRIPTION
+         ssh (SSH client) is a program for logging into a remote machine and for executing
+         commands on a remote machine.  It is intended to replace rlogin and rsh, and
+         provide secure encrypted communications between two untrusted hosts over an 
+         insecure network.  X11 connections and arbitrary TCP ports can also be forwarded 
+         over the secure channel.
+
+         ssh connects and logs into the specified hostname (with optional user name).  The 
+         user must prove his/her identity to the remote machine using one of several methods 
+         depending on the protocol version used (see below).
+
+         If command is specified, it is executed on the remote host instead of a login shell.
+
+         The options are as follows:
+
+         -1      Forces ssh to try protocol version 1 only.
+
+         -2      Forces ssh to try protocol version 2 only.
+
+         -4      Forces ssh to use IPv4 addresses only.
+
+         -6      Forces ssh to use IPv6 addresses only.
+
+         -A      Enables forwarding of the authentication agent connection.  This can also
+                 be specified on a per-host
+
+    ... and a whole lot more
 </code></pre>
 
-<p>where <code class="language-plaintext highlighter-rouge">T</code> is the temperature in degrees Fahrenheit (when less than 50)
-and <code class="language-plaintext highlighter-rouge">V</code> is the wind velocity in miles per hour.  The <code class="language-plaintext highlighter-rouge">^</code> character
-denotes exponentiation.  Note that the above formula is <em>not</em> in C
-programming language syntax.</p>
+<p>This is just a snippet of the <code class="language-plaintext highlighter-rouge">man ssh</code> output (<code class="language-plaintext highlighter-rouge">man</code> is short for manual).
+The manual output includes all the nitty gritty details on options and about the command.
+For most commands you can use the common option <code class="language-plaintext highlighter-rouge">--help</code> (two hyphens) to get a brief breakdown of the command and its switches.
+This doesn’t work for all commands (including <code class="language-plaintext highlighter-rouge">ssh</code>, interestingly), but in that case the use of <code class="language-plaintext highlighter-rouge">-help</code> is interpreted as an invalid entry by ssh and it lists of the options anyway.</p>
 
-<h4 class="no_toc" id="input">input</h4>
+<p>You can use</p>
 
-<p>No input files; stdin is ignored.</p>
-
-<p>The user may run your program with no arguments, one argument, or two arguments as explained below.</p>
-
-<h4 class="no_toc" id="output-no-arguments">output: no arguments</h4>
-
-<p>If the user provides no arguments to your program, it should print out
-a table of temperatures (from -10 to +40 by 10’s) and and wind speeds
-(from 5 to 15 by 5’s).  Your output should look similar to the
-following, with nice columns and titles:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nv">$ </span>./chill
-    Temp    Wind    Chill
-    <span class="nt">----</span>    <span class="nt">----</span>    <span class="nt">-----</span>
-     <span class="nt">-10</span>       5    <span class="nt">-22</span>.3
-     <span class="nt">-10</span>      10    <span class="nt">-28</span>.3
-     <span class="nt">-10</span>      15    <span class="nt">-32</span>.2
-
-       0       5    <span class="nt">-10</span>.5
-       0      10    <span class="nt">-15</span>.9
-       0      15    <span class="nt">-19</span>.4
-
-      10       5     1.2
-      10      10    <span class="nt">-3</span>.5
-      10      15    <span class="nt">-6</span>.6
-
-      20       5     13.0
-      20      10     8.9
-      20      15     6.2
-
-      30       5     24.7
-      30      10     21.2
-      30      15     19.0
-
-      40       5     36.5
-      40      10     33.6
-      40      15     31.8
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>man -k keyword
 </code></pre></div></div>
 
-<h4 class="no_toc" id="output-one-argument">output: one argument</h4>
+<p>to search through the manual pages for matches on a keyword.
+For example:</p>
 
-<p>If the user provides one argument, it will assumed to be a temperature (expressed as a floating-point number).
-If that temperature is less than 50, it is acceptable; <code class="language-plaintext highlighter-rouge">chill</code> then prints a table of wind speeds (from 5 to 15 by 5’s) and the calculated wind chills <em>for that temperature only</em>.
-Your program’s output for one argument should look like this:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nv">$ </span>./chill 32
-     Temp   Wind   Chill
-    <span class="nt">-----</span>   <span class="nt">----</span>   <span class="nt">-----</span>
-      32      5     27.1
-      32     10     23.7
-      32     15     21.6
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[kotz@flume ~]$ man -k shell
+bash (1)             - GNU Bourne-Again SHell
+capsh (1)            - capability shell wrapper
+chroot (1)           - run command or interactive shell with special root directory
+chsh (1)             - change your login shell
+CPAN::Admin (3pm)    - A CPAN Shell for CPAN admins
+CPAN::Plugin (3pm)   - Base class for CPAN shell extensions
+csh (1)              - C shell with file name completion and command line editing
+... and much more
 </code></pre></div></div>
 
-<h4 class="no_toc" id="output-two-arguments">output: two arguments</h4>
+<h2 id="your-home-directory-and-its-files">Your home directory and its files</h2>
 
-<p>If the user provides two arguments, they will be temperature and
-velocity, respectively (expressed as floating-point numbers).  The
-temperature must be less than 50 and the velocity must be greater than
-or equal to 0.5.</p>
+<p>Each user has a ‘home directory’.  After you have logged in using
+<code class="language-plaintext highlighter-rouge">ssh</code> you are in your home directory - that is, the shell’s notion of
+your ‘current working directory’ is your home directory.</p>
 
-<p>If the arguments are acceptable, then your program should calculate
-and print the wind chill for <em>that temperature and velocity only</em>.</p>
+<p>We can look at our home directory ‘path’ using the <code class="language-plaintext highlighter-rouge">pwd</code> (print
+working directory) command.  You can always use the <code class="language-plaintext highlighter-rouge">man</code> and <code class="language-plaintext highlighter-rouge">info</code>
+commands to get more information.</p>
 
-<p>Your program’s output for two arguments should look like this:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nv">$ </span>./chill 5 20
-     Temp    Wind   Chill
-     <span class="nt">-----</span>   <span class="nt">----</span>   <span class="nt">-----</span>
-        5     20    <span class="nt">-15</span>.4
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">pwd</span>
+/net/nusers/kotz
+<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span>
 </code></pre></div></div>
 
-<p>If either argument is out of range, your program should issue a
-message and exit.  Here’s an example:</p>
+<p>The tilde (~) above is shorthand for ‘home’.  Let’s take a look at the
+contents of my home directory (using the -l switch which means long
+format):</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nv">$ </span>./chill 55
-    Temperature must be less than 50 degrees Fahrenheit
-
-    <span class="nv">$ </span>./chill <span class="nt">-150</span> 
-    Temperature must be greater than <span class="nt">-139</span> Fahrenheit 
-    <span class="o">(</span>coldest recorded earth temperature, see https://en.wikipedia.org/wiki/Lowest_temperature_recorded_on_Earth<span class="o">)</span>
-
-    <span class="nv">$ </span>./chill 10 0
-    Wind velocity must be greater than or equal to 0.5 MPH
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">ls
+</span>cs50/  old/  public_html/
+<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-l</span>
+total 12
+drwxrwxr-x 5 kotz root 4096 Feb  2 11:24 cs50/
+drwxrwxr-x 2 kotz root 4096 Jan 27 20:00 old/
+drwxr-xr-x 3 kotz root 4096 Mar 17 12:01 public_html/
+<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">cd </span>cs500
+<span class="nt">-bash</span>: <span class="nb">cd</span>: cs500: No such file or directory
+<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span>cs cs50
+<span class="nt">-bash</span>: cs: <span class="nb">command </span>not found
+<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">cd </span>cs50
+<span class="o">[</span>kotz@flume ~/cs50]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-l</span>
+total 20
+drwxr-xr-x 2 kotz root 4096 Jan 28 11:08 lab1/
+drwxr-xr-x 2 kotz root 4096 Feb  2 10:36 lab2/
+drwxr-xr-x 2 kotz root 4096 Jan 28 10:14 project/
+<span class="nt">-rw-r--r--</span> 1 kotz root   74 Feb  2 11:19 testfile
+<span class="nt">-rwxr-xr-x</span> 1 kotz root  402 Feb  2 11:23 testread.sh<span class="k">*</span>
+<span class="o">[</span>kotz@flume ~/cs50]<span class="nv">$ </span>
 </code></pre></div></div>
 
-<blockquote>
-  <p>In the preceding examples some values were printed as integers and some as decimal fractions.
-You may print everything in the format “x.y”, if you wish, but do not print more than one decimal place.
-Indeed, it may be wise to use this format when the user specifies temperature or windspeed, because the user may specify a non-integral value and it may be misleading to print it as an integer.</p>
-</blockquote>
+<p>Yes, I mistyped two commands in that example: <code class="language-plaintext highlighter-rouge">cd cs500</code> and <code class="language-plaintext highlighter-rouge">cs
+cs50</code>.  I wanted you to see what the system says when you make a
+mistake … just in case you make one yourself sometime. ;-)</p>
 
-<h4 class="no_toc" id="output-more-than-two-arguments">output: more than two arguments</h4>
+<p>The <code class="language-plaintext highlighter-rouge">cd</code> command changes the current working directory; I finally
+typed it right and the shell reported that my working directory is
+<code class="language-plaintext highlighter-rouge">~/cs50</code>.  The same command, <code class="language-plaintext highlighter-rouge">ls -l</code>, listed <em>that</em> directory the
+second time.</p>
 
-<p>print a “usage” line and exit with error status.</p>
+<p>Files can be plain files, directories, or special files (more later).
+We can see that each file has file permissions and other data
+associated with it; for example, the directory <code class="language-plaintext highlighter-rouge">public_html</code>:</p>
 
-<h4 class="no_toc" id="exit-1">exit</h4>
-
-<p>If the program terminates normally, it exits with a return code  of <code class="language-plaintext highlighter-rouge">0</code>.
-Otherwise, it terminates with a documented, non-zero return code.</p>
-
-<h4 class="no_toc" id="compiling">Compiling</h4>
-
-<p>You will likely need the math library.
-To use it, add
-<code class="language-plaintext highlighter-rouge">#include &lt;math.h&gt;</code>
-to your <code class="language-plaintext highlighter-rouge">chill.c</code> file, and add
-<code class="language-plaintext highlighter-rouge">-lm</code> to your <code class="language-plaintext highlighter-rouge">mygcc</code> command.
-(That is “dash ell emm”, which is short for “library math”.)</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mygcc chill.c <span class="nt">-lm</span> <span class="nt">-o</span> chill
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>drwxr-xr-x 3 kotz root 4096 Mar 17 12:01 public_html/
 </code></pre></div></div>
 
-<h2 id="wordsc">words.c</h2>
+<p>You can traverse directory trees assuming you have the appropriate permission.</p>
 
-<p>Write a C program reminiscent of one of the pipelines we explored in Lab 1; specifically, a program called <code class="language-plaintext highlighter-rouge">words</code> that breaks its input into a series of words, one per line.
-It may take input from stdin, or from files whose names are listed as arguments.</p>
+<p>Unix supports a number of shells (command line interpreters).  If we
+use the echo command we can look at the environment variable that
+tells us which shell is running.  For this course we will use the bash
+(Born Again SHell) shell.</p>
 
-<h4 class="no_toc" id="usage">usage</h4>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>words [filename]...
+<p>Again, the shell is the command processor for Unix systems.  One way
+to find out what shell you’re running, try this:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>kotz@flume ~/cs50]<span class="nv">$ </span><span class="nb">echo </span>my shell is <span class="nv">$SHELL</span>
+my shell is /bin/bash
+<span class="o">[</span>kotz@flume ~/cs50]<span class="nv">$ </span>
 </code></pre></div></div>
 
-<h4 class="no_toc" id="input-1">input</h4>
+<p>The last parameter to <code class="language-plaintext highlighter-rouge">echo</code> substitutes the value of the variable <code class="language-plaintext highlighter-rouge">SHELL</code>.
+More on the bash shell later.</p>
 
-<p>When no filenames are given on the command line, <code class="language-plaintext highlighter-rouge">words</code> reads from stdin.</p>
+<p>Another useful command for copying files between machines is the <code class="language-plaintext highlighter-rouge">scp</code> - secure copy (remote file copy program) command.
+Below I find, then copy, of the schedule for CS50 from the course website.</p>
 
-<p>When one or more filenames are given on the command line, <code class="language-plaintext highlighter-rouge">words</code> reads from each file in sequence.</p>
-
-<p>If the special filename <code class="language-plaintext highlighter-rouge">-</code> is given as one of the filenames, the stdin is read at that point in the sequence.</p>
-
-<h4 class="no_toc" id="output">output</h4>
-
-<p>In any case, the stdout should consist of a sequence of lines, with
-exactly one word on each output line (i.e., each output line contains
-exactly one word and no other characters).  A “word” is a sequence of
-letters.</p>
-
-<blockquote>
-  <p>Although you may be tempted to think of the input as a sequence of lines, it may be helpful to think of it as a sequence of characters.</p>
-</blockquote>
-
-<blockquote>
-  <p>Note it is possible for the output to be empty, if there are no words in any of the input files.</p>
-</blockquote>
-
-<p>Any error messages are written to stderr.</p>
-
-<h4 class="no_toc" id="exit-2">exit</h4>
-
-<p>If the program terminates normally, it exits with a return code  of <code class="language-plaintext highlighter-rouge">0</code>.
-Otherwise, it terminates with a documented, non-zero return code.</p>
-
-<h4 class="no_toc" id="hints-1">hints</h4>
-
-<blockquote>
-  <p>Check out <code class="language-plaintext highlighter-rouge">man ctype</code> on a mac, or <code class="language-plaintext highlighter-rouge">man ctype.h</code> on a Linux system.</p>
-
-  <p>Consider a function that processes a file, given a <code class="language-plaintext highlighter-rouge">FILE*</code> as parameter.</p>
-
-  <p>Would it be easier to process the file(s) one character at a time?</p>
-</blockquote>
-
-<h2 id="histoc">histo.c</h2>
-
-<p>Write a program that reads a series of positive integers from stdin, and prints out a histogram.
-There should be 16 bins in your histogram.
-The catch?
-You don’t know in advance the <em>range</em> of input values; assume the integers range from 0 to some unknown positive maximum.
-Thus, you will need to dynamically scale the bin size for your histogram.
-An example is below.</p>
-
-<h4 class="no_toc" id="usage-1">Usage:</h4>
-
-<p>There are no command-line arguments.</p>
-
-<h4 class="no_toc" id="requirements">Requirements:</h4>
-
-<p>You must begin with bin size 1, and double it as needed so all
-positive integers observed on input fit within the histogram.</p>
-
-<p>You must have 16 bins.
-The number ‘16’ should appear only <em>once</em> in your code.</p>
-
-<h4 class="no_toc" id="input-2">input:</h4>
-
-<p>Input is read from stdin, whether from the keyboard, redirected from a
-file, or piped in from another command.  You can use a simple
-<code class="language-plaintext highlighter-rouge">scanf()</code> for this.  Assume the input contains only integers,
-separated by white space (space, tab, newline).  Assume the smallest
-integer is zero; ignore any negative integers.  If there is
-non-integer non-space content in the file, it is ok for the program to
-treat that as the end of input; the program should not crash, or enter
-an infinite loop – it should just silently behave as if there are no
-more integers.  (These assumptions make it easy to use <code class="language-plaintext highlighter-rouge">scanf</code> for
-your input.)</p>
-
-<p>As always, any other assumptions you make should be documented in your <code class="language-plaintext highlighter-rouge">README</code> file and your testing procedure should be documented in your <code class="language-plaintext highlighter-rouge">TESTING</code> file.</p>
-
-<h4 class="no_toc" id="output-1">output:</h4>
-
-<p>See examples below.</p>
-
-<h4 class="no_toc" id="exit-3">exit</h4>
-
-<p>This program has no arguments and does not check its input for errors, so it should always exit with zero status.</p>
-
-<h4 class="no_toc" id="examples">Examples:</h4>
-
-<p>Here we compile and run the program, and type a set of numbers (spread
-over three lines, but it doesn’t matter as long as we put space or
-newline between numbers), ending with <code class="language-plaintext highlighter-rouge">ctrl-D</code> on the beginning of a
-line.  (That sends EOF to the program.)  It then printed a histogram,
-nicely labeling each line with the range of values assigned to that
-bin, and printing a row of <code class="language-plaintext highlighter-rouge">*</code> to represent the count of values that
-fell into that bin.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mygcc histo.c -o histo
-$ ./histo
-16 bins of size 1 for range [0,16)
-3 -4 5 1 7 0
-8 0 15 12 3 5
-3 3 3 3 3
-^D
-[ 0: 0] **
-[ 1: 1] *
-[ 2: 2]
-[ 3: 3] *******
-[ 4: 4]
-[ 5: 5] **
-[ 6: 6]
-[ 7: 7] *
-[ 8: 8] *
-[ 9: 9]
-[10:10]
-[11:11]
-[12:12] *
-[13:13]
-[14:14]
-[15:15] *
-$
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>DFK:~] ssh kotz@flume
+Last login: Mon Mar 28 10:17:04 2016 from 10.31.123.28
+<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">cd</span> ~cs50
+<span class="o">[</span>kotz@flume /net/class/cs50]<span class="nv">$ </span><span class="nb">ls
+</span>Archive/		 master.bashrc	proc-log      src/  web-tse-from-2016W/
+download_16S_repos.awk<span class="k">*</span>  private/	public_html/  web@
+<span class="o">[</span>kotz@flume /net/class/cs50]<span class="nv">$ </span><span class="nb">cd </span>public_html/
+<span class="o">[</span>kotz@flume /net/class/cs50/public_html]<span class="nv">$ </span><span class="nb">ls
+</span>css/	    Labs/      Logistics/  Reading/    Schedule.pdf
+index.html  Lectures/  Project/    Resources/  Schedule.xlsx
+<span class="o">[</span>kotz@flume /net/class/cs50/public_html]<span class="nv">$ </span><span class="nb">logout
+</span>Connection to flume closed.
+<span class="o">[</span>DFK:~] scp flume.cs.dartmouth.edu:/net/class/cs50/public_html/Schedule.pdf <span class="nb">.</span>
+Schedule.pdf                                           100%   44KB  44.1KB/s   00:00    
+<span class="o">[</span>DFK:~] open Schedule.pdf
+<span class="o">[</span>DFK:~] 
 </code></pre></div></div>
 
-<p>The notation [a,b) includes all values <em>x</em> such that <em>a &lt;= x &lt; b</em>,
-that is, the range includes <em>a</em> but does not include <em>b</em>.  For
-example, [0,4) = {0, 1, 2, 3}.</p>
+<p>Recall that <code class="language-plaintext highlighter-rouge">~</code> is my home directory, so <code class="language-plaintext highlighter-rouge">~cs50</code> is the home directory
+for user <code class="language-plaintext highlighter-rouge">cs50</code>.  I changed my working directory to the cs50 home,
+then into its <code class="language-plaintext highlighter-rouge">public_html</code>, and listed the files there.  Now I know
+the ‘path name’ for the desired file - the directory name followed by
+slash followed by the filename.  The <code class="language-plaintext highlighter-rouge">scp</code> command allows me to
+specify the host and pathname for the source and destination of the
+copy; here the destination is <code class="language-plaintext highlighter-rouge">.</code>, a shorthand for ‘current working
+directory.  Finally, I used the MacOS command <code class="language-plaintext highlighter-rouge">open</code> to open the file,
+which launches <code class="language-plaintext highlighter-rouge">Preview</code> to show me the pdf.</p>
 
-<p>Now watch what happens if we input a number outside the original range
-of [0,16).</p>
+<h3 id="logging-out">Logging out</h3>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./histo
-16 bins of size 1 for range [0,16)
-3 -4 5 1 7 0
-8 0 15 12 3 5
-18
-16 bins of size 2 for range [0,32)
-19 20 30 7 12
-50
-16 bins of size 4 for range [0,64)
-34
-32
-19
-44
-^D
-[ 0: 3] *****
-[ 4: 7] ****
-[ 8:11] *
-[12:15] ***
-[16:19] ***
-[20:23] *
-[24:27]
-[28:31] *
-[32:35] **
-[36:39]
-[40:43]
-[44:47] *
-[48:51] *
-[52:55]
-[56:59]
-[60:63]
-$
+<p>When we are ready to logout from our session on
+flume.cs.dartmouth.edu, we use <code class="language-plaintext highlighter-rouge">logout</code> or <code class="language-plaintext highlighter-rouge">exit</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">logout
+</span>Connection to flume.cs.dartmouth.edu closed.
 </code></pre></div></div>
 
-<p>Each time it sees a number outside the current range, it doubles the
-range and doubles the size of each bin.  (Notice also the [low:high]
-labels in the histogram; this notation includes both <em>low</em> and <em>high</em>
-and everything in between.) It might have to repeat the doubling if we
-put in a number well past the current bin size:</p>
+<h2 id="one-more-thing-unix-machines">One more thing: Unix machines</h2>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./histo
-16 bins of size 1 for range [0,16)
-150
-16 bins of size 2 for range [0,32)
-16 bins of size 4 for range [0,64)
-16 bins of size 8 for range [0,128)
-16 bins of size 16 for range [0,256)
-^D
-[  0: 15]
-[ 16: 31]
-[ 32: 47]
-[ 48: 63]
-[ 64: 79]
-[ 80: 95]
-[ 96:111]
-[112:127]
-[128:143]
-[144:159] *
-[160:175]
-[176:191]
-[192:207]
-[208:223]
-[224:239]
-[240:255]
-$
-</code></pre></div></div>
+<p>Note the following, depending on your personal computer’s operating system.</p>
 
-<p>Here’s an example using bash syntax to generate a list of numbers, and
-piping the output to <code class="language-plaintext highlighter-rouge">histo</code>:</p>
+<p><strong>Linux</strong>: The systems in M210 are running Ubuntu GNU/Linux.
+Your Linux will likely be sufficiently compatible that you won’t have
+any trouble developing on your machine and delivering your assignments
+on a machine in M210.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ echo {1..16} 150 | ./histo
-16 bins of size 1 for range [0,16)
-16 bins of size 2 for range [0,32)
-16 bins of size 4 for range [0,64)
-16 bins of size 8 for range [0,128)
-16 bins of size 16 for range [0,256)
-[  0: 15] ***************
-[ 16: 31] *
-[ 32: 47]
-[ 48: 63]
-[ 64: 79]
-[ 80: 95]
-[ 96:111]
-[112:127]
-[128:143]
-[144:159] *
-[160:175]
-[176:191]
-[192:207]
-[208:223]
-[224:239]
-[240:255]
-$
-</code></pre></div></div>
+<p><strong>Mac</strong>: Mac OSX Unix conforms to the POSIX standard for the C API,
+shell utilities, and threads and can compile and run your existing
+code.  The GNU tools we will be using, such as <code class="language-plaintext highlighter-rouge">gcc</code>, <code class="language-plaintext highlighter-rouge">make</code>, etc.,
+are either included or freely available.  (You may need to install
+command-line tools via Xcode; if so, you will be prompted to do so
+when you first type <code class="language-plaintext highlighter-rouge">gcc</code> or <code class="language-plaintext highlighter-rouge">make</code> or related commands.) You can use
+the <code class="language-plaintext highlighter-rouge">Terminal</code> application.  You can also use the <code class="language-plaintext highlighter-rouge">ssh</code> command to
+remotely log on to computers, as discussed above.  <strong>We recommend you
+install <a href="/engs50/Resources/Homebrew.html">Homebrew</a>.</strong></p>
 
-<p>Although we scale the bin size (x axis), I’m not asking you to scale
-the bin count (y axis) for printing, which can lead to some really
-wide output:</p>
+<p><strong>Windows</strong>: There are Unix-command shells for Windows and even an
+X-Window system for Windows systems.  However, since this is a Unix
+course you would be far better off doing your assignments on the
+Thayer machines in M210.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ echo {1..100} 1500 | ./histo
-16 bins of size 1 for range [0,16)
-16 bins of size 2 for range [0,32)
-16 bins of size 4 for range [0,64)
-16 bins of size 8 for range [0,128)
-16 bins of size 16 for range [0,256)
-16 bins of size 32 for range [0,512)
-16 bins of size 64 for range [0,1024)
-16 bins of size 128 for range [0,2048)
-[   0: 127] ****************************************************************************************************
-[ 128: 255]
-[ 256: 383]
-[ 384: 511]
-[ 512: 639]
-[ 640: 767]
-[ 768: 895]
-[ 896:1023]
-[1024:1151]
-[1152:1279]
-[1280:1407]
-[1408:1535] *
-[1536:1663]
-[1664:1791]
-[1792:1919]
-[1920:2047]
-$
-</code></pre></div></div>
+<h2 id="historical-note">Historical note</h2>
 
-<p>We took some pains to format the [low:high] range indicators for each
-row, using a fixed-width field just wide enough to hold the biggest
-number.  It’s a nice touch (read <code class="language-plaintext highlighter-rouge">man printf</code> for some clues) but it’s
-ok if you make a simpler assumption (e.g., always use 6-digit field
-width).</p>
+<p>The name “Terminal” is still commonly used in Unix parlance, right
+down to the MacOS app by that name.  This term refers to the fact that
+early Unix computers, like other computers of its time, had a small
+number of interactive ‘terminals’ connected to it – each directly
+connected by a dedicated wire to a card within the computer.  Each
+terminal was little more than a keyboard and a screen - or in the
+early days, a keyboard and a printer that would print each character
+as it was typed, and print the characters sent by the computer.</p>
 
-<h4 id="representing-a-histogram">Representing a histogram</h4>
+<p>The first such terminals were “teletypes”, adapted from the device
+used by newsrooms around the country, which printed characters
+transmitted over the phone line from a distant device.  This
+<a href="https://www.youtube.com/watch?v=E4IztV7M3jI">video</a> shows a Teletype
+model ASR33.  From the sound of this machine, can you tell why
+television news shows’ opening music usually has a stocatto
+tap-tap-tap-tap-tap background theme?</p>
 
-<p>You will need an array of 16 bins to represent the number of integers
-observed in each bin.  You’ll need to keep track of the bin size and
-the range of the histogram.  If you observe a value outside the range,
-you should double the bin size and range - but first you need to
-compress the current 16 bins into the first 8 bins.  You’ll likely
-need one loop to compute the new values for the lower half of the bins
-(each bin receiving the sum of two bins’ counts), and then another to
-assign the new value (0) to the upper half of the bins.</p>
-
-<p>(Again: the number ‘16’ may only occur <em>once</em> in your code; scattering
-hard-coded numbers around your code is bad style.)</p>
-
-<p>Notice that the number of bins, bin size, and histogram range are all
-powers of 2.</p>
-
-<h2 id="what-to-hand-in-and-how">What to hand in, and how</h2>
-
-<p>Make sure to compile and test your solutions on one of the machines in
-M210.  If you choose to develop your solutions on some other system,
-you are responsible to ensure that the work you submit runs correctly
-on a machine in M210 — which is where where we will test it!</p>
-
-<ul>
-  <li>
-    <p>In addition to your code, each of the four subdirectories of
-<code class="language-plaintext highlighter-rouge">lab2</code> must include two simple text files:</p>
-
-    <p>a.  <code class="language-plaintext highlighter-rouge">README</code>,
-     which describes how your program should be compiled and executed, along with an explanation of any assumptions you made about the assignment.
-See the <a href="/engs50/Examples/subtemplate-README.txt">example README file</a>.</p>
-
-    <p>b.  <code class="language-plaintext highlighter-rouge">TESTING</code>,
-     which describes how you tested the program, including test inputs and test scripts; these test inputs and test scripts should be included as files in the same directory.</p>
-  </li>
-</ul>
-
-<blockquote>
-  <p>See the <a href="/engs50/Examples/subtemplate-TESTING.txt">example TESTING file</a>; in that case we would not need to include testing inputs because they were CS50-provided files, or generated within the testing file itself.
-(We created this file in MacOS Terminal by choosing “Export Text As…” from the Shell menu when we had finished all the testing commands, we edited it with emacs to add the comments.</p>
-</blockquote>
-
-<p>When finished, you should have the following files:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lab2
-├── chill
-│   ├── README
-│   ├── TESTING
-│   └── chill.c
-├── histo
-│   ├── README
-│   ├── TESTING
-│   ├── histo.c
-├── regress
-│   ├── README
-│   ├── TESTING
-│   └── regress.sh
-└── words
-    ├── README
-    ├── TESTING
-    └── words.c
-</code></pre></div></div>
-
-<blockquote>
-  <p>This listing was produced by the <code class="language-plaintext highlighter-rouge">tree</code> command.  Neat, huh?</p>
-</blockquote>
-
+<!--David-->
+<!--
+> One of the first interactive computer systems I ever used was a PDP8/e running ETOS and BASIC - far simpler than Unix - with a couple of teletype terminals.
+I found a [video of a refurbished PDP8/e driving a teletype](https://www.youtube.com/watch?v=2B-U-5ylvWo).
+Fun.
+-->
 
   </div>
 

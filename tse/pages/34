@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/cohesion/
+https://thayer.github.io/engs50/Labs/Lab4/
 2
-11317
+21618
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/cohesion/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Cohesion and coupling</title>
+  <title>Lab 4 - Crawler</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/cohesion/">
+  <link rel="canonical" href="/engs50/Labs/Lab4/">
 </head>
 
 
@@ -44,200 +44,268 @@ https://thayer.github.io/engs50/Notes/cohesion/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Cohesion and coupling</h1>
+    <h1 class="post-title">Lab 4 - Crawler</h1>
   </header>
 
   <div class="post-content">
-    <h3 id="goals">Goals</h3>
+    <p><strong>Due Friday, April 27, 2018, at 10pm</strong></p>
 
-<p>to discuss</p>
+<p>In this lab you’ll begin the Tiny Search Engine (TSE) by coding the Crawler according to the <a href="REQUIREMENTS.html">Crawler Requirements Spec</a> and the  <a href="DESIGN.html">Crawler Design Spec</a>.</p>
 
-<ul>
-  <li><em>routines</em> - types and names</li>
-  <li><em>cohesion</em> - and why we want strong cohesion</li>
-  <li><em>coupling</em> - and why we want weak coupling</li>
+<ul id="markdown-toc">
+  <li><a href="#preparation" id="markdown-toc-preparation">Preparation</a></li>
+  <li><a href="#assignment" id="markdown-toc-assignment">Assignment</a></li>
+  <li><a href="#whatsubmit" id="markdown-toc-whatsubmit">Submission - what</a></li>
+  <li><a href="#howsubmit" id="markdown-toc-howsubmit">Submission - how</a>    <ul>
+      <li><a href="#extensions" id="markdown-toc-extensions">Extensions</a></li>
+    </ul>
+  </li>
+  <li><a href="#hints-and-tips" id="markdown-toc-hints-and-tips">Hints and tips</a>    <ul>
+      <li><a href="#libcs50" id="markdown-toc-libcs50">libcs50</a></li>
+      <li><a href="#markdown" id="markdown-toc-markdown">Markdown</a></li>
+      <li><a href="#testing-crawler" id="markdown-toc-testing-crawler">Testing Crawler</a></li>
+      <li><a href="#use-valgrind-and-gdb" id="markdown-toc-use-valgrind-and-gdb">Use valgrind and gdb</a></li>
+      <li><a href="#memory-allocation" id="markdown-toc-memory-allocation">Memory allocation</a></li>
+      <li><a href="#hashtable-of-url" id="markdown-toc-hashtable-of-url">Hashtable of URL</a></li>
+      <li><a href="#pseudocode" id="markdown-toc-pseudocode">Pseudocode</a></li>
+      <li><a href="#pagedirectory" id="markdown-toc-pagedirectory">pageDirectory</a></li>
+    </ul>
+  </li>
 </ul>
 
-<p>The concepts in today’s lecture come from chapter 5 of <em>Code Complete</em> by Steve McConnell. [Microsoft Press, 1993.]</p>
+<h2 id="preparation">Preparation</h2>
 
-<h2 id="routines">Routines</h2>
+<ol>
+  <li>
+    <p><em>Fork</em> a copy of our <a href="https://gitlab.cs.dartmouth.edu/CS50/tse">TSE starter kit</a> to make a new project in your Gitlab account; see instructions in the README there.
+Ensure the repo is <em>Private</em>.
+Give “Master” access to Professor Palmer (ccpalmer) and to head grader Haider Syed ( he may have two ids in Gitlab, use the one with “@h”).</p>
+  </li>
+  <li>
+    <p><em>Clone</em> the new project to a Git repository on your CS Unix account; again, see instructions in your fork’s README.</p>
+  </li>
+  <li>
+    <p>Edit the <code class="language-plaintext highlighter-rouge">README.md</code> file to remove the git instructions; a suggested template is at the bottom of the file. Include your name!</p>
+  </li>
+  <li>
+    <p>In the terminal, <strong>copy</strong> your <a href="Lab3/">Lab 3</a> sources (just <code class="language-plaintext highlighter-rouge">counters.[ch] set.[ch] hashtable.[ch]</code>) to the <code class="language-plaintext highlighter-rouge">libcs50</code> subdirectory in your brand-new repository; try <code class="language-plaintext highlighter-rouge">make</code> in that directory to ensure everything works.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">git add libcs50/*.[ch]; git commit -a; git push</code>.</p>
+  </li>
+  <li>
+    <p>Visit your repo on <a href="gitlab.cs.dartmouth.edu">Gitlab</a> and you should see the updated README and your new source files.
+Double-check the <a href="https://gitlab.cs.dartmouth.edu/help/public_access/public_access">visibility</a> of your repo to ensure it is <strong><em>Private</em></strong>.</p>
+  </li>
+</ol>
 
-<p>We often use the word <em>routine</em> as a general concept, to refer to  a <em>function</em> or a <em>procedure</em>.
-We typically use the word <em>procedure</em> to refer to a function with no return value.
-In other languages, routines might be called <em>subroutines</em> or <em>methods</em>.</p>
+<h2 id="assignment">Assignment</h2>
 
-<p>There are many reasons to break a program into <em>routines</em>:</p>
+<p>Write the <em>crawler</em>, first sub-system of the Tiny Search Engine.
+Please follow the <a href="/engs50/Resources/CodingStyle.html">CS50 coding style guidelines</a>, the <a href="REQUIREMENTS.html">Crawler Requirements Spec</a>, and the  <a href="DESIGN.html">Crawler Design Spec</a>.</p>
+
+<ol>
+  <li>
+    <p>Create a subdirectory <code class="language-plaintext highlighter-rouge">crawler</code>.</p>
+  </li>
+  <li>
+    <p>In that directory, write a program <code class="language-plaintext highlighter-rouge">crawler</code> that implements the Requirements Spec, leveraging your data structures.
+Please take special care that your crawler does not explore URLs that are not ‘internal’ according to <code class="language-plaintext highlighter-rouge">IsInternalURL()</code>.</p>
+  </li>
+  <li>
+    <p>In that directory, write a <code class="language-plaintext highlighter-rouge">Makefile</code> so you can build everything from the top-level directory by simply typing <code class="language-plaintext highlighter-rouge">make</code>, and clean up everything by typing <code class="language-plaintext highlighter-rouge">make clean</code>.
+To build <code class="language-plaintext highlighter-rouge">crawler</code> you will need to add <code class="language-plaintext highlighter-rouge">-lcurl</code> to include the <code class="language-plaintext highlighter-rouge">libcurl</code> library.</p>
+  </li>
+  <li>
+    <p>In that directory, write a <code class="language-plaintext highlighter-rouge">README.md</code> file to provide any special information about how to compile or use your crawler.
+This file is likely to be short.
+<em>You must use Markdown; see below.</em></p>
+  </li>
+  <li>
+    <p>In that directory, write a <code class="language-plaintext highlighter-rouge">IMPLEMENTATION.md</code> file to describe the implementation of your crawler.
+<em>You must use Markdown; see below.</em></p>
+  </li>
+  <li>
+    <p>Add a <code class="language-plaintext highlighter-rouge">TESTING.md</code> file in the <code class="language-plaintext highlighter-rouge">crawler</code> directory, telling the grader how you tested your crawler.
+(You may find it helpful to write a <code class="language-plaintext highlighter-rouge">bash</code> script to execute your crawler, and/or a <code class="language-plaintext highlighter-rouge">make test</code> target.) Read <a href="#testing-crawler">about testing</a> below.</p>
+  </li>
+  <li>
+    <p>As you create files and directories, add them to your git repository.
+<strong>Important:</strong> do not add any compiled files to git.
+In short: your repo should not contain any data files, core dumps, or files built with <code class="language-plaintext highlighter-rouge">make</code> and removed by <code class="language-plaintext highlighter-rouge">make clean</code>.
+Commit and push at least once a day.</p>
+  </li>
+</ol>
+
+<h2 id="whatsubmit">Submission - what</h2>
+
+<p>In this lab you shall add/edit these files in your repo:</p>
 
 <ul>
-  <li>Reduce complexity</li>
-  <li>Avoid duplicate code</li>
-  <li>Limit effects of changes (narrow scope of change to a routine)</li>
-  <li>Hide sequences (a form of information hiding)</li>
-  <li>Improve performance (optimize in one place)</li>
-  <li>Centralize control (e.g., controlling devices, files, data structures… more information hiding)</li>
-  <li>Hide data structures (ADTs)</li>
-  <li>Hide global data (access routines centralize control of globals)</li>
-  <li>Hide pointer operations (makes it easier to read)</li>
-  <li>Promote code reuse (easier to reuse code in a routine)</li>
-  <li>Plan for a family of programs (isolate parts that may change in a few routines)</li>
-  <li>Improve readability (named routine is more readable; avoid deep nesting, etc)</li>
-  <li>Improve portability (isolate nonportable features)</li>
-  <li>Isolate complex operations (algorithm, protocols, etc)</li>
-  <li>Isolate use of nonstandard language functions (isolate nonportable features)</li>
-  <li>Simplify complicated boolean tests (inlines are great here)</li>
+  <li><code class="language-plaintext highlighter-rouge">README.md</code> (edited)</li>
+  <li><code class="language-plaintext highlighter-rouge">Makefile</code> (possibly edited)</li>
+  <li><code class="language-plaintext highlighter-rouge">crawler/</code>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">Makefile</code></li>
+      <li><code class="language-plaintext highlighter-rouge">crawler.c</code></li>
+      <li><code class="language-plaintext highlighter-rouge">README.md</code></li>
+      <li><code class="language-plaintext highlighter-rouge">IMPLEMENTATION.md</code></li>
+      <li><code class="language-plaintext highlighter-rouge">TESTING.md</code></li>
+      <li><em>optional other files related to testing</em></li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">common/</code> <em>if you follow our tip/suggestion below</em>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">pagedir.c</code></li>
+      <li><code class="language-plaintext highlighter-rouge">pagedir.h</code></li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">libcs50/</code>  <em>if you wish to use your Lab3 solution</em>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">set.c</code></li>
+      <li><code class="language-plaintext highlighter-rouge">counters.c</code></li>
+      <li><code class="language-plaintext highlighter-rouge">hashtable.c</code></li>
+    </ul>
+  </li>
 </ul>
 
-<p>Routines should be well named:</p>
+<p><em>You shall NOT modify any of the code we provide in <code class="language-plaintext highlighter-rouge">libcs50</code></em>.</p>
+
+<p><em>You shall NOT include any data files produced by the crawler, any binary/object files produced by the compiler, backup files, core dumps etc.</em></p>
+
+<h2 id="howsubmit">Submission - how</h2>
+
+<p>When you are ready for final submission,</p>
 
 <ul>
-  <li>a <em>procedure</em> name should be a strong verb followed by object (like <em>printCalendar()</em>).</li>
-  <li>a <em>function</em> name should describe its return value (like <em>numberOfNonzeros()</em>).</li>
-  <li>a <em>boolean function</em> name should sound like a question (like <em>IsInternalURL()</em>).</li>
+  <li><strong>Add</strong> all required files using an appropriate <code class="language-plaintext highlighter-rouge">git add</code> commandline.</li>
+  <li><strong>Commit</strong> all changes using an appropriate <code class="language-plaintext highlighter-rouge">git commit</code> commandline.</li>
+  <li><strong>Tag</strong>: <code class="language-plaintext highlighter-rouge">git tag lab4submit</code></li>
+  <li><strong>Push</strong>: <code class="language-plaintext highlighter-rouge">git push --tags</code> to ensure the tags are pushed to the remote.
+See <a href="/git/tags.html">more about tags</a>.</li>
 </ul>
 
-<p>A good routine name</p>
+<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="language-plaintext highlighter-rouge">lab4submit</code> and the files associated with that tagged commit include everything we’ll need to grade your lab.</p>
+
+<p>We grade the version tagged <code class="language-plaintext highlighter-rouge">lab4submit</code> so it is safe for you to continue work (e.g., so you can start work on Lab 5), even if you commit or push.</p>
+
+<p>We will clone your repo at 0h, 24h, 48h, and 72h after the original deadline.
+We will start grading when we first see one with tag <code class="language-plaintext highlighter-rouge">lab4submit</code>, and judge it late if that tag was added after the deadline.
+To avoid confusion, <em>please blitz <code class="language-plaintext highlighter-rouge">cs50 AT cs.dartmouth.edu</code> if you want a late submission to be graded instead of your on-time submission.</em></p>
+
+<p><strong><em>Your entire codebase must compile with <code class="language-plaintext highlighter-rouge">make</code> from the top-level directory and produce no compiler warnings.</em></strong>  If we find that your code will not compile, or has <strong>segmentation faults</strong>, we will send it back to you as soon as we can for repair; recall the <a href="/#crashes">grading policy</a>.</p>
+
+<p>We will run your crawler on our own set of test data.</p>
+
+<p>We will run <code class="language-plaintext highlighter-rouge">valgrind</code> on your program to look for memory leaks; you will lose points for memory leaks or memory errors.
+<strong>Important</strong>: the <code class="language-plaintext highlighter-rouge">libcurl</code> library is known to leave some “still reachable” memory; these are not your fault and will not count against you.</p>
+
+<h3 id="extensions">Extensions</h3>
+
+<p>If you want to claim your 24h extension, create a file <code class="language-plaintext highlighter-rouge">EXTENSION</code> at the top-level directory of your repository.
+Don’t forget to <code class="language-plaintext highlighter-rouge">git push</code> <em>(before the deadline!)</em> so we will see the file.
+For example,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">touch </span>EXTENSION
+<span class="nv">$ </span>git add EXTENSION
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"extension request"</span>
+<span class="nv">$ </span>git tag lab4submit     <span class="c"># add tag, as above</span>
+<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab, including tags</span>
+</code></pre></div></div>
+
+<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="language-plaintext highlighter-rouge">lab4submit</code> and that its files include <code class="language-plaintext highlighter-rouge">EXTENSION</code>.</p>
+
+<p>When you are ready to submit your code, remove <code class="language-plaintext highlighter-rouge">EXTENSION</code> as follows, <em>update your submission tag</em>, and push to Gitlab:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git <span class="nb">rm </span>EXTENSION
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"ready for grading"</span>
+<span class="nv">$ </span>git push <span class="nt">--delete</span> origin lab4submit <span class="c"># remove the tag from remote</span>
+<span class="nv">$ </span>git tag <span class="nt">-f</span> lab4submit  <span class="c"># move the local tag forward to this commit</span>
+<span class="nv">$ </span>git push <span class="nt">--tags</span>        <span class="c"># push to gitlab remote, including tags</span>
+</code></pre></div></div>
+
+<p>Use your web browser to view your remote on Gitlab and make sure there is a tag <code class="language-plaintext highlighter-rouge">lab4submit</code>, that its files do <em>not</em> include <code class="language-plaintext highlighter-rouge">EXTENSION</code>, and its files include everything we’ll need to grade your lab.</p>
+
+<h1 id="hints-and-tips">Hints and tips</h1>
+
+<h3 id="libcs50">libcs50</h3>
+
+<p>We provide several modules in the <code class="language-plaintext highlighter-rouge">libcs50</code> directory, which compiles to a library <code class="language-plaintext highlighter-rouge">libcs50.a</code> you can link with your crawler.
+<em>You should not change any of our code.</em>
+You may drop in your <code class="language-plaintext highlighter-rouge">set.[ch]</code>, <code class="language-plaintext highlighter-rouge">counters.[ch]</code>, <code class="language-plaintext highlighter-rouge">hashtable.[ch]</code> files from Lab 3.
+If you’d prefer to use our version of <em>set</em>, <em>counters</em>, and <em>hashtable</em>, that’s totally fine; the starter kit includes a pre-compiled library you can use instead; see <code class="language-plaintext highlighter-rouge">libcs50/README.md</code>.</p>
+
+<p>Most of the modules in this directory are documented with a corresponding Markdown file.</p>
+
+<h3 id="markdown">Markdown</h3>
+
+<p>In this and subsequent labs, you must provide documentation files in Markdown format, that is, you should supply <code class="language-plaintext highlighter-rouge">README.md</code>, <code class="language-plaintext highlighter-rouge">IMPLEMENTATION.md</code>, and <code class="language-plaintext highlighter-rouge">TESTING.md</code>.
+The Markdown syntax provides very simple (and readable) markup for headings, lists, italics, bold, and code snippets.
+(This course website is written in Markdown.) See <a href="/engs50/Resources/#markdown">Markdown resources</a>.</p>
+
+<h3 id="testing-crawler">Testing Crawler</h3>
+
+<p>It is your responsibility to test your crawler and write about your approach in <code class="language-plaintext highlighter-rouge">TESTING.md</code>.
+Consider following some of the testing plan discussed in <a href="/crawler/">Lecture</a>.</p>
+
+<p>Some safe seeds you might test include</p>
 
 <ul>
-  <li>avoids meaningless verbs (like <em>do</em>, <em>perform</em>)</li>
-  <li>describes everything the routine does</li>
-  <li>is as long as necessary</li>
-  <li>follows naming conventions!</li>
+  <li>http://old-www.cs.dartmouth.edu/~cs50/data/tse/letters</li>
+  <li>http://old-www.cs.dartmouth.edu/~cs50/index.html</li>
+  <li>http://old-www.cs.dartmouth.edu/~cs50/data/tse/wikipedia</li>
 </ul>
-
-<p>A routine’s body should not be <strong>too long</strong>.
-If you find your routine approaching 200 lines, you should break it up - or have a darn good reason you should not break it up.</p>
-
-<h3 id="cohesion">Cohesion</h3>
 
 <blockquote>
-  <p>“Cohesion refers to how closely [or strongly] the operations in a routine are related.” – McConnell</p>
+  <p>The first two are good at depths 0 and higher, but the Wikipedia case is likely too slow to run past maxDepth=2.</p>
 </blockquote>
 
-<p>One study found that 50% of high-cohesion routines were fault-free, while 18% of low-cohesion routines were fault-free.</p>
+<p>You may point your crawler at any other CS user’s home page - but your seed URL must begin with <code class="language-plaintext highlighter-rouge">http://old-www.cs.dartmouth.edu/</code>.</p>
 
-<p>Good routines have <strong><em>strong cohesion</em></strong>.</p>
+<p>For example, you might construct your own test files in your CS Unix account in a directory like <code class="language-plaintext highlighter-rouge">~/public_html/tse</code> and crawl the URL <code class="language-plaintext highlighter-rouge">http://old-www.cs.dartmouth.edu/~YOURUSERID/tse</code></p>
 
-<p><strong>Acceptable cohesion</strong>:</p>
+<h3 id="use-valgrind-and-gdb">Use valgrind and gdb</h3>
 
-<ul>
-  <li><strong>Functional cohesion</strong> (strongest and best kind): performs one and only one operation.</li>
-  <li><strong>Sequential cohesion</strong>: contains operations that must be performed in a sequential order.</li>
-  <li><strong>Communicational cohesion</strong>: contains operations that make use of the same data, but are not otherwise related.</li>
-  <li><strong>Temporal cohesion</strong>: contains operations that do several things, because all are done at the same time.</li>
-</ul>
+<p>In <a href="/debug/">Lecture</a> we learned how to use <code class="language-plaintext highlighter-rouge">valgrind</code> and <code class="language-plaintext highlighter-rouge">gdb</code>; make use of them.</p>
 
-<p><strong>Unacceptable cohesion</strong>:</p>
+<h3 id="memory-allocation">Memory allocation</h3>
 
-<ul>
-  <li><strong>Procedural cohesion</strong>: contains operations that must be performed in a sequential order, but don’t share the same data.</li>
-  <li><strong>Logical cohesion</strong>: several things in a routine, only one executed, depending on a flag parameter.
-(Exception - it can be  ok if using a <code class="language-plaintext highlighter-rouge">switch</code> statement to call one of many other (cohesive) functions.)</li>
-  <li><strong>Coincidental cohesion</strong>: no apparent reason for things to be together in a routine!</li>
-</ul>
+<p>You may find the <code class="language-plaintext highlighter-rouge">memory.c</code> module useful.
+Its use is optional, but it is ready to use as part of library <code class="language-plaintext highlighter-rouge">libcs50.a</code>.</p>
 
-<h3 id="coupling">Coupling</h3>
+<p>In our Lab3 we tried to recover gracefully from memory-allocation failures.
+In the TSE application programs, we’ll be a bit more lazy: on NULL return from malloc/calloc you can print an error and exit with non-zero exit status.
+(You may find the <code class="language-plaintext highlighter-rouge">assertp()</code> function, defined by the  <code class="language-plaintext highlighter-rouge">memory</code> module, to be useful here.)</p>
 
-<blockquote>
-  <p>“The degree of coupling refers to the strength of a connection between two routines. Coupling is a complement to cohesion.” – McConnell</p>
-</blockquote>
+<h3 id="hashtable-of-url">Hashtable of URL</h3>
 
-<p>Good code has <strong><em>loose coupling</em></strong> among routines.</p>
+<p>Our design calls for use of a Hashtable to store the URLs already seen.
+Our Hashtable implementation stores a <code class="language-plaintext highlighter-rouge">void*item</code> with each key… but if you’re just storing URLs (as keys), what item do you store?
+Our hashtable disallows NULL items.
+Suggestion: just pass a constant string as the item.</p>
 
-<blockquote>
-  <p>“Make the coupling of routines as simple as possible.”</p>
-</blockquote>
+<h3 id="pseudocode">Pseudocode</h3>
 
-<p><strong>Criteria</strong> for evaluating coupling between routines:</p>
+<p>Your implementation does not need to follow our pseudocode; this is one reason why you need to write about your implementation choices in <code class="language-plaintext highlighter-rouge">IMPLEMENTATION.md</code>.</p>
 
-<ul>
-  <li><strong>size</strong> (number of connections)</li>
-  <li><strong>intimacy</strong> (directness of connection; better to use direct parameter passing than indirect global variables)</li>
-  <li><strong>visibility</strong> (best if connection is obvious)</li>
-  <li><strong>flexibility</strong> (how easily you can change connections)</li>
-</ul>
+<p>Our pseudocode refers to a <code class="language-plaintext highlighter-rouge">pagefetcher</code>; note this is effectively <code class="language-plaintext highlighter-rouge">webage_fetch()</code>.
+<strong>Note that <code class="language-plaintext highlighter-rouge">webage_fetch()</code> inserts a 1-second delay after every fetch attempt</strong>; your Crawler thus gets this behavior for free.</p>
 
-<p>Go for minimal interconnectedness, and make what interconnections you have simple and obvious.
-“If a program were a piece of wood, you’d try to split it with the grain.”</p>
+<p>Our pseudocode refers to a <code class="language-plaintext highlighter-rouge">pagescanner</code>; yours should leverage <code class="language-plaintext highlighter-rouge">webage_getNextURL()</code>.</p>
 
-<h4 id="kinds-of-coupling">Kinds of coupling</h4>
+<h3 id="pagedirectory">pageDirectory</h3>
 
-<ul>
-  <li><strong>Simple-data coupling</strong>: the only data passed from one routine to another is through parameters, and is nonstructured.</li>
-  <li><strong>Data-structure coupling</strong>: one routine passes a data structure to another; best if it really needs the whole data structure.</li>
-  <li><strong>Control coupling</strong>: one routine tells the other what to do.</li>
-  <li><strong>Global-data coupling</strong>: two routines use the same global data; may be tolerable if read-only.</li>
-  <li><strong>Pathological coupling</strong>: one routine uses the data inside the other routine. (Somewhat hard to do in C and C++.)</li>
-</ul>
+<p>The Crawler is supposed to determine whether the pathname provided as pageDirectory is indeed a directory, and is writable (meaning, you can create files there).
+How?
+The simplest method is to create a file there.
+If you construct a string <code class="language-plaintext highlighter-rouge">filename</code> that is the directory name, followed by a slash <code class="language-plaintext highlighter-rouge">'/'</code>, followed by a file name like <code class="language-plaintext highlighter-rouge">.crawler</code>, you could call <code class="language-plaintext highlighter-rouge">fopen(filename, "w")</code>; if it returns NULL (failure), then either the directory does not exist or is not writable.
+If it returns non-NULL (success), close the file.
+It’s fine to leave <code class="language-plaintext highlighter-rouge">.crawler</code> in the page directory.
+(Actually, the presence of this file will later help your indexer  confirm the pageDirectory is indeed a Crawler-produced directory.)</p>
 
-<blockquote>
-  <p>“Try to create routines that depend little on other routines.”</p>
-</blockquote>
-
-<h4 id="defensive-programming">Defensive programming</h4>
-
-<p>Best practices:</p>
-
-<ul>
-  <li>Use assert() or other tests to insert sanity checks into your code.</li>
-  <li>Be particularly suspicious of parameters and input values that come from another module (including the user!), i.e., data that crosses a module interface.</li>
-</ul>
-
-<h4 id="routine-parameters">Routine parameters</h4>
-
-<p>Best practices:</p>
-
-<ul>
-  <li>Put parameters in input-modify-output order; put “status” or “error” variables last.</li>
-  <li>Use all the parameters.</li>
-  <li>Use a consistent order among similar routines.</li>
-  <li>Document assumptions about parameters: <em>Preconditions</em> are assumptions about the parameters (or internal data-structure state) before the routine executes, and <em>postconditions</em> are assumptions about the parameters, data structure, and return value after the routine exits.</li>
-</ul>
-
-<h4 id="macros">Macros</h4>
-
-<p>You can write <em>macros</em> in C with #define - these are handled by the C preprocessor.
-Macros can be handy, on occasion, but it is usually better to use <code class="language-plaintext highlighter-rouge">inline</code> functions or <code class="language-plaintext highlighter-rouge">const</code> variables for these purposes.
-You get better syntax, type checking, and better debugger support.</p>
-
-<h2 id="modules">Modules</h2>
-
-<p>A <em>module</em> is a collection of related routines that, together, encapsulate a data structure, subsystem, or task.
-In object-oriented programming, a module is typically called a <em>class</em>.</p>
-
-<p>Why modules?</p>
-
-<ul>
-  <li>It is sometimes necessary to have strong coupling between routines.</li>
-  <li>In that case you should group those routines into a <em>module</em>; the module has strong cohesion.</li>
-  <li>Strive for strong intra-module cohesion and loose inter-module coupling.</li>
-  <li>A well-designed module (in C) or class (in C++ or Java) encourages <em>information hiding</em>.</li>
-</ul>
-
-<h4 id="information-hiding">Information hiding</h4>
-
-<p>A good module serves to “hide” implementation details inside the module, providing a clean abstraction and clear interface to other modules.</p>
-
-<p>Each module programmer makes many implementation decisions, which should largely be unknown to code outside the module.
-Thus the module is</p>
-
-<ul>
-  <li>less coupled to others,</li>
-  <li>more maintainable,</li>
-  <li>more self-testable,</li>
-  <li>more replacable,</li>
-  <li>more debuggable (can insert debugging code easily),</li>
-  <li>more reliable (can insert checks in a few places),</li>
-  <li>more understandable (hides complexity).</li>
-</ul>
-
-<h4 id="collaborative-work">Collaborative work</h4>
-
-<p>Modules (classes) are an excellent mechanism for dividing work among programmers, because module boundaries and interfaces are clear, and there is otherwise little coupling.
-Thus, the module programmer has wide flexibility and authority on the implementation details of her module, as long as she sticks to the agreed-upon interface for the module and clearly documents the interface.</p>
-
-<h2 id="activity">Activity</h2>
-
-<p>In today’s <a href="activity.html">activity</a> your group will look at some <a href="/engs50/Notes/cohesion/example.c">example</a> code and comment on its naming, cohesion, and coupling.</p>
+<p><strong>Tip: think ahead</strong>, and put the code for writing webpages to the pageDirectory in a separate <code class="language-plaintext highlighter-rouge">pagedir</code> module, in the <code class="language-plaintext highlighter-rouge">common</code> directory.
+Write a <code class="language-plaintext highlighter-rouge">Makefile</code> that produces library <code class="language-plaintext highlighter-rouge">common/common.a</code>.
+Not required for Lab4 but you’ll end up needing to take this step in Lab5 anyway.</p>
 
   </div>
 

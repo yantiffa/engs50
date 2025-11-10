@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/bash2/
+https://thayer.github.io/engs50/Notes/malloc/
 2
-41536
+20543
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/bash2/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>More about Bash</title>
+  <title>Dynamic memory allocation; linked lists</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/bash2/">
+  <link rel="canonical" href="/engs50/Notes/malloc/">
 </head>
 
 
@@ -44,545 +44,208 @@ https://thayer.github.io/engs50/Notes/bash2/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">More about Bash</h1>
+    <h1 class="post-title">Dynamic memory allocation; linked lists</h1>
   </header>
 
   <div class="post-content">
-    <p>Don’t forget this week’s <a href="/engs50/Reading/#week-1">reading</a>.</p>
-
-<p>In this lecture, we continue our discussion of the Unix shell and its commands.</p>
-
-<h2 id="goals">Goals</h2>
-
-<p>We plan to learn the following today:</p>
+    <h3 id="goals">Goals</h3>
 
 <ul>
-  <li>Redirection and pipes</li>
-  <li>Special characters and quoting</li>
-  <li>Standard input, output, and error</li>
+  <li>To understand that <code class="language-plaintext highlighter-rouge">malloc</code> and <code class="language-plaintext highlighter-rouge">free</code> allocate and de-allocate memory from the heap.</li>
+  <li>To use dynamic memory to build a linked list.</li>
 </ul>
 
-<p>We’ll do this activity in today’s class:</p>
+<p>Terminal <a href="/engs50/Notes/malloc/script.txt">script</a> from today’s class.</p>
+
+<h3 id="background">Background</h3>
+
+<p>We’ll be working with C code that builds and manipulates <em>linked lists</em>.
+You learned about linked lists in CS10, and may want to review the CS10 linked-list notes and implementation:</p>
 
 <ul>
-  <li>Sit with your group, and get to know your group mates.</li>
-  <li>Experiment with shell pipelines in this <a href="activity.html">Activity</a>.</li>
+  <li>slides in <a href="/engs50/Notes/malloc/cs10-lists.pdf">pdf</a> or <a href="/engs50/Notes/malloc/cs10-lists.pptx">Powerpoint</a></li>
+  <li><a href="/engs50/Notes/malloc/SinglyLinked.java">SinglyLinked.java</a></li>
+  <li><a href="/engs50/Notes/malloc/SimpleList.java">SimpleList.java</a></li>
 </ul>
 
-<h3 id="class-scripts">Class scripts</h3>
+<h1 id="dynamic-memory-allocation">Dynamic memory allocation</h1>
 
-<p>I recorded my Terminal windows from <a href="/engs50/Notes/bash2/script-flume.txt">flume</a> and <a href="/engs50/Notes/bash2/script-mac.txt">Mac</a>.</p>
+<p>Before we dive in, check out this <a href="https://www.youtube.com/watch?v=5VnDaHBi8dM">animated explanation of pointers</a>.
+Fun!</p>
 
-<h2 id="redirection-and-pipes">Redirection and pipes</h2>
-
-<p>To date we have seen Unix programs using default input and output -
-called <em>standard input</em> (stdin) and <em>standard output</em> (stdout) - the
-keyboard is the standard input and the display the standard output.
-The Unix shell is able to redirect both the input and output of
-programs.  As an example of output redirection consider the following.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">date</span> <span class="o">&gt;</span> listing
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-lR</span> public_html/ <span class="o">&gt;&gt;</span> listing
-</code></pre></div></div>
-
-<p>The output redirection <code class="language-plaintext highlighter-rouge">&gt;</code> writes the output of <code class="language-plaintext highlighter-rouge">date</code> to the file
-called <code class="language-plaintext highlighter-rouge">listing</code>; that is, the ‘standard output’ of the <code class="language-plaintext highlighter-rouge">date</code> process
-has been directed to the file instead of the default, the display.
-Note that the <code class="language-plaintext highlighter-rouge">&gt;</code> operation created a file that did not exist before
-the output redirection command was executed.  Next, we append a
-recursive, long-format directory listing to the same file; by using
-the <code class="language-plaintext highlighter-rouge">&gt;&gt;</code> (double <code class="language-plaintext highlighter-rouge">&gt;</code>) we tell the shell to <em>append</em> to the file rather
-than overwriting the file.</p>
-
-<p>Note that the <code class="language-plaintext highlighter-rouge">&gt;</code> or <code class="language-plaintext highlighter-rouge">&gt;&gt;</code> and their target filenames are <em>not</em>
-arguments to the command - the command simply writes to stdout, as it
-always does, but the shell has arranged for stdout to be directed to a
-file instead of the terminal.</p>
-
-<p>The shell also supports input redirection.  This provides input to a
-program (rather than the keyboard).  Let’s create a file of prime
-numbers using output redirection.  The input to the <code class="language-plaintext highlighter-rouge">cat</code> command can
-come from the standard input (i.e., the keyboard).  We can instruct
-the shell to redirect the <code class="language-plaintext highlighter-rouge">cat</code> command’s output (stdout) to file
-named <code class="language-plaintext highlighter-rouge">primes</code>.  The numbers are input at the keyboard and <code class="language-plaintext highlighter-rouge">CTRL-D</code> is
-used to signal the end of the file (<code class="language-plaintext highlighter-rouge">EOF</code>).</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cat</span> <span class="o">&gt;</span> primes
-61
-53
-41
-2
-3
-11
-13
-18
-37
-5
-19
-23
-29
-31
-47
-53
-59
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span> 
-</code></pre></div></div>
-
-<p>Input redirection <code class="language-plaintext highlighter-rouge">&lt;</code> tells the shell to use a file as input to the command rather than the keyboard.
-In the input redirection example below <code class="language-plaintext highlighter-rouge">primes</code> is used as input to <code class="language-plaintext highlighter-rouge">cat</code> which sends its standard output to the screen.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cat</span> &lt; primes
-61
-53
-41
-2
-3
-11
-13
-18
-37
-5
-19
-23
-29
-31
-47
-53
-59
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>Many Unix commands (e.g., <code class="language-plaintext highlighter-rouge">cat</code>, <code class="language-plaintext highlighter-rouge">sort</code>) allow you to provide input from stdin if you do not specify a file on the command line.
-For example, if you type <code class="language-plaintext highlighter-rouge">cat (CR)</code> (carriage return) then the command expects input from the standard input.</p>
-
-<p>Unix also supports a powerful ‘pipe’ operator for passing data between commands using the operator <code class="language-plaintext highlighter-rouge">|</code> (a vertical bar, usually located above the <code class="language-plaintext highlighter-rouge">\</code> key on your keyboard).
-Pipes connect commands that run as separate processes as data becomes available the processes are scheduled.</p>
+<p>C does not have language support for dynamically allocating new ‘things’.
+Instead, the programmer has to call a library function called <code class="language-plaintext highlighter-rouge">malloc()</code> to allocate a new chunk of memory from the <em>heap segment</em>, and later call <code class="language-plaintext highlighter-rouge">free()</code> to return that chunk of memory to the heap.
+The programmer has to remember to initialize the chunk of bytes received from <code class="language-plaintext highlighter-rouge">malloc()</code> – which otherwise should be assumed to contain random data.
+The programmer has to be careful allocate a large enough chunk to hold the data she intends to store there, and not to use pointers to write “outside” that chunk of memory.
+Lots of flexibility and power - but as with any great power, you must take great care in using it.</p>
 
 <blockquote>
-  <p>Pipes were invented by Doug McIlroy while he was working with Ken Thompson and Dennis Ritchie at AT&amp;T Bell Labs.
-(As I mentioned earlier, Doug has been an adjunct professor here at Dartmouth College for several years now.)  In this <a href="/engs50/Reading/DougMcIlroy.pdf">two-page interview</a>, at the middle of the third column, Doug tells how pipes were invented and the <code class="language-plaintext highlighter-rouge">|</code> character selected as the operator.
-Pay special attention to the next paragraph: the Dartmouth Time Sharing System had something similar, even earlier!</p>
+  <p>In Java, you can use <code class="language-plaintext highlighter-rouge">new</code> to dynamically create a new object, and <code class="language-plaintext highlighter-rouge">delete</code> to discard an object created with <code class="language-plaintext highlighter-rouge">new</code>, but for the most part the Java compiler and runtime handles object deletion and memory recovery automatically - it’s called ‘garbage collection.’</p>
 </blockquote>
 
-<p>Pipes are a clever invention indeed, since the need for separate temporary files for sharing data between processes is not required.
-Because commands are implemented as processes, a program reading an empty pipe will be ``suspended’’ until there is data or information ready for it to read.
-There is no limit to the number of programs or commands in the pipeline.
-In our example below there are four programs in the pipeline all running simultaneously waiting on the input:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sort</span> <span class="nt">-n</span> primes | <span class="nb">uniq</span> | <span class="nb">grep</span> <span class="nt">-v</span> 18 | more
-2
-3
-5
-11
-13
-19
-23
-29
-31
-37
-41
-47
-53
-59
-61
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>What is the difference between pipes and redirection?
-Basically, redirection (<code class="language-plaintext highlighter-rouge">&gt;</code>,<code class="language-plaintext highlighter-rouge">&gt;&gt;</code>,<code class="language-plaintext highlighter-rouge">&lt;</code>) is used to direct the stdout of command to a file, or from a file to the stdin of a command.
-Pipes (<code class="language-plaintext highlighter-rouge">|</code>) are used to redirect the stdout to the stdin of another command.
-This operator allows us to ‘glue’ together programs as ‘filters’ to process the plain text sent between them (<em>plain text</em> between the processes - a nice design decision).
-This supports the notion of reuse and allows us to build sophisticated programs quickly and simply.
-It’s another cool feature of Unix.</p>
-
-<p>Notice three new commands above: <code class="language-plaintext highlighter-rouge">sort</code>, <code class="language-plaintext highlighter-rouge">uniq</code>, and <code class="language-plaintext highlighter-rouge">grep</code>.</p>
+<p>There are four related functions you should understand:</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">sort</code> reads lines from from stdin and outputs the lines in sorted order; here <code class="language-plaintext highlighter-rouge">-n</code> tells `sort to use numeric order (rather than alphabetical order);</li>
-  <li><code class="language-plaintext highlighter-rouge">uniq</code> removes duplicates, printing only one of a run of identical lines;</li>
-  <li><code class="language-plaintext highlighter-rouge">grep</code> prints lines matching a pattern (more generally, a <em>regular expression</em>); here, <code class="language-plaintext highlighter-rouge">-v</code> inverts this behavior: print lines that <em>do not</em> match the pattern.
-In this case, the pattern is simply <code class="language-plaintext highlighter-rouge">18</code> and <code class="language-plaintext highlighter-rouge">grep</code> does not print that number as it comes through.</li>
+  <li><strong>malloc</strong> <code class="language-plaintext highlighter-rouge">p = malloc(n)</code> - allocates <code class="language-plaintext highlighter-rouge">n</code> bytes of heap memory; the memory contents remain uninitialized.</li>
+  <li><strong>calloc</strong> <code class="language-plaintext highlighter-rouge">p = calloc(count, size)</code> allocates <code class="language-plaintext highlighter-rouge">count*size</code> bytes of heap memory and initializes it all to zero; this call is appropriate when you want to allocate an array of <code class="language-plaintext highlighter-rouge">count</code> items, each of <code class="language-plaintext highlighter-rouge">size</code> bytes.</li>
+  <li><strong>realloc</strong> <code class="language-plaintext highlighter-rouge">p = realloc(p, n)</code> - where <code class="language-plaintext highlighter-rouge">p</code> is a pointer to heap memory - expands (or shrinks) its allocation to <code class="language-plaintext highlighter-rouge">n</code> bytes.</li>
+  <li><strong>free</strong> <code class="language-plaintext highlighter-rouge">free(p)</code> - where <code class="language-plaintext highlighter-rouge">p</code> is a pointer to heap memory - releases that portion of heap memory for future use.</li>
 </ul>
 
-<p>And, as we saw last time, <code class="language-plaintext highlighter-rouge">more</code> pauses the output when it would scroll off the screen.</p>
+<p>Our examples today show how to use <code class="language-plaintext highlighter-rouge">malloc</code> to allocate space to store a string, and later, a <code class="language-plaintext highlighter-rouge">struct</code> holding aggregate types.
+For an example using <code class="language-plaintext highlighter-rouge">calloc</code> and <code class="language-plaintext highlighter-rouge">realloc</code>, read about <a href="/malloc/readlinep.html">how readlinep() works</a>.</p>
 
-<p>Note that the original file - <code class="language-plaintext highlighter-rouge">primes</code> - is not changed by executing the command line above.
-Rather, the file is read in by the <code class="language-plaintext highlighter-rouge">sort</code> command and the data is manipulated as it is processed by each stage of the command pipe line.
-Because <code class="language-plaintext highlighter-rouge">sort</code> and <code class="language-plaintext highlighter-rouge">cat</code> are happy to read its input data from stdin, or from a file given as an argument, the following pipelines all achieve the same result:</p>
+<h2 id="memory-leaks-and-stray-pointers">Memory leaks and stray pointers</h2>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sort</span> <span class="nt">-n</span> &lt; primes       | <span class="nb">uniq</span> | <span class="nb">grep</span> <span class="nt">-v</span> 18 | more
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cat   </span>primes | <span class="nb">sort</span> <span class="nt">-n</span> | <span class="nb">uniq</span> | <span class="nb">grep</span> <span class="nt">-v</span> 18 | more
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cat</span> &lt; primes | <span class="nb">sort</span> <span class="nt">-n</span> | <span class="nb">uniq</span> | <span class="nb">grep</span> <span class="nt">-v</span> 18 | more
-</code></pre></div></div>
-
-<p>Which do you think would be most efficient?</p>
-
-<p><strong>Another pipeline</strong>: How did I create that list of existing usernames, for Lab0?</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 1 /etc/passwd | <span class="nb">sort</span> <span class="o">&gt;</span> usernames.txt
-</code></pre></div></div>
-
-<blockquote>
-  <p>See <code class="language-plaintext highlighter-rouge">man cut</code> to understand what the first command does.</p>
-</blockquote>
-
-<p><strong>Another example</strong>: what is the most popular shell?
-Try each of these in turn:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd | less
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd | <span class="nb">sort</span>
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd | <span class="nb">sort</span> | <span class="nb">uniq</span> <span class="nt">-c</span>
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd | <span class="nb">sort</span> | <span class="nb">uniq</span> <span class="nt">-c</span> | <span class="nb">sort</span> <span class="nt">-n</span>
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cut</span> <span class="nt">-d</span> : <span class="nt">-f</span> 7 /etc/passwd | <span class="nb">sort</span> | <span class="nb">uniq</span> <span class="nt">-c</span> | <span class="nb">sort</span> <span class="nt">-nr</span>
-</code></pre></div></div>
-
-<h3 id="macos-tip">MacOS tip:</h3>
-
-<p>There are three great commands you should know - they are not on Linux, because they interact with MacOS: <code class="language-plaintext highlighter-rouge">open</code>, <code class="language-plaintext highlighter-rouge">pbpaste</code>, <code class="language-plaintext highlighter-rouge">pbcopy</code>.</p>
-
-<p>You’ve already seen the <code class="language-plaintext highlighter-rouge">open</code> command, which on MacOS at the Terminal command line, will open a file for viewing in the relevant MacOS application; for example, for a photo file you might type <code class="language-plaintext highlighter-rouge">open photo.jpg</code> and see Preview launch and open that file; for an html file you might type <code class="language-plaintext highlighter-rouge">open index.html</code> and see Safari launch and render that page.</p>
-
-<p>The commands <code class="language-plaintext highlighter-rouge">pbpaste</code> and <code class="language-plaintext highlighter-rouge">pbcopy</code> are a great fit into many pipelines.
-The first command prints the MacOS ‘clipboard’ to its standard output, and the second copies its standard input into the MacOS clipboard.
-For example; select some text in a window somewhere, then <em>cmd-C</em> to copy it to the clipboard, then</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	pbpaste | wc
-</code></pre></div></div>
-<p>to count the lines, words, and characters in the clipboard.
-Or,</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	ls -l | pbcopy
-</code></pre></div></div>
-<p>saves the directory listing in the clipboard, where you might paste it into Piazza or an email message or some document.</p>
-
-<p>I’m not certain you can combine <code class="language-plaintext highlighter-rouge">pbpaste</code> and <code class="language-plaintext highlighter-rouge">pbcopy</code> on the same command line, however; if you wanted to <em>replace</em> the clipboard with its number of lines, you might try</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	pbpaste | wc -l | pbcopy
-</code></pre></div></div>
-<p>but be careful mixing those two commands.</p>
-
-<h2 id="standard-input-output-and-error">Standard input, output and error</h2>
-
-<p>As we learned above, every process (a running program) has a <em>standard input</em> (abbreviated
-to <code class="language-plaintext highlighter-rouge">stdin</code>) and a <em>standard output</em> (<code class="language-plaintext highlighter-rouge">stdout</code>). 
-The shell sets <code class="language-plaintext highlighter-rouge">stdin</code> to the keyboard by default, but the command
-line can tell the shell to redirect <code class="language-plaintext highlighter-rouge">stdin</code> using <code class="language-plaintext highlighter-rouge">&lt;</code> or a pipe.  The
-shell sets <code class="language-plaintext highlighter-rouge">stdout</code> to the display by default, but the command line
-can tell the shell to redirect <code class="language-plaintext highlighter-rouge">stdout</code> using <code class="language-plaintext highlighter-rouge">&gt;</code> or <code class="language-plaintext highlighter-rouge">&gt;&gt;</code>, or to a
-pipe.</p>
-
-<p>Each process also has a <em>standard error</em> (<code class="language-plaintext highlighter-rouge">stderr</code>), which most
-programs use for printing error messages.  The separation of <code class="language-plaintext highlighter-rouge">stdout</code>
-and <code class="language-plaintext highlighter-rouge">stderr</code> is important when <code class="language-plaintext highlighter-rouge">stdin</code> is redirected to a file or
-pipe, because normal output can flow into the file or pipe while error
-messages reach the user on the screen.</p>
-
-<p>Inside the running process these three streams are represented with
-numeric <em>file descriptors</em>:</p>
-
-<ol>
-  <li><code class="language-plaintext highlighter-rouge">stdin</code></li>
-  <li><code class="language-plaintext highlighter-rouge">stdout</code></li>
-  <li><code class="language-plaintext highlighter-rouge">stderr</code></li>
-</ol>
-
-<p>You can tell the shell to redirect using these numbers; <code class="language-plaintext highlighter-rouge">&gt;</code> is
-shorthand for <code class="language-plaintext highlighter-rouge">1&gt;</code> and <code class="language-plaintext highlighter-rouge">&lt;</code> is shorthand for <code class="language-plaintext highlighter-rouge">0&lt;</code>.  You can thus
-redirect the standard error (file descriptor 2) with the symbol <code class="language-plaintext highlighter-rouge">2&gt;</code>.
-Suppose I was logged in as <code class="language-plaintext highlighter-rouge">dfk</code> and wanted to make a list of the web
-files <code class="language-plaintext highlighter-rouge">index.html</code> anywhere in the <code class="language-plaintext highlighter-rouge">cs50</code> account’s home directory
-tree.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find ~cs50 <span class="nt">-name</span> index.html <span class="o">&gt;</span> pages
-find: <span class="sb">`</span>/net/class/cs50/Archive/src<span class="s1">': Permission denied
-find: `/net/class/cs50/.emacs.d'</span>: Permission denied
-find: <span class="sb">`</span>/net/class/cs50/private/<span class="s1">': Permission denied
-[engs50@mc ~]$ 
-</span></code></pre></div></div>
-
-<p>I redirected the output of <code class="language-plaintext highlighter-rouge">find</code> to a file called <code class="language-plaintext highlighter-rouge">pages</code> - and
-indeed that file filled with useful information - but <code class="language-plaintext highlighter-rouge">find</code> printed
-its error messages to the screen so I could still see them.  Suppose I
-wanted to capture those errors in a file too:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find ~cs50 <span class="nt">-name</span> index.html <span class="o">&gt;</span> pages 2&gt; errors
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-<p>The file <code class="language-plaintext highlighter-rouge">errors</code> contains the error messages we saw earlier.</p>
-
-<p>As another alternative, we could ignore the error output entirely by
-sending it to a place where all characters go and never return!</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find ~cs50 <span class="nt">-name</span> index.html <span class="o">&gt;</span> pages 2&gt; /dev/null
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-<p>The file called <code class="language-plaintext highlighter-rouge">/dev/null</code> is a special kind of file - it’s not a file at all,
-actually, it’s a ‘device’ that simply discards anything written to it.
-(If you read from it, it appears to be an empty file.)</p>
-
-<h2 id="special-characters">Special characters</h2>
-
-<p>There are a number of special characters interpreted by the shell -
-spaces, tabs, wildcard (‘globbing’) characters for filename expansion,
-redirection symbols, and so forth.  Special characters have special
-meaning and cannot be used as regular characters because the shell
-interprets them in a special manner.  These special characters
-include:</p>
-
-<p><code class="language-plaintext highlighter-rouge">&amp; ; | * ?  ` " ' [ ] ( ) $ &lt; &gt; { } # / \ ! ~</code></p>
-
-<p>We have already used several of these special characters.
-Don’t try to memorize them at this stage.
-Through use, they will become second nature.
-We will just give some examples of the ones we have not discussed so far.</p>
-
-<h2 id="quoting">Quoting</h2>
-
-<p>If you need to use one of these special characters as a regular
-character, you can tell the shell not to interpret it by escaping or
-quoting it.  To <em>escape</em> a single special character, precede it with a
-backslash <code class="language-plaintext highlighter-rouge">\</code>; earlier we saw how to escape the character <code class="language-plaintext highlighter-rouge">*</code> with
-<code class="language-plaintext highlighter-rouge">\*</code>.  To escape multiple special characters (as in <code class="language-plaintext highlighter-rouge">**</code>), quote each:
-<code class="language-plaintext highlighter-rouge">\*\*</code>.  You can also <em>quote</em> using single quotation marks such as
-<code class="language-plaintext highlighter-rouge">'**'</code> or double quotation marks such as <code class="language-plaintext highlighter-rouge">"**"</code> - but these have
-subtlety different behavior.  You might use this form when quoting a
-filename with embedded spaces: <code class="language-plaintext highlighter-rouge">"Homework assignment"</code>.</p>
-
-<p>You will often need to pass special characters as part of arguments to
-commands and other programs - for example, an argument that represents
-a pattern to be interpreted by the command; as happens often with
-<code class="language-plaintext highlighter-rouge">find</code> and <code class="language-plaintext highlighter-rouge">grep</code>.</p>
-
-<p>There is a situation where single quotes work differently than double
-quotes.  If you use a pair of single quotes around a shell variable
-substitution (like <code class="language-plaintext highlighter-rouge">$USER</code>), the variable’s value will not be
-substituted, whereas it would be substituted within double quotes:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$LOGNAME</span><span class="s2"> uses the </span><span class="nv">$SHELL</span><span class="s2"> shell and his home directory is </span><span class="nv">$HOME</span><span class="s2">."</span>
-cs50 uses the /bin/bash shell and his home directory is /net/class/cs50.
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="s1">'$LOGNAME uses the $SHELL shell and his home directory is $HOME.'</span>
-<span class="nv">$LOGNAME</span> uses the <span class="nv">$SHELL</span> shell and his home directory is <span class="nv">$HOME</span><span class="nb">.</span>
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p><strong><em>Example 1.</em></strong>
-Double-quotes are especially important in shell scripts, because the
-variables involved might have been user input (a command-line argument
-or a keyboard input) or might have be a file name or output of a
-command; such variables should <em>always</em> be quoted when substituted,
-because spaces (and other special characters) embedded in the value of
-the variable can cause confusion.  Thus:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">directoryName</span><span class="o">=</span><span class="s2">"Homework three"</span>
-...
-<span class="nb">mkdir</span> <span class="s2">"</span><span class="nv">$directoryName</span><span class="s2">"</span>
-<span class="nb">mkdir</span> <span class="nv">$directoryName</span>
-</code></pre></div></div>
-
-<p>Try it!</p>
-
-<p><strong><em>Example 2.</em></strong>
-Escapes and quoting can pass special characters and patterns passed to
-commands.</p>
-
-<p>Suppose I have a list of email addresses, one per line.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> Eric Chen &lt;eric.t.chen.17@dartmouth.edu&gt;
- Rui Liu &lt;Rui.Liu.GR@dartmouth.edu&gt;
- Taylor Hardin &lt;Taylor.A.Hardin.GR@dartmouth.edu&gt;
- Elena N. Horton &lt;Elena.N.Horton.18@dartmouth.edu&gt;
- Jinnan Ge &lt;Jinnan.Ge.TH@dartmouth.edu&gt;
- Mauricio Esquivel Rogel &lt;Mauricio.Esquivel.Rogel.18@dartmouth.edu&gt;
- James Edwards &lt;James.G.Edwards.18@dartmouth.edu&gt;
- Emily J. Lin &lt;Emily.J.Lin.18@dartmouth.edu&gt;
- John Cardwell &lt;John.R.Cardwell.18@dartmouth.edu&gt;
- John Kotz &lt;John.P.Kotz.19@dartmouth.edu&gt;
- Joel J. Katticaran &lt;joel.j.katticaran.ug@dartmouth.edu&gt;
- Kaya M. Thomas &lt;Kaya.M.Thomas.17@dartmouth.edu&gt;
- Trevor L. Davis &lt;trevor.l.davis.18@dartmouth.edu&gt;
- Thomas D. Kim &lt;Thomas.D.Kim.19@dartmouth.edu&gt;
- Kyle Dotterrer &lt;kyle.dotterrer.18@dartmouth.edu&gt;
-</code></pre></div></div>
-
-<p>Some email programs, or websites, require these to be comma-separated.
-If I have the above text in my clipboard, I can change those newline characters to commas:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>pbpaste | <span class="nb">tr</span> <span class="se">\\</span>n ,
-Eric Chen &lt;eric.t.chen.17@dartmouth.edu&gt;, Rui Liu &lt;Rui.Liu.GR@dartmouth.edu&gt;, Taylor Hardin &lt;Taylor.A.Hardin.GR@dartmouth.edu&gt;, Elena N. Horton &lt;Elena.N.Horton.18@dartmouth.edu&gt;, Jinnan Ge &lt;Jinnan.Ge.TH@dartmouth.edu&gt;, Mauricio Esquivel Rogel &lt;Mauricio.Esquivel.Rogel.18@dartmouth.edu&gt;, James Edwards &lt;James.G.Edwards.18@dartmouth.edu&gt;, Emily J. Lin &lt;Emily.J.Lin.18@dartmouth.edu&gt;, John Cardwell &lt;John.R.Cardwell.18@dartmouth.edu&gt;, John Kotz &lt;John.P.Kotz.19@dartmouth.edu&gt;, Joel J. Katticaran &lt;joel.j.katticaran.ug@dartmouth.edu&gt;, Kaya M. Thomas &lt;Kaya.M.Thomas.17@dartmouth.edu&gt;, Trevor L. Davis &lt;trevor.l.davis.18@dartmouth.edu&gt;, Thomas D. Kim &lt;Thomas.D.Kim.19@dartmouth.edu&gt;, Kyle Dotterrer &lt;kyle.dotterrer.18@dartmouth.edu&gt; 
-</code></pre></div></div>
-
-<blockquote>
-  <p>On Unix a single special character called ‘newline’ is what <em>defines</em> the end of one line and the beginning of the next.
-A common syntax for the newline character, in programming languages,
-is <code class="language-plaintext highlighter-rouge">\n</code>.  But the <code class="language-plaintext highlighter-rouge">\</code> is special, in bash, so we need to escape it,
-um, with <code class="language-plaintext highlighter-rouge">\</code>; thus we have <code class="language-plaintext highlighter-rouge">\\n</code>.</p>
-</blockquote>
-
-<p>The <code class="language-plaintext highlighter-rouge">tr</code> command filters <code class="language-plaintext highlighter-rouge">stdin</code> to <code class="language-plaintext highlighter-rouge">stdout</code>, translates each instance
-of the character given in the first argument (<code class="language-plaintext highlighter-rouge">\\n</code>) to the character
-given in the second argument (<code class="language-plaintext highlighter-rouge">,</code>).  Here, <code class="language-plaintext highlighter-rouge">tr</code> spit out the
-translated input - on one very long line that does not end with a
-newline.  I can then copy-paste that result into the pesky web
-browser.</p>
-
-<p>Outlook and Microsoft tools want <em>semicolons</em>, not commas; sigh.
-But the semicolon is also special to bash; so we must escape it too:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">tr</span> <span class="se">\\</span>n <span class="se">\;</span>
-</code></pre></div></div>
-
-<p>On MacOS I can connect the MacOS “Clipboard” to this tool as follows:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>pbpaste | <span class="nb">tr</span> <span class="se">\\</span>n <span class="se">\;</span> | pbcopy
-</code></pre></div></div>
-<p>great!
-copy the list of addresses to the clipboard, type that command in the shell, and now the clipboard contains a semicolon-separated list of addresses.</p>
-
-<p><strong><em>Example 3.</em></strong>
-An even more powerful filtering tool - the stream editor called
-<code class="language-plaintext highlighter-rouge">sed</code> - allows you to transform occurrences of one or more patterns in
-the input file(s):</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nb">sed </span>pattern <span class="o">[</span>file]...  
-</code></pre></div></div>
-
-<p>For example,</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cat</span> .forward
- David Kotz &lt;kotz@cs&gt;
- Eric Chen &lt;eric.t.chen.17@dartmouth.edu&gt;
- Rui Liu &lt;Rui.Liu.GR@dartmouth.edu&gt;
- Taylor Hardin &lt;Taylor.A.Hardin.GR@dartmouth.edu&gt;
- Elena N. Horton &lt;Elena.N.Horton.18@dartmouth.edu&gt;
- Jinnan Ge &lt;Jinnan.Ge.TH@dartmouth.edu&gt;
- Mauricio Esquivel Rogel &lt;Mauricio.Esquivel.Rogel.18@dartmouth.edu&gt;
- James Edwards &lt;James.G.Edwards.18@dartmouth.edu&gt;
- Emily J. Lin &lt;Emily.J.Lin.18@dartmouth.edu&gt;
- John Cardwell &lt;John.R.Cardwell.18@dartmouth.edu&gt;
- John Kotz &lt;John.P.Kotz.19@dartmouth.edu&gt;
- Joel J. Katticaran &lt;joel.j.katticaran.ug@dartmouth.edu&gt;
- Kaya M. Thomas &lt;Kaya.M.Thomas.17@dartmouth.edu&gt;
- Trevor L. Davis &lt;trevor.l.davis.18@dartmouth.edu&gt;
- Thomas D. Kim &lt;Thomas.D.Kim.19@dartmouth.edu&gt;
- Kyle Dotterrer &lt;kyle.dotterrer.18@dartmouth.edu&gt;
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="c"># remove myself, and excess white space</span>
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sed</span> <span class="nt">-e</span> /kotz@cs/d <span class="nt">-e</span> <span class="s1">'s/\t/ /g'</span> <span class="nt">-e</span> <span class="s1">'s/  */ /g'</span>  .forward
- Eric Chen &lt;eric.t.chen.17@dartmouth.edu&gt;
- Rui Liu &lt;Rui.Liu.GR@dartmouth.edu&gt;
- Taylor Hardin &lt;Taylor.A.Hardin.GR@dartmouth.edu&gt;
- Elena Horton &lt;Elena.N.Horton.18@dartmouth.edu&gt;
- Jinnan Ge &lt;Jinnan.Ge.TH@dartmouth.edu&gt;
- Mauricio Esquivel Rogel &lt;Mauricio.Esquivel.Rogel.18@dartmouth.edu&gt;
- James Edwards &lt;James.G.Edwards.18@dartmouth.edu&gt;
- Emily Lin &lt;Emily.J.Lin.18@dartmouth.edu&gt;
- John Cardwell &lt;John.R.Cardwell.18@dartmouth.edu&gt;
- John Kotz &lt;John.P.Kotz.19@dartmouth.edu&gt;
- Joel Katticaran &lt;joel.j.katticaran.ug@dartmouth.edu&gt;
- Kaya Thomas &lt;Kaya.M.Thomas.17@dartmouth.edu&gt;
- Trevor Davis &lt;trevor.l.davis.18@dartmouth.edu&gt;
- Thomas Kim &lt;Thomas.D.Kim.19@dartmouth.edu&gt;
- Kyle Dotterrer &lt;kyle.dotterrer.18@dartmouth.edu&gt;
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="c"># remove myself, remove names, make comma-sep list of addresses</span>
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sed</span> <span class="nt">-e</span> /kotz@cs/d <span class="nt">-e</span> <span class="s1">'s/.*&lt;//'</span> <span class="nt">-e</span> <span class="s1">'s/&gt;.*/,/'</span>  .forward
-eric.t.chen.17@dartmouth.edu,
-Rui.Liu.GR@dartmouth.edu,
-Taylor.A.Hardin.GR@dartmouth.edu,
-Elena.N.Horton.18@dartmouth.edu,
-Jinnan.Ge.TH@dartmouth.edu,
-Mauricio.Esquivel.Rogel.18@dartmouth.edu,
-James.G.Edwards.18@dartmouth.edu,
-Emily.J.Lin.18@dartmouth.edu,
-John.R.Cardwell.18@dartmouth.edu,
-John.P.Kotz.19@dartmouth.edu,
-joel.j.katticaran.ug@dartmouth.edu,
-Kaya.M.Thomas.17@dartmouth.edu,
-trevor.l.davis.18@dartmouth.edu,
-Thomas.D.Kim.19@dartmouth.edu,
-kyle.dotterrer.18@dartmouth.edu,
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>The above uses the <code class="language-plaintext highlighter-rouge">-e</code> switch to <code class="language-plaintext highlighter-rouge">sed</code>, which allows one to list more than one pattern on the same command.</p>
-
-<p>A few quick notes about sed’s patterns:</p>
+<p><strong><em>For every <code class="language-plaintext highlighter-rouge">malloc</code> there must be a matching <code class="language-plaintext highlighter-rouge">free</code>.</em></strong></p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">d</code> deletes lines matching the pattern</li>
-  <li><code class="language-plaintext highlighter-rouge">p</code> prints lines matching the pattern (useful with <code class="language-plaintext highlighter-rouge">-n</code>)</li>
-  <li><code class="language-plaintext highlighter-rouge">s</code> substitutes text for matches to the pattern.</li>
+  <li>If you allocate space but never free it, you’ve created a <em>memory leak</em>; as the program runs, the process memory size will grow and grow, and eventually run out of memory.</li>
+  <li>If you free a pointer you’ve never allocated - or free the same pointer twice - you may cause the heap manager to corrupt its data structures and trigger a segmentation fault at some future time - often a seemingly random time.</li>
 </ul>
 
-<p>Patterns are actually <a href="http://sed.sourceforge.net/sedfaq3.html#s3.1.1">regular expressions</a>; I use some above.</p>
+<p>Whenever you write <code class="language-plaintext highlighter-rouge">malloc</code>, write the corresponding <code class="language-plaintext highlighter-rouge">free</code> call; or, document whose responsibility is to <code class="language-plaintext highlighter-rouge">free</code> that pointer.</p>
 
-<p><strong><em>Example 4.</em></strong></p>
+<p>Whenever you call <code class="language-plaintext highlighter-rouge">free(p)</code>, it’s good practice to immediately set <code class="language-plaintext highlighter-rouge">p=NULL</code>.
+Not because you have to - it makes no difference to the heap - but because that step will prevent you from accidentally re-using that now-defunct pointer <code class="language-plaintext highlighter-rouge">p</code> - you’ll get a clean segmentation fault instead of unpredictable behavior.</p>
 
-<p>I saved a list of students enrolled in CS50 in the file <code class="language-plaintext highlighter-rouge">~cs50/demo/students.txt</code>.
-Each line is of the form <code class="language-plaintext highlighter-rouge">First.M.Last.18@Dartmouth.edu;</code>.</p>
+<blockquote>
+  <p>When the process exits, all its memory is free - the four segments (code, global, stack, and heap) disappear.</p>
+</blockquote>
 
-<p>Let’s suppose you all decide to move to Harvard.</p>
+<h2 id="coding-style---memory-allocation">Coding style - memory allocation</h2>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sed </span>s/Dartmouth/Harvard/ demo/students.txt
-...
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">sed</span> <span class="nt">-e</span> s/Dartmouth/Harvard/ <span class="nt">-e</span> <span class="s1">'s/\.[0-9][0-9]//'</span> <span class="nt">-e</span> <span class="s1">'s/;$//'</span> demo/students.txt
-...
+<p>Avoid sprinking calls to <code class="language-plaintext highlighter-rouge">malloc()</code> and <code class="language-plaintext highlighter-rouge">free()</code> throughout your code.
+Instead, think about the kinds of things you need to create and destroy, and write type-specific wrapper for each such type.
+For example, if your program manipulates things of type <code class="language-plaintext highlighter-rouge">struct listnode</code>, you would write two functions:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">struct</span> <span class="n">listnode</span> <span class="o">*</span><span class="nf">listnode_new</span><span class="p">(...);</span>
+    <span class="kt">void</span> <span class="nf">listnode_free</span><span class="p">(</span><span class="k">struct</span> <span class="n">listnode</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 </code></pre></div></div>
 
-<p>The second form removes the dot and two-digit class number, and the
-trailing semicolon.  Notice how I quoted those patterns from the
-shell, and even escaped the dot from sed’s normal meaning (dot matches
-any character) so sed would look for a literal dot in that position.
-The dollar <code class="language-plaintext highlighter-rouge">$</code> constrains the semicolon match to happen at the end of
-the line.</p>
+<p>The first function calls <code class="language-plaintext highlighter-rouge">malloc(sizeof(struct listnode))</code> and initializes all of its contents, perhaps using parameters passed by the caller.
+The second calls <code class="language-plaintext highlighter-rouge">free(node)</code>.
+Both involve careful error-checking code.
+See example <a href="/engs50/Examples/names7.c">names7.c</a>.</p>
 
-<p>Here’s another fun pipe: count the number of students from each class
-(leveraging the class numbers in email addresses):</p>
+<p>There are many advantages to this approach:</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">tr</span> <span class="nt">-c</span> <span class="nt">-d</span> 0-9<span class="se">\\</span>n &lt; demo/students.txt | <span class="nb">sed</span> <span class="s1">'s/^$/other/'</span>  | <span class="nb">sort</span>  | <span class="nb">uniq</span> <span class="nt">-c</span> | <span class="nb">sort</span> <span class="nt">-nr</span>
-     27 18
-     22 19
-      9 17
-      5 other
-      1 16
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+<ul>
+  <li>The mainline code is more readable, because it’s clear what <code class="language-plaintext highlighter-rouge">listnode_new()</code> is doing.</li>
+  <li>The <code class="language-plaintext highlighter-rouge">new</code> function acts like a ‘constructor’ in object-oriented languages and can ensure the newly returned memory is initialized, or at least, not random bytes.</li>
+  <li>Code involving <code class="language-plaintext highlighter-rouge">malloc</code> can sometimes be tricky, and you isolate that trickiness in one spot and focus on getting it right once.</li>
+  <li>Some new types might need multiple <code class="language-plaintext highlighter-rouge">malloc</code> calls, as in our linked-list examples <a href="/engs50/Examples/names5.c">names5.c</a> <a href="/engs50/Examples/names6.c">names6.c</a> <a href="/engs50/Examples/names7.c">names7.c</a>.
+All those <code class="language-plaintext highlighter-rouge">malloc</code> calls (and corresponding <code class="language-plaintext highlighter-rouge">free</code> calls) can be in the <code class="language-plaintext highlighter-rouge">new</code>/<code class="language-plaintext highlighter-rouge">free</code> functions.</li>
+  <li>You can insert debugging output or reference-counting logic, or set debugger breakpoints, in these <code class="language-plaintext highlighter-rouge">new</code>/<code class="language-plaintext highlighter-rouge">free</code> functions and immediately have that feature apply to <em>all</em> occurrences of your program’s work with this type.</li>
+</ul>
+
+<h1 id="data-structures-in-c">Data structures in C</h1>
+
+<p>C is not an object-oriented language like Java, Python, or C++.
+It does not provide any language features to declare a ‘class’ or create and manipulate object ‘instances’ of that class.</p>
+
+<p>But C does provide two kinds of aggregate data: arrays and structures.</p>
+
+<h2 id="arrays">Arrays</h2>
+
+<p>We’ve seen examples with arrays of characters (aka strings) and arrays of character pointers, and even two-dimensional arrays of characters.
+But one can also define arrays of other types:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="kt">char</span> <span class="n">names</span><span class="p">[</span><span class="n">NumStudents</span><span class="p">][</span><span class="n">NameLength</span><span class="p">];</span>
+	<span class="kt">int</span> <span class="n">ages</span><span class="p">[</span><span class="n">NumStudents</span><span class="p">];</span>
+	<span class="kt">float</span> <span class="n">grades</span><span class="p">[</span><span class="n">NumStudents</span><span class="p">];</span>
 </code></pre></div></div>
 
-<p>See <code class="language-plaintext highlighter-rouge">man sed</code> or the <a href="http://sed.sourceforge.net/sedfaq.html">sed FAQ</a> for more info.
-You’ll want to learn a bit about <em>regular expressions</em>, which are used to describe patterns in sed’s commands; 
-see <a href="http://sed.sourceforge.net/sedfaq3.html#s3.1.1">sed regexp info</a>.</p>
+<p>and so forth.</p>
 
-<h2 id="compressing-and-archiving-files">Compressing and archiving files</h2>
+<blockquote>
+  <p>Sometimes you need to understand that an array name is, in effect, a pointer to the first spot in memory where that array’s data lives; thus, <code class="language-plaintext highlighter-rouge">ages</code> is of type <code class="language-plaintext highlighter-rouge">int*</code> and is a pointer to the first entry in the array, but <code class="language-plaintext highlighter-rouge">ages[0]</code> is of type <code class="language-plaintext highlighter-rouge">int</code> and is the value of that first entry in the array.
+This concept comes up mostly in arrays of characters; <code class="language-plaintext highlighter-rouge">names</code> is of type <code class="language-plaintext highlighter-rouge">char**</code>, and even <code class="language-plaintext highlighter-rouge">names[0]</code> is of type <code class="language-plaintext highlighter-rouge">char*</code>, and <code class="language-plaintext highlighter-rouge">names[0][1]</code> is of type <code class="language-plaintext highlighter-rouge">char</code>.
+In effect, <code class="language-plaintext highlighter-rouge">names</code> is an array of strings, and <code class="language-plaintext highlighter-rouge">names[0]</code> is the first string in the array; like other strings, <code class="language-plaintext highlighter-rouge">names[0]</code> is of type <code class="language-plaintext highlighter-rouge">char*</code>.</p>
+</blockquote>
 
-<p>It is often useful to bundle several files into a compressed <em>archive</em> file.
-You may have encountered files like this on the Internet - such as <code class="language-plaintext highlighter-rouge">files.zip</code>, <code class="language-plaintext highlighter-rouge">something.tar</code>, or <code class="language-plaintext highlighter-rouge">somethin-else.tgz</code>.
-Each packs together several files - including directories, creation dates, access permissions, as well as file contents - into one single file.
-This is a convenient way to transfer large collections of files.</p>
+<h2 id="structs">Structs</h2>
 
-<p>On Unix it is most common to use the <code class="language-plaintext highlighter-rouge">tar</code> utility (short for tape archive - from back when we used tapes) to create an archive of all the files and directories listed in the arguments and name it to something appropriate.
-We often ask <code class="language-plaintext highlighter-rouge">tar</code> to compress the resulting archive  too.</p>
+<p>C allows you to define an aggregate called a ‘struct’; like an object, it has data members.
+Unlike an object, it has no methods (function members).</p>
 
-<p>Given a directory <code class="language-plaintext highlighter-rouge">stuff</code>, you can create (<code class="language-plaintext highlighter-rouge">c</code>) a compressed tar archive (aka, a “tarball”), and then list (<code class="language-plaintext highlighter-rouge">t</code>) its contents.
-The <code class="language-plaintext highlighter-rouge">f</code> refers to a file and the <code class="language-plaintext highlighter-rouge">z</code> refers to compression.</p>
+<p>Continuing our above example, we could have defined a <code class="language-plaintext highlighter-rouge">struct</code> for each student, and then an array of <code class="language-plaintext highlighter-rouge">structs</code>, as follows:</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">mkdir </span>stuff
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="o">&gt;</span> stuff/x
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">tar </span>cfz stuff.tgz stuff
- 98.8%
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">tar </span>tfz stuff.tgz
-stuff/
-stuff/x
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="k">struct</span> <span class="n">student</span> <span class="p">{</span>
+       <span class="kt">char</span> <span class="n">name</span><span class="p">[</span><span class="n">NameLength</span><span class="p">];</span>
+       <span class="kt">int</span> <span class="n">age</span><span class="p">;</span>
+       <span class="kt">float</span> <span class="n">grade</span><span class="p">;</span>
+   <span class="p">};</span>
+   <span class="k">struct</span> <span class="n">student</span> <span class="n">students</span><span class="p">[</span><span class="n">NumStudents</span><span class="p">];</span>
 </code></pre></div></div>
 
-<p>The command leaves the original directory and files intact.
-Notice that <code class="language-plaintext highlighter-rouge">tar</code> has an unconventional syntax for its switches - there is no dash <code class="language-plaintext highlighter-rouge">-</code> before them.</p>
+<p>Now we can refer to the first student as <code class="language-plaintext highlighter-rouge">student[0]</code>, the second student as <code class="language-plaintext highlighter-rouge">student[1]</code>, and so forth.
+We can refer to the name of the first student as <code class="language-plaintext highlighter-rouge">student[0].name</code> and the age of the second student as <code class="language-plaintext highlighter-rouge">student[1].age</code>.</p>
 
-<p>To unpack the archive,</p>
+<p>In our classtime examples, <a href="/engs50/Examples/names5.c">names5.c</a>, <a href="/engs50/Examples/names5.c">names6.c</a>, and <a href="/engs50/Examples/names7.c">names7.c</a>, we declare a <code class="language-plaintext highlighter-rouge">struct listnode</code> and use it to build a linked list.
+There we see a different notation: instead of <code class="language-plaintext highlighter-rouge">.</code> to refer to a member of a struct, we have to use <code class="language-plaintext highlighter-rouge">-&gt;</code> to dereference the pointer and refer to member of the pointee.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">tar </span>xfz stuff.tgz
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="k">struct</span> <span class="n">student</span> <span class="n">alice</span><span class="p">;</span>        <span class="c1">// a single struct representing alice</span>
+   <span class="k">struct</span> <span class="n">student</span> <span class="o">*</span><span class="n">sp</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">alice</span><span class="p">;</span> <span class="c1">// a pointer, initialized to point at alice</span>
+
+   <span class="c1">// the following three all do the same thing.</span>
+   <span class="kt">int</span> <span class="n">age</span> <span class="o">=</span> <span class="n">alice</span><span class="p">.</span><span class="n">age</span><span class="p">;</span>
+   <span class="kt">int</span> <span class="n">age</span> <span class="o">=</span> <span class="n">sp</span><span class="o">-&gt;</span><span class="n">age</span><span class="p">;</span>
+   <span class="kt">int</span> <span class="n">age</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">sp</span><span class="p">).</span><span class="n">age</span><span class="p">;</span>
 </code></pre></div></div>
 
-<p>In short, <code class="language-plaintext highlighter-rouge">c</code> for create, <code class="language-plaintext highlighter-rouge">t</code> for type (list), <code class="language-plaintext highlighter-rouge">x</code> for extract.
-The <code class="language-plaintext highlighter-rouge">f</code> implies that the next argument is the tarball file name.
-The <code class="language-plaintext highlighter-rouge">z</code> indicates that the tarball should be compressed.
-By convention, a tarball filename ends in <code class="language-plaintext highlighter-rouge">.tar</code> if not compressed, <code class="language-plaintext highlighter-rouge">.tgz</code> if compressed.</p>
+<h2 id="linked-lists">Linked lists</h2>
+
+<p>In the examples below we construct a simple linked list comprising nodes that each have a pointer to a string and a pointer to the next node.
+The list includes a dummy <em>head node</em> to simplify list management.
+The variable <code class="language-plaintext highlighter-rouge">head</code> is a pointer to that dummy node.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// A structure for each node in linked list</span>
+<span class="k">struct</span> <span class="n">listnode</span> <span class="p">{</span>
+  <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">;</span>
+  <span class="k">struct</span> <span class="n">listnode</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="k">struct</span> <span class="n">listnode</span> <span class="n">head</span> <span class="o">=</span> <span class="p">{</span><span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">};</span> <span class="c1">// dummy node at head of empty list</span>
+</code></pre></div></div>
+
+<p>After adding three nodes, the list might look like this:</p>
+
+<p><img src="/engs50/Notes/malloc/linked-list.png" alt="" /></p>
+
+<h2 id="examples">Examples</h2>
+
+<p>We first live-coded a simple revision of the <code class="language-plaintext highlighter-rouge">names</code> program, using an array of pointers instead of a two-dimensional array of characters:</p>
+
+<ul>
+  <li><a href="/engs50/Examples/names3.c">names3.c</a>: array of pointers; use of <code class="language-plaintext highlighter-rouge">readlinep</code></li>
+</ul>
+
+<p>Here, the two-dimensional <code class="language-plaintext highlighter-rouge">names</code> array is replaced by a one-dimensional array of string pointers, which is more common in C, and which allows the names to be of any length - each array entry points to a dynamically allocated memory from the heap, big enough to hold that name.</p>
+
+<p>We use a new <code class="language-plaintext highlighter-rouge">freadlinep</code> function; after the next lecture, I recommend you read about its <a href="../readlinep.html">implementation</a>.</p>
+
+<p>We don’t have time in class, but we can extend this code to sort the array using <code class="language-plaintext highlighter-rouge">qsort()</code> quicksort:</p>
+
+<ul>
+  <li><a href="/engs50/Examples/names4.c">names4.c</a>: sort names; <code class="language-plaintext highlighter-rouge">void*</code>; casting</li>
+</ul>
+
+<p>Then we live-coded a linked-list version of the <code class="language-plaintext highlighter-rouge">names</code> program:</p>
+
+<ul>
+  <li><a href="/engs50/Examples/names5.c">names5.c</a> -  revises names3.c to use linked list instead of array</li>
+</ul>
+
+<p>You should look at two more versions of the <code class="language-plaintext highlighter-rouge">names</code> program:</p>
+
+<ul>
+  <li><a href="/engs50/Examples/names6.c">names6.c</a> - extends names5.c to keep the list sorted</li>
+  <li><a href="/engs50/Examples/names7.c">names7.c</a> - extends names6.c to remove duplicates</li>
+</ul>
+
+<h2 id="activity">Activity</h2>
+
+<p>Today’s <a href="activity.html">activity</a> deletes the list.</p>
 
   </div>
 

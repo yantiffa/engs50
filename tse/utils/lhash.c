@@ -13,7 +13,7 @@
 #include <pthread.h>
 #include "queue.h"
 #include "lhash.h"
-#inlcude "hash.h"
+#include "hash.h"
 
 lhashtable_t * lhopen(uint32_t hsize){
 	lhashtable_t *lhash = malloc(sizeof(lhashtable_t));

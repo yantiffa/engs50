@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/intro/
+https://thayer.github.io/engs50/Notes/memory/
 2
-31558
+14317
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/intro/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Welcome to Engs50 (CS50)!</title>
+  <title>Memory, pointers, and malloc</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/intro/">
+  <link rel="canonical" href="/engs50/Notes/memory/">
 </head>
 
 
@@ -44,470 +44,159 @@ https://thayer.github.io/engs50/Notes/intro/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Welcome to Engs50 (CS50)!</h1>
+    <h1 class="post-title">Memory, pointers, and malloc</h1>
   </header>
 
   <div class="post-content">
-    <p>This note discusses the aim and schedule of the course, and takes a
-brief look at Unix, C programming, and computer architecture.</p>
+    <p>To truly understand C, and in particular, the use of pointers, you need to understand how C programs use memory.
+These same concepts underly nearly all procedural languages, though some languages cover up the details.</p>
 
-<h2 id="the-course">The course</h2>
+<!--
+***We started today with a demo of my solutions for [Lab 2](/engs50/Labs/Lab2)***.
+-->
+<!-- Terminal [script](/engs50/Notes/memory/script.txt) from today's class. -->
 
-<p>The aim of this course is to develop the necessary systems programming
-skills in C and Unix as a foundation to tackle the design,
-implementation, and integration of a large software project working in
-small teams.  The challenge of the course is to quickly get people up
-to speed so there is sufficient time to get into the details of a
-complex software design project.  The first part of the course serves
-to develop design, programming and other systems skills such as
-source-code management, testing, and debugging.  The second part of
-the course is all about the project and team work.  Good team work
-will lead to success.  That’s the message.</p>
-
-<p>A note about Unix/Linux: Unix came first.  All of the others,
-including BSD, MacOS, and all the variants of Linux, are derivations
-of that original effort.  While we use Ubuntu Linux on the M210
-machines, you may elect to use your own copy of Linux or the Unix that
-Mac OSX is based on.  Except when it <em>really</em> matters, I use the term
-Unix to refer to them all.</p>
-
-<p>The syllabus in a nutshell:</p>
+<h3 id="goals">Goals</h3>
 
 <ul>
-  <li>Unix: shell, commands, shell programming;</li>
-  <li>C: structure, arrays, pointers, dynamic memory, files;</li>
-  <li>Programming tools: gcc (GNU compiler), make (maintain groups of programs), gdb (GNU debugger), git (source code management), valgrind (profiling and memory leak checker).</li>
-  <li>Software development methodology: design, implement, unit test/debug, integration, demo, maintenance.</li>
-  <li>Programming: building a search engine (crawler, indexer, query engine).</li>
-  <li>Team project: it’s a surprise!</li>
+  <li>to recognize that all data is stored in memory, that memory is a linear sequence of bytes, and that every byte has a numeric <em>address</em>.</li>
+  <li>to understand that C stores the running program and its data in one of <em>four areas of memory</em>, each managed differently.</li>
+  <li>to learn about C syntax for pointers, addresses, and dereferencing.</li>
+  <li>to begin to explore dynamic memory allocation.</li>
 </ul>
 
-<p>The course includes several Unix shell and C programming assignments
-listed under Modules on Canvas. There are no lectures; all the lecture
-material is on videos for easy reference. Class time is devoted to
-working programming problems individually in Module 1 and in teams for
-the remainder of the course.</p>
+<h3 id="slides-and-examples">Slides and examples</h3>
 
-<p>Please take note of the <a href="/engs50/Reading">reading assigned</a>
-each week.  I will list the reading week by week, rather than lecture
-by lecture, to give you some flexibility – but please do the reading,
-you’ll find it to be interesting and valuable!</p>
+<p>Today I used a brief set of slides (in <a href="/engs50/Notes/memory/memory-pointers-C.key">Keynote</a> or <a href="/engs50/Notes/memory/memory-pointers-C.pdf">PDF</a>) to explain memory, addresses, and pointers, complementing the notes below.
+The slides reference several examples:</p>
 
-<h2 id="logistics">Logistics</h2>
+<ul>
+  <li><a href="/engs50/Examples/pointer0.c">pointer0.c</a></li>
+  <li><a href="/engs50/Examples/pointer1.c">pointer1.c</a></li>
+  <li><a href="/engs50/Examples/pointer2.c">pointer2.c</a></li>
+  <li><a href="/engs50/Examples/pointer3.c">pointer3.c</a></li>
+</ul>
 
-<p>Read the <a href="">Logistics</a> information.</p>
+<h1 id="memory-and-addresses">Memory, and addresses</h1>
 
-<p><strong>About communication:</strong> be sure to track Canvas for announcements and updates.</p>
+<p>Every bit of information the computer needs must be stored somewhere in memory - whether instructions or data.
+The computer’s memory is a sequence of bytes, each byte with its own numeric <em>address</em>.
+If the computer has one megabyte of memory, these 2^20 bytes will be numbered from 0 to 2^20-1, that is, from 0 to 1,048,575.
+Or, since we’re computer scientists, we work in hexadecimal rather than decimal; the bytes are numbered from 00000 to FFFFF.
+In practice, we tend to write hexadecimal numbers in C notation: 0x00000 to 0xFFFFF.</p>
 
-<p><strong>About engagement:</strong> you will learn more from this course if you are
-actively engaged, where <em>engagement = preparation + participation.</em>
-Read the lecture notes and weekly reading, practice at home, and
-participate with your team mates.</p>
+<p>Given a variable, we can use a C operator <code class="language-plaintext highlighter-rouge">&amp;</code> to get its address.
+You might read this operator as “address of…”.</p>
 
-<p><strong>About the programming:</strong> <em>There is a significant amount
-of programming in this course, requiring
-a considerable time commitment on the part of the student.</em></p>
-
-<p>You will need to be well organized to complete all the programming
-assignments and project.  Start each lab early.  It will be
-challenging, but we hope it will be fun!</p>
-
-<p><strong>About the project</strong>:
-You will be assigned to a team and given about three weeks to complete
-a large project requiring strong collaboration and a problem-solving
-mindset.  Each member is responsible for contributing to the overall
-system design, implementation, testing, integration, and
-documentation.  The goal of this activity is to help you develop the
-confidence, skills, and habits necessary to write large computer
-programs while part of a multi-person team.  You will become
-conversant in software engineering paradigms, such as source code
-control with <code class="language-plaintext highlighter-rouge">git</code> and other open source tools that ease the software
-development process.  In addition, you will develop vital skills in
-self-directed learning, problem solving, and communication.  The
-project concludes with a demo and a review of your design and
-implementation.</p>
-
-<p>In the first few Modules we cover Unix, the shell, and shell
-programming.  This is not meant to be a detailed presentation of the
-Unix OS and its programming tools – it would require a whole term to
-cover all that material in detail.  We need to know enough about Unix
-and its tools to be able to navigate our way around the system, write
-some basic shell scripts, and use its programming tools.</p>
-
-<p>It is important that you use these notes as a starting point, but like
-any budding engineer you need to do some experimenting and read up on
-the details.  You need to go on the web and find information if there
-are gaps in your knowledge, and then come see the instructor or TAs
-for help if you’re still stuck.  There are many references on the
-<a href="/engs50/Resources">Resources</a> page.</p>
-
-<p><strong>Caveat</strong>: Please take note that the notes will not always be
-detailed.  You will need to augment these notes with your own comments
-and by using the references and reading assignments so you can dive
-deeper into the topic.</p>
-
-<h2 id="the-command-line">The command line</h2>
-
-<p><a href="/engs50/Notes/intro/script.txt">shell examples.</a></p>
-
-<p>Unix was originally developed for computers with hardwired
-‘terminals’, each of which was basically an electronic typewriter - a
-printer with a keyboard.  There were no graphical displays, and the
-concepts of ‘windows’ and ‘mouse’ had not yet been invented.  To
-interact with the computer, the user types on the keyboard, and the
-computer echos the keystrokes on the paper.  (See the <a href="#historical-note">historical
-note</a> below.  The system is controlled by typing
-‘commands’, most of which print results for the user to see.  The
-interaction occurs over the ‘command line’.</p>
-
-<p>Modern Unix systems support rich graphical user interfaces, but under
-the hood they all support the command line.  In this class, I will
-demonstrate everything using the MacOS command line, accessed via the
-MacOS application called <code class="language-plaintext highlighter-rouge">Terminal</code>.  If you have a Mac, you can
-follow along.  If you use Windows, consider installing Linux on your
-laptop (either ‘dual boot’ or ‘virtual machine’).  But all of us can
-(and will) also use the Thayer M210 machines.</p>
-
-<p>When I open a new Terminal window on my Mac, I can type Unix commands
-at the ‘prompt’.  This prompt is from the ‘shell’ – a program – that
-interprets your command line and runs a program representing each
-command.  Your prompt may look different - the shell allows users to
-customize prompts and you’ll see a few formats in the examples below.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>MacBook ~]<span class="nv">$ </span><span class="nb">ls
-</span>Applications/           Movies/                 bin/
-Creative Cloud Files/   Music/                  cs50@
-Desktop/                Pictures/               lib/
-Documents/              Pictures personal/      projects/
-Downloads/              Public/                 public_html/
-Dropbox/                Scans/                  repositories/
-Google Drive/           Shared@                 src/
-Library/                Sites/
-<span class="o">[</span>MacBook ~]<span class="nv">$ </span><span class="nb">echo </span>Hello CS50
-Hello CS50
-<span class="o">[</span>MacBook ~]<span class="nv">$ </span>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<span class="kt">int</span><span class="o">*</span> <span class="n">xp</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>
 </code></pre></div></div>
 
-<p>The <code class="language-plaintext highlighter-rouge">ls</code> command is the “list directory contents” command.
-The <code class="language-plaintext highlighter-rouge">echo</code> command is like a print statement - it echos its arguments back.</p>
-
-<p>Most commands quickly produce some output and then exit.  Some will
-run too long - perhaps printing too much output; you can stop (kill)
-the command, forcing it to exit, by typing control-C <code class="language-plaintext highlighter-rouge">^C</code> at the
-keyboard.  One silly program, <code class="language-plaintext highlighter-rouge">yes</code>, just prints an infinite sequence
-of <code class="language-plaintext highlighter-rouge">y</code> characters until you kill it:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>DFK:~] <span class="nb">yes
-</span>y
-y
-y
-^C
-<span class="o">[</span>DFK:~]
-</code></pre></div></div>
-
-<p>Some commands ask for your input, and continue to read input until they read an “end of file” (EOF); you can cause the program to detect an EOF by typing control-D <code class="language-plaintext highlighter-rouge">^D</code> at the beginning of an input line.
-Below I typed three lines of text, the <code class="language-plaintext highlighter-rouge">^D</code> at the start of the fourth input line, to the <code class="language-plaintext highlighter-rouge">cat</code> program:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>mail kotz@cs
-Subject: Hello from cs50
-This is an email message from me to kotz@cs.
-I can end the message by typing ctrl-D.
-bye!
-EOT
-<span class="o">[</span>cs50@flume ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>Here, when we typed ctrl-D the <code class="language-plaintext highlighter-rouge">mail</code> program detected an end of file (EOF) on its input (i.e., the keyboard), then printed <code class="language-plaintext highlighter-rouge">EOT</code> and exited.
-Moments later, the mail message landed in my inbox.</p>
-
-<p>Notice the difference between <code class="language-plaintext highlighter-rouge">^C</code> and <code class="language-plaintext highlighter-rouge">^D</code>; the former kills the program immediately, whereas the latter causes it to detect EOF when it next reads input from the keyboard.</p>
-
-<h2 id="logging-into-a-remote-machine-using-ssh">Logging into a remote machine using <code class="language-plaintext highlighter-rouge">ssh</code></h2>
-
-<p>Thayer operates a set of Linux machines called
-hubN.thayer.dartmouth.edu where N is a number between 1 and 16. You
-can use these to practice using ssh, but use the M210 machines for
-verifying your labs before you hand them in your labs.</p>
-
-<p>I’ll login in from my Mac using the <strong>s</strong>ecure <strong>sh</strong>ell (<code class="language-plaintext highlighter-rouge">ssh</code>) Unix command.
-The <code class="language-plaintext highlighter-rouge">ssh</code> command establishes a secure channel and uses public-key cryptography to authenticate the remote computer and the user.</p>
+<p>The first variable <code class="language-plaintext highlighter-rouge">x</code> is an integer.
+The second variable <code class="language-plaintext highlighter-rouge">xp</code> is a pointer to an integer, and it is initialized to the address in memory where <code class="language-plaintext highlighter-rouge">x</code> is stored.</p>
 
 <blockquote>
-  <p>The <code class="language-plaintext highlighter-rouge">ssh</code> command replaces the archaic <code class="language-plaintext highlighter-rouge">telnet</code> (remote communications with another computer) and <code class="language-plaintext highlighter-rouge">rlogin</code> (remote login) because they lack security.
-The <code class="language-plaintext highlighter-rouge">ssh</code> command is exclusively used, these days, because your session is encrypted when it’s transmitted over the network, rather than being sent in clear text.</p>
+  <p>By the way, the <code class="language-plaintext highlighter-rouge">NULL</code> pointer is simply address zero (0x00000).
+The OS arranges for that memory segment to be illegal for reading or for writing, so if you try to dereference a null pointer for reading or writing (think <code class="language-plaintext highlighter-rouge">char *p=NULL; char c = *p;</code>) the OS will catch it and trigger a ‘segmentation fault’.</p>
 </blockquote>
 
-<p>Below, I remotely log in as user <code class="language-plaintext highlighter-rouge">kotz</code> to the server named <code class="language-plaintext highlighter-rouge">flume</code> by giving its full IP name - <code class="language-plaintext highlighter-rouge">flume.cs.dartmouth.edu</code>.</p>
+<p>When you run your program, it becomes a <em>process</em> within Unix.
+(To see a list of all your processes, type <code class="language-plaintext highlighter-rouge">ps</code> at the bash commandline.
+To see <em>all</em> the processes running on the system, try <code class="language-plaintext highlighter-rouge">ps ax</code>.)  Your program’s executable code is copied into memory so the processor can read the instructions and execute them.
+This region is often called the <em>code segment</em> or <em>text segment</em>).</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>MacBook ~]<span class="nv">$ </span>ssh <span class="nt">-l</span> kotz flume.cs.dartmouth.edu
-Last login: Fri Jan 27 13:25:26 2017 from 10.31.126.2
-<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">ls
-</span>cs50/  old/  public_html/
-<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">ls </span>cs50
-labs/
-<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">ls </span>cs50/labs
-<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">logout
-</span>Connection to flume.cs.dartmouth.edu closed.
-<span class="o">[</span>MacBook ~]<span class="nv">$ </span>
+<p>Let’s focus on data, which live in the other three segments.</p>
+
+<h2 id="three-regions-of-data-memory">Three regions of data memory</h2>
+
+<p>C stores all of the data your program manipulates in three distinct regions of memory (aka <em>segments</em>).
+There’s nothing special about each region - they’re all somewhere in that linear sequence of bytes - but C manages each differently.
+Let’s look at each in turn.</p>
+
+<h3 id="global-memory-aka-static">Global memory (aka static)</h3>
+
+<p>The simplest region is called ‘global’ (or ‘static’) storage, and it’s where global variables live.
+If you define a constant or variable outside of any function, it has</p>
+
+<ul>
+  <li><em>global scope</em> - meaning that it is visible to all code in any function within the current file, and</li>
+  <li><em>static storage</em> - meaning that C allocates space for it (and initializes the contents) before the program begins executing; its address will never change throughout the execution of the program (hence the name ‘static’).</li>
+</ul>
+
+<p>For example,</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">float</span> <span class="n">pi</span><span class="o">=</span><span class="mi">3</span><span class="p">.</span><span class="mi">1415926535</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">char</span> <span class="n">usage</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"Usage: dog [-n] [-m mapfile] [-] [filename]...</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">error_count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="p">...</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
-<blockquote>
-  <p>It is also possible to connect to a remote Linux server using X-windows, an early form of graphical user interface that has the capability to run applications on a remote server but put the windows on your local computer.
-I won’t be using X in this course, but you may wish to explore the option.</p>
-</blockquote>
+<p>The above declares three global variables, two of which are constants and one of which is variable.
+All are visible to functions defined below their declaration.
+Global variables are always declared at the top of a C file, after <code class="language-plaintext highlighter-rouge">#include</code> directives and before any function definitions.</p>
 
-<p>There are hundreds of Unix commands – but you probably only need a few dozen to get by.
-Each Unix command has a short abbreviated command name (e.g., LiSt directory (ls) or Secure SHell (ssh)) and its associated syntax that typically includes various arguments, and options; typically, these options (or <em>switches</em> as they are also known) are either a single letter preceded by a hyphen (e.g., <code class="language-plaintext highlighter-rouge">-l</code>) or one or more words preceded by two hyphens (e.g., <code class="language-plaintext highlighter-rouge">--verbose</code>).
-For example, the format of an <code class="language-plaintext highlighter-rouge">ssh</code> command line looks like this:</p>
+<p>Global variables can be handy, and sometimes necessary, but it is good style to avoid use of global variables.
+(Global constants are generally ok.)  Well-modularized programs keep their data close - passing the data (or pointers to data) among functions.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	ssh <span class="o">[</span>options] <span class="o">[</span>user@] <span class="nb">hostname</span> <span class="o">[</span><span class="nb">command</span><span class="o">]</span>
-</code></pre></div></div>
+<p>There are two kinds of ‘global’ in C: global within a C file, and global across all C files in the program.
+The former are reasonable, if used carefully, but the latter are more dangerous.
+We’ll discuss the differences later, if we have time.</p>
 
-<p>In <code class="language-plaintext highlighter-rouge">ssh -l kotz flume.cs.dartmouth.edu</code>, the switch <code class="language-plaintext highlighter-rouge">-l</code> informs the <code class="language-plaintext highlighter-rouge">ssh</code> command that the username of the user logging in is kotz.
-(Alternately, I could have used the form <code class="language-plaintext highlighter-rouge">ssh kotz@flume.cs.dartmouth.edu</code>).</p>
+<h3 id="the-stack-for-local-variables">The Stack (for local variables)</h3>
 
-<p>This is a good time to look at the formatting of these command help texts.
-The <code class="language-plaintext highlighter-rouge">[ ]</code> are used to denote optional things, like</p>
+<p>All of the example code we’ve seen so far makes extensive use of local variables; these variables are defined within a function and have</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[command]
-</code></pre></div></div>
+<ul>
+  <li><em>local scope</em> - meaning that the variable is visible within the function only, and</li>
+  <li><em>stack storage</em> - meaning that C allocates space for the variable within the stack frame for this particular instance of this function call.</li>
+</ul>
 
-<p>while the things outside of the <code class="language-plaintext highlighter-rouge">[ ]</code> , like <code class="language-plaintext highlighter-rouge">hostname</code>, must be specified.</p>
+<p><strong>Note:</strong> Local variables include the function’s parameters.</p>
 
-<h2 id="getting-information-using-the-online-manual-man">Getting Information using the online manual (man)</h2>
+<p>Think about how a stack works.
+When the program starts, C allocates a chunk of bytes on the stack to hold all the variables defined in <code class="language-plaintext highlighter-rouge">main</code>.
+This chunk is called a ‘stack frame’.
+<em>It does not initialize these bytes</em> - the program must initialize variables, either in the variable definition or in the code to follow.
+Later, when <code class="language-plaintext highlighter-rouge">main</code> calls another function, say, <code class="language-plaintext highlighter-rouge">readline</code>, it allocates another chunk of bytes on the stack (you could say, it <em>pushes another frame on the stack</em>) to hold the variables defined by <code class="language-plaintext highlighter-rouge">readline </code>.
+When <code class="language-plaintext highlighter-rouge">readline</code> calls <code class="language-plaintext highlighter-rouge">fgetc</code>, it pushes another stack frame on the stack, a chunk of bytes to hold the variables defined within <code class="language-plaintext highlighter-rouge">fgetc</code>.
+When <code class="language-plaintext highlighter-rouge">fgetc</code> returns, it <em>pops the frame off the stack</em>.
+When <code class="language-plaintext highlighter-rouge">readline</code> returns, it pops that frame off the stack.
+The local variables defined in <code class="language-plaintext highlighter-rouge">readline </code> are not just syntactically inaccessible to <code class="language-plaintext highlighter-rouge">main</code> (out of scope), their memory is no longer allocated.
+Indeed, when <code class="language-plaintext highlighter-rouge">main</code> calls another function, say, <code class="language-plaintext highlighter-rouge">printf</code>, a stack frame is pushed on to the stack for <code class="language-plaintext highlighter-rouge">printf</code>, re-using the same memory that had been allocated to <code class="language-plaintext highlighter-rouge">readline </code> and <code class="language-plaintext highlighter-rouge">fgetc</code>).</p>
 
-<p>If you want the detailed syntax of a Unix command you can use the manual command followed by the command, as in <code class="language-plaintext highlighter-rouge">man ssh</code> which produced the following:</p>
+<h3 id="the-heap-dynamically-allocated-memory">The Heap (dynamically allocated memory)</h3>
 
-<pre><code class="language-man">    SSH(1)                    BSD General Commands Manual                   SSH(1)
+<p>The third kind of data memory is called the “heap”.
+It is a large region of memory managed by <code class="language-plaintext highlighter-rouge">malloc()</code>.
+Each call to <code class="language-plaintext highlighter-rouge">malloc()</code> selects a chunk of bytes from the heap region, and returns a pointer to that chunk.
+It keeps careful records of which chunks have been allocated, and which are free.
+It is the programmer’s responsibility to, eventually, return unused chunks by calling <code class="language-plaintext highlighter-rouge">free(p)</code> where <code class="language-plaintext highlighter-rouge">p</code> is a pointer earlier returned by <code class="language-plaintext highlighter-rouge">malloc</code>.
+If the programmer forgets to call <code class="language-plaintext highlighter-rouge">free</code>, that chunk can never be reused, and eventually <code class="language-plaintext highlighter-rouge">malloc</code> will run out of free chunks to be allocated.
+(This situation is called a ‘memory leak.’)   It is also the programmer’s responsibility not to call <code class="language-plaintext highlighter-rouge">free</code> multiple times for the same pointer; doing so may corrupt the records kept by the memory-allocation library, and will likely lead to program crashes.</p>
 
-    NAME
-         ssh -- OpenSSH SSH client (remote login program)
+<p>There are four related functions you should understand:</p>
 
-    SYNOPSIS
-         ssh [-1246AaCfgKkMNnqsTtVvXxYy] [-b bind_address] [-c cipher_spec]
-             [-D [bind_address:]port] [-e escape_char] [-F configfile] [-I pkcs11] 
-             [-i identity_file] [-L [bind_address:]port:host:hostport] [-l login_name]
-             [-m mac_spec] [-O ctl_cmd] [-o option] [-p port] 
-                [-R [bind_address:]port:host:hostport] [-S ctl_path]
-             [-W host:port] [-w local_tun[:remote_tun]] [user@]hostname [command]
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">p = malloc(n)</code> - allocates <code class="language-plaintext highlighter-rouge">n</code> bytes of heap memory</li>
+  <li><code class="language-plaintext highlighter-rouge">p = calloc(count, size)</code> allocates <code class="language-plaintext highlighter-rouge">count*size</code> bytes of heap memory</li>
+  <li><code class="language-plaintext highlighter-rouge">p = realloc(p, n)</code> - where <code class="language-plaintext highlighter-rouge">p</code> is a pointer to heap memory - expands (or shrinks) its allocation to <code class="language-plaintext highlighter-rouge">n</code> bytes.</li>
+  <li><code class="language-plaintext highlighter-rouge">free(p)</code> - where <code class="language-plaintext highlighter-rouge">p</code> is a pointer to heap memory - releases that portion of heap memory for future use.</li>
+</ul>
 
-    DESCRIPTION
-         ssh (SSH client) is a program for logging into a remote machine and for executing
-         commands on a remote machine.  It is intended to replace rlogin and rsh, and
-         provide secure encrypted communications between two untrusted hosts over an 
-         insecure network.  X11 connections and arbitrary TCP ports can also be forwarded 
-         over the secure channel.
+<p>Check out this <a href="https://www.youtube.com/watch?v=5VnDaHBi8dM">animated explanation of pointers</a>.
+Fun!</p>
 
-         ssh connects and logs into the specified hostname (with optional user name).  The 
-         user must prove his/her identity to the remote machine using one of several methods 
-         depending on the protocol version used (see below).
+<h3 id="on-exit">On exit</h3>
 
-         If command is specified, it is executed on the remote host instead of a login shell.
+<p>When the process exits, all its memory is released - the four segments (code, global, stack, and heap) disappear.</p>
 
-         The options are as follows:
+<h3 id="activity">Activity</h3>
 
-         -1      Forces ssh to try protocol version 1 only.
-
-         -2      Forces ssh to try protocol version 2 only.
-
-         -4      Forces ssh to use IPv4 addresses only.
-
-         -6      Forces ssh to use IPv6 addresses only.
-
-         -A      Enables forwarding of the authentication agent connection.  This can also
-                 be specified on a per-host
-
-    ... and a whole lot more
-</code></pre>
-
-<p>This is just a snippet of the <code class="language-plaintext highlighter-rouge">man ssh</code> output (<code class="language-plaintext highlighter-rouge">man</code> is short for manual).
-The manual output includes all the nitty gritty details on options and about the command.
-For most commands you can use the common option <code class="language-plaintext highlighter-rouge">--help</code> (two hyphens) to get a brief breakdown of the command and its switches.
-This doesn’t work for all commands (including <code class="language-plaintext highlighter-rouge">ssh</code>, interestingly), but in that case the use of <code class="language-plaintext highlighter-rouge">-help</code> is interpreted as an invalid entry by ssh and it lists of the options anyway.</p>
-
-<p>You can use</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>man -k keyword
-</code></pre></div></div>
-
-<p>to search through the manual pages for matches on a keyword.
-For example:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[kotz@flume ~]$ man -k shell
-bash (1)             - GNU Bourne-Again SHell
-capsh (1)            - capability shell wrapper
-chroot (1)           - run command or interactive shell with special root directory
-chsh (1)             - change your login shell
-CPAN::Admin (3pm)    - A CPAN Shell for CPAN admins
-CPAN::Plugin (3pm)   - Base class for CPAN shell extensions
-csh (1)              - C shell with file name completion and command line editing
-... and much more
-</code></pre></div></div>
-
-<h2 id="your-home-directory-and-its-files">Your home directory and its files</h2>
-
-<p>Each user has a ‘home directory’.  After you have logged in using
-<code class="language-plaintext highlighter-rouge">ssh</code> you are in your home directory - that is, the shell’s notion of
-your ‘current working directory’ is your home directory.</p>
-
-<p>We can look at our home directory ‘path’ using the <code class="language-plaintext highlighter-rouge">pwd</code> (print
-working directory) command.  You can always use the <code class="language-plaintext highlighter-rouge">man</code> and <code class="language-plaintext highlighter-rouge">info</code>
-commands to get more information.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">pwd</span>
-/net/nusers/kotz
-<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>The tilde (~) above is shorthand for ‘home’.  Let’s take a look at the
-contents of my home directory (using the -l switch which means long
-format):</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">ls
-</span>cs50/  old/  public_html/
-<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-l</span>
-total 12
-drwxrwxr-x 5 kotz root 4096 Feb  2 11:24 cs50/
-drwxrwxr-x 2 kotz root 4096 Jan 27 20:00 old/
-drwxr-xr-x 3 kotz root 4096 Mar 17 12:01 public_html/
-<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">cd </span>cs500
-<span class="nt">-bash</span>: <span class="nb">cd</span>: cs500: No such file or directory
-<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span>cs cs50
-<span class="nt">-bash</span>: cs: <span class="nb">command </span>not found
-<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">cd </span>cs50
-<span class="o">[</span>kotz@flume ~/cs50]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-l</span>
-total 20
-drwxr-xr-x 2 kotz root 4096 Jan 28 11:08 lab1/
-drwxr-xr-x 2 kotz root 4096 Feb  2 10:36 lab2/
-drwxr-xr-x 2 kotz root 4096 Jan 28 10:14 project/
-<span class="nt">-rw-r--r--</span> 1 kotz root   74 Feb  2 11:19 testfile
-<span class="nt">-rwxr-xr-x</span> 1 kotz root  402 Feb  2 11:23 testread.sh<span class="k">*</span>
-<span class="o">[</span>kotz@flume ~/cs50]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>Yes, I mistyped two commands in that example: <code class="language-plaintext highlighter-rouge">cd cs500</code> and <code class="language-plaintext highlighter-rouge">cs
-cs50</code>.  I wanted you to see what the system says when you make a
-mistake … just in case you make one yourself sometime. ;-)</p>
-
-<p>The <code class="language-plaintext highlighter-rouge">cd</code> command changes the current working directory; I finally
-typed it right and the shell reported that my working directory is
-<code class="language-plaintext highlighter-rouge">~/cs50</code>.  The same command, <code class="language-plaintext highlighter-rouge">ls -l</code>, listed <em>that</em> directory the
-second time.</p>
-
-<p>Files can be plain files, directories, or special files (more later).
-We can see that each file has file permissions and other data
-associated with it; for example, the directory <code class="language-plaintext highlighter-rouge">public_html</code>:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>drwxr-xr-x 3 kotz root 4096 Mar 17 12:01 public_html/
-</code></pre></div></div>
-
-<p>You can traverse directory trees assuming you have the appropriate permission.</p>
-
-<p>Unix supports a number of shells (command line interpreters).  If we
-use the echo command we can look at the environment variable that
-tells us which shell is running.  For this course we will use the bash
-(Born Again SHell) shell.</p>
-
-<p>Again, the shell is the command processor for Unix systems.  One way
-to find out what shell you’re running, try this:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>kotz@flume ~/cs50]<span class="nv">$ </span><span class="nb">echo </span>my shell is <span class="nv">$SHELL</span>
-my shell is /bin/bash
-<span class="o">[</span>kotz@flume ~/cs50]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>The last parameter to <code class="language-plaintext highlighter-rouge">echo</code> substitutes the value of the variable <code class="language-plaintext highlighter-rouge">SHELL</code>.
-More on the bash shell later.</p>
-
-<p>Another useful command for copying files between machines is the <code class="language-plaintext highlighter-rouge">scp</code> - secure copy (remote file copy program) command.
-Below I find, then copy, of the schedule for CS50 from the course website.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>DFK:~] ssh kotz@flume
-Last login: Mon Mar 28 10:17:04 2016 from 10.31.123.28
-<span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">cd</span> ~cs50
-<span class="o">[</span>kotz@flume /net/class/cs50]<span class="nv">$ </span><span class="nb">ls
-</span>Archive/		 master.bashrc	proc-log      src/  web-tse-from-2016W/
-download_16S_repos.awk<span class="k">*</span>  private/	public_html/  web@
-<span class="o">[</span>kotz@flume /net/class/cs50]<span class="nv">$ </span><span class="nb">cd </span>public_html/
-<span class="o">[</span>kotz@flume /net/class/cs50/public_html]<span class="nv">$ </span><span class="nb">ls
-</span>css/	    Labs/      Logistics/  Reading/    Schedule.pdf
-index.html  Lectures/  Project/    Resources/  Schedule.xlsx
-<span class="o">[</span>kotz@flume /net/class/cs50/public_html]<span class="nv">$ </span><span class="nb">logout
-</span>Connection to flume closed.
-<span class="o">[</span>DFK:~] scp flume.cs.dartmouth.edu:/net/class/cs50/public_html/Schedule.pdf <span class="nb">.</span>
-Schedule.pdf                                           100%   44KB  44.1KB/s   00:00    
-<span class="o">[</span>DFK:~] open Schedule.pdf
-<span class="o">[</span>DFK:~] 
-</code></pre></div></div>
-
-<p>Recall that <code class="language-plaintext highlighter-rouge">~</code> is my home directory, so <code class="language-plaintext highlighter-rouge">~cs50</code> is the home directory
-for user <code class="language-plaintext highlighter-rouge">cs50</code>.  I changed my working directory to the cs50 home,
-then into its <code class="language-plaintext highlighter-rouge">public_html</code>, and listed the files there.  Now I know
-the ‘path name’ for the desired file - the directory name followed by
-slash followed by the filename.  The <code class="language-plaintext highlighter-rouge">scp</code> command allows me to
-specify the host and pathname for the source and destination of the
-copy; here the destination is <code class="language-plaintext highlighter-rouge">.</code>, a shorthand for ‘current working
-directory.  Finally, I used the MacOS command <code class="language-plaintext highlighter-rouge">open</code> to open the file,
-which launches <code class="language-plaintext highlighter-rouge">Preview</code> to show me the pdf.</p>
-
-<h3 id="logging-out">Logging out</h3>
-
-<p>When we are ready to logout from our session on
-flume.cs.dartmouth.edu, we use <code class="language-plaintext highlighter-rouge">logout</code> or <code class="language-plaintext highlighter-rouge">exit</code>:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>kotz@flume ~]<span class="nv">$ </span><span class="nb">logout
-</span>Connection to flume.cs.dartmouth.edu closed.
-</code></pre></div></div>
-
-<h2 id="one-more-thing-unix-machines">One more thing: Unix machines</h2>
-
-<p>Note the following, depending on your personal computer’s operating system.</p>
-
-<p><strong>Linux</strong>: The systems in M210 are running Ubuntu GNU/Linux.
-Your Linux will likely be sufficiently compatible that you won’t have
-any trouble developing on your machine and delivering your assignments
-on a machine in M210.</p>
-
-<p><strong>Mac</strong>: Mac OSX Unix conforms to the POSIX standard for the C API,
-shell utilities, and threads and can compile and run your existing
-code.  The GNU tools we will be using, such as <code class="language-plaintext highlighter-rouge">gcc</code>, <code class="language-plaintext highlighter-rouge">make</code>, etc.,
-are either included or freely available.  (You may need to install
-command-line tools via Xcode; if so, you will be prompted to do so
-when you first type <code class="language-plaintext highlighter-rouge">gcc</code> or <code class="language-plaintext highlighter-rouge">make</code> or related commands.) You can use
-the <code class="language-plaintext highlighter-rouge">Terminal</code> application.  You can also use the <code class="language-plaintext highlighter-rouge">ssh</code> command to
-remotely log on to computers, as discussed above.  <strong>We recommend you
-install <a href="/engs50/Resources/Homebrew.html">Homebrew</a>.</strong></p>
-
-<p><strong>Windows</strong>: There are Unix-command shells for Windows and even an
-X-Window system for Windows systems.  However, since this is a Unix
-course you would be far better off doing your assignments on the
-Thayer machines in M210.</p>
-
-<h2 id="historical-note">Historical note</h2>
-
-<p>The name “Terminal” is still commonly used in Unix parlance, right
-down to the MacOS app by that name.  This term refers to the fact that
-early Unix computers, like other computers of its time, had a small
-number of interactive ‘terminals’ connected to it – each directly
-connected by a dedicated wire to a card within the computer.  Each
-terminal was little more than a keyboard and a screen - or in the
-early days, a keyboard and a printer that would print each character
-as it was typed, and print the characters sent by the computer.</p>
-
-<p>The first such terminals were “teletypes”, adapted from the device
-used by newsrooms around the country, which printed characters
-transmitted over the phone line from a distant device.  This
-<a href="https://www.youtube.com/watch?v=E4IztV7M3jI">video</a> shows a Teletype
-model ASR33.  From the sound of this machine, can you tell why
-television news shows’ opening music usually has a stocatto
-tap-tap-tap-tap-tap background theme?</p>
-
-<!--David-->
-<!--
-> One of the first interactive computer systems I ever used was a PDP8/e running ETOS and BASIC - far simpler than Unix - with a couple of teletype terminals.
-I found a [video of a refurbished PDP8/e driving a teletype](https://www.youtube.com/watch?v=2B-U-5ylvWo).
-Fun.
--->
+<p>Today’s <a href="activity.html">activity</a> looks at a program that copies a string - and tries to find a bug.</p>
 
   </div>
 

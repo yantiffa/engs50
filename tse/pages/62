@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/makefiles/preprocessor.html
+https://thayer.github.io/engs50/Notes/git/activity.html
 3
-15355
+7759
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/makefiles/preprocessor.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Extra - the C preprocessor</title>
+  <title>Activity - Git and Gitlab</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/makefiles/preprocessor.html">
+  <link rel="canonical" href="/engs50/Notes/git/activity.html">
 </head>
 
 
@@ -44,169 +44,77 @@ https://thayer.github.io/engs50/Notes/makefiles/preprocessor.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Extra - the C preprocessor</h1>
+    <h1 class="post-title">Activity - Git and Gitlab</h1>
   </header>
 
   <div class="post-content">
-    <p>You will notice that a few lines, typically near the beginning of a C program, begin with the character <code class="language-plaintext highlighter-rouge">#</code>, aka ‘hash’, ‘pound’, or ‘sharp’.
-These lines are “C preprocessor directives” and are actually instructions (directives) to a special program called the “C preprocessor”.
-As its name suggests, the C preprocessor processes the text of a C program <em>before</em> the C compiler sees it.
-The preprocessor directives (all beginning with <code class="language-plaintext highlighter-rouge">#</code>) should begin in column 1 (the 1st column) of any source line on which they appear.</p>
+    <h3 id="goals">Goals</h3>
 
-<p>The C preprocessor is very powerful but we will use it only for very specific purposes.
-Most of the other common uses for preprocessor directives are either beyond the scope of this course, or unnecessary (and bad style) in modern C.</p>
+<ul>
+  <li>to gain experience with git and Gitlab</li>
+  <li>to create and share a repo within your team</li>
+</ul>
 
-<h2 id="header-file-inclusion">Header file inclusion</h2>
+<h3 id="activity">Activity</h3>
 
-<p>The <code class="language-plaintext highlighter-rouge">#include</code> directive, often pronounced “pound include”, should appear at the beginning of a C program.
-It is used to literally copy the entire contents of another file at the point of the <code class="language-plaintext highlighter-rouge">#include</code> directive.
-A common <code class="language-plaintext highlighter-rouge">#include</code> directive, seen at the beginning of most C files, is</p>
+<p>The lecture notes has a section about the <a href="index.html#cs-gitlab">CS Gitlab Server</a> that shows a similar (though not identical) activity.</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="cp">#include &lt;stdio.h&gt;
-</span></code></pre></div></div>
+<ol>
+  <li>Use a browser to go to <a href="https://gitlab.cs.dartmouth.edu/"><code class="language-plaintext highlighter-rouge">https://gitlab.cs.dartmouth.edu/</code></a></li>
+  <li>Each member of your group that doesn’t already have one should <strong><em>create a Gitlab userid that is identical to your CS login name</em></strong>.</li>
+  <li>When the GitLab userid is created, go back and login.</li>
+  <li><strong><em>One</em></strong> member of your group should follow steps 1 through 9 in the <a href="/git/index.html#cs-gitlab">CS Gitlab Server</a> section of today’s lecture notes.</li>
+  <li>After the project has been created, the <strong><em>same</em></strong> person should click on <em>Settings</em> and then <em>Members</em>; this page allows you to share the repo with other Gitlab users.
+  Type the usernames of each of your group members and pick <em>Master</em> from the role menu, then click <em>Add to project</em>.
+  Below, I’m adding Travis as a Master on my Binary-tree repo: <img src="/engs50/Notes/git/gitlab7.png" alt="" />.</li>
+  <li><strong><em>Other</em></strong> members of your group should then receive an email message confirming their addition to this repo.
+  They should click the link in that message to visit the repo in the browser.</li>
+  <li><strong><em>All</em></strong> members of your group should then click on the repo name (right near the top of the page; in my example, it’s <em>binary-tree</em>) to pop back to the home page for this repo.</li>
+  <li><strong><em>Important:</em></strong> Click on the <code class="language-plaintext highlighter-rouge">SSH</code> pop-up to change it to <code class="language-plaintext highlighter-rouge">HTTPS</code>.</li>
+  <li>Scroll down to see the command-line instructions for using this project: <img src="/engs50/Notes/git/gitlab4.png" alt="" /></li>
+  <li>Before you proceed, copy the two <em>Git global setup</em> commands and paste them into a Terminal window.
+  While you’re at it, run two more commands:
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">git config --global push.default simple</code></li>
+      <li><code class="language-plaintext highlighter-rouge">git config --global core.editor emacs</code></li>
+      <li>(or vim, if you prefer it to emacs)</li>
+    </ul>
+  </li>
+  <li>Back to the new project.
+   Since this is a brand-new project, you have no repository on your local computer (whether that be your laptop or flume).
+   Look at the instructions under <em>Create a new Git repository.</em>
+   Copy the <code class="language-plaintext highlighter-rouge">git clone</code> command you see there.</li>
+  <li>Go to your Terminal window, and <code class="language-plaintext highlighter-rouge">cd ~/cs50</code>, your usual workspace for this class.
+   Paste the <code class="language-plaintext highlighter-rouge">git clone</code> command.
+   This command “clones” the remote repository (the one on Gitlab) into a new subdirectory.</li>
+  <li>Enter your Gitlab username and password.
+   It should proceed to create the local repository.</li>
+  <li><strong><em>One</em></strong> member of your group should create and push a <code class="language-plaintext highlighter-rouge">README.md</code> file.
+   (If you prefer plaintext, just call it <code class="language-plaintext highlighter-rouge">README</code>.) The Gitlab page lists the commands to add an empty <code class="language-plaintext highlighter-rouge">README.md</code> file but you might want to write <em>something</em> in that README!</li>
+  <li>Meanwhile, <strong><em>Other</em></strong> members of the group should each create a file <code class="language-plaintext highlighter-rouge">ABOUT-me.md</code> where they replace <code class="language-plaintext highlighter-rouge">me</code> with their name.
+   (For example, I would create <code class="language-plaintext highlighter-rouge">ABOUT-David.md</code>.
+   In the file they should write a sentence describing themself.
+   Then,
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">git add ABOUT-me.md</code> (with the appropriate filename)</li>
+      <li><code class="language-plaintext highlighter-rouge">git commit ABOUT-me.md</code> (an editor will open so you can type a commit message)</li>
+      <li><code class="language-plaintext highlighter-rouge">git push</code> (you may need to enter your Gitlab password)</li>
+    </ul>
+  </li>
+  <li>Back in the browser, refresh the repo’s home page - you should all see the new README.
+   If you click on <em>Files</em> you should see all the other files people added to the repo.</li>
+  <li><strong><em>All</em></strong> members of the group should <code class="language-plaintext highlighter-rouge">git pull</code> in their Terminal window - which should download all the files created by others to their local copy of the repo.</li>
+</ol>
 
-<p>This directive indicates that the contents of the file named <code class="language-plaintext highlighter-rouge">stdio.h</code> should be included at this point (the directive is replaced with the contents).
-There is no limit to the number of lines that may be included with this directive and, in fact, the contents of the included file may contain other <code class="language-plaintext highlighter-rouge">#include</code> directives which are handled in the same way.
-We say that the inclusions are nested and, of course, care should be taken to avoid duplicate or, even worse, recursive nestings!</p>
+<p>You now have a shared repo for use by your group!</p>
 
-<p>The example using <code class="language-plaintext highlighter-rouge">&lt;stdio.h&gt;</code>, above, demonstrates two important points.
-The filename itself appears between the characters <code class="language-plaintext highlighter-rouge">&lt; &gt;</code>.
-The use of these characters indicates that the enclosed filename should be found in the standard include directory <code class="language-plaintext highlighter-rouge">/usr/include</code>.
-The required file is then <code class="language-plaintext highlighter-rouge">/usr/include/stdio.h</code>.</p>
+<h3 id="tips">Tips</h3>
 
-<p>The standard include files are used to consistently provide system-wide data structures or declarations that are required in many different files.
-By having the standard include files centrally located and globally available, all C programmers are guaranteed of using the same data structures and declarations that they (all) require.</p>
-
-<p>Alternatively, the <code class="language-plaintext highlighter-rouge">" "</code> characters may also be used, as in the following example:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="cp">#include "readline.h"
-</span></code></pre></div></div>
-
-<p>to include the contents of the file <code class="language-plaintext highlighter-rouge">readline.h</code> at the correct point in the C program.
-Because double-quotes are used, the file is sought in the present working directory, that is <code class="language-plaintext highlighter-rouge">./readline.h</code>.
-The filename in double-quotes can actually be a pathname, if your source code is spread over several directories; for example,</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="cp">#include "includes/readline.h"
-</span></code></pre></div></div>
-
-<p>In both of the above examples the indicated filename had the <code class="language-plaintext highlighter-rouge">.h</code> extension.
-Whereas we have previously said that the extension of <code class="language-plaintext highlighter-rouge">.c</code> is expected by the C compiler, the use of <code class="language-plaintext highlighter-rouge">.h</code> is only a convention within UNIX.
-The <code class="language-plaintext highlighter-rouge">.h</code> indicates that the file is a <em>header file</em>, because they generally contain information required at the head (beginning) of a C program.
-Header files typically (and should) contain only <em>declarations</em> of C constructs, like data types, data structures, and constants used throughout the C program.
-In particular, <strong>include files should contain only <em>declarations</em>, and no <em>definitions</em>, of variables or functions.</strong></p>
-
-<p>You can also give the compiler a command-line flag to identify a directory where it can search for non-standard include files.
-If, for example, you moved your <code class="language-plaintext highlighter-rouge">includes</code> directory up a level, you might write</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="cp">#include "readline.h"
-</span></code></pre></div></div>
-<p>but then tell the compiler where to look for such files:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mygcc <span class="nt">-I</span> ../includes    <span class="nt">-c</span> readline.c
-</code></pre></div></div>
-
-<h2 id="conditional-compilation">Conditional compilation</h2>
-
-<p>Another often used feature of the C preprocessor is the use of “conditional compilation directives”.</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define DEBUG
-</span><span class="p">...</span>
-<span class="cp">#ifdef DEBUG
-</span> <span class="p">...</span> <span class="n">code</span> <span class="k">for</span> <span class="n">use</span> <span class="n">when</span> <span class="n">DEBUG</span> <span class="n">is</span> <span class="n">defined</span>
-<span class="cp">#else // DEBUG
-</span> <span class="p">...</span> <span class="n">code</span> <span class="k">for</span> <span class="n">use</span> <span class="n">when</span> <span class="n">DEBUG</span> <span class="n">is</span> <span class="n">not</span> <span class="n">defined</span>
-<span class="cp">#endif // DEBUG
-</span></code></pre></div></div>
-
-<p>The C preprocessor actually includes some code, and strips out other code, before passing it to the C compiler.
-In the above example, we define the preprocessor constant called <code class="language-plaintext highlighter-rouge">DEBUG</code>, and later test its value with <code class="language-plaintext highlighter-rouge">#ifdef</code>.
-Notice the use of comments on the <code class="language-plaintext highlighter-rouge">#else</code> and <code class="language-plaintext highlighter-rouge">#endif</code> lines to help readability.</p>
-
-<p>The above example is a common approach for debugging.
-Even better, remove the <code class="language-plaintext highlighter-rouge">#DEBUG</code> line and let that be determined by the programmer at compile time:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#ifdef DEBUG
-</span> <span class="p">...</span> <span class="n">code</span> <span class="k">for</span> <span class="n">use</span> <span class="n">when</span> <span class="n">DEBUG</span> <span class="n">is</span> <span class="n">defined</span>
-<span class="cp">#else // DEBUG
-</span> <span class="p">...</span> <span class="n">code</span> <span class="k">for</span> <span class="n">use</span> <span class="n">when</span> <span class="n">DEBUG</span> <span class="n">is</span> <span class="n">not</span> <span class="n">defined</span>
-<span class="cp">#endif // DEBUG
-</span></code></pre></div></div>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  mygcc <span class="nt">-DDEBUG</span> program.c <span class="nt">-o</span> program
-</code></pre></div></div>
-
-<p>The program compiles (and behaves) differently with and without the compile-time switch <code class="language-plaintext highlighter-rouge">-DDEBUG</code>.</p>
-
-<h2 id="header-file-protection">Header file protection</h2>
-
-<p>The one place we really <em>must</em> use conditional compilation is in header files.
-Look at our example <a href="/engs50/Examples/readline.h">readline.h</a>:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
- * readline.h - a utility function to safely read one line of input
- * See readline.c for documentation.
- *
- * David Kotz, April 2016
- */</span>
-
-<span class="cp">#ifndef __READLINE_H__
-#define __READLINE_H__
-</span>
-<span class="cp">#include &lt;stdbool.h&gt;
-</span>
-<span class="k">extern</span> <span class="n">bool</span> <span class="nf">readline</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">len</span><span class="p">);</span>
-
-<span class="cp">#endif //  __READLINE_H__
-</span></code></pre></div></div>
-
-<p>If the constant <code class="language-plaintext highlighter-rouge">__READLINE_H__</code> is not yet defined (<code class="language-plaintext highlighter-rouge">#ifndef</code>) then incude the remainder of the file up to <code class="language-plaintext highlighter-rouge">#endif</code>.
-The first thing it does is to define that <code class="language-plaintext highlighter-rouge">__READLINE_H__</code>.
-Thus, if a C file happens to include <code class="language-plaintext highlighter-rouge">readline.h</code> twice, which can happen in complex programs when header files include other include files, the C compiler won’t see multiple copies of the included code.
-That is,</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include "readline.h"
-#include "readline.h"
-</span></code></pre></div></div>
-
-<p>does not translate to</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">extern</span> <span class="n">bool</span> <span class="nf">readline</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">len</span><span class="p">);</span>
-<span class="k">extern</span> <span class="n">bool</span> <span class="nf">readline</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">len</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>but just to</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">extern</span> <span class="n">bool</span> <span class="nf">readline</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">len</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>The standard file <code class="language-plaintext highlighter-rouge">stdbool</code> protects itself this way, which is good, because a programmer may well write into her <code class="language-plaintext highlighter-rouge">.c</code> file something like</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
-#include &lt;stdbool.h&gt;
-#include &lt;readline.h&gt;
-</span></code></pre></div></div>
-
-<p>and, because <code class="language-plaintext highlighter-rouge">readline.h</code> also includes <code class="language-plaintext highlighter-rouge">stdbool.h</code>, the latter might get imported several times without that protection.</p>
-
-<blockquote>
-  <p>Why do we care?
-Some include files can safely be repeated and the C compiler won’t care; actually, <code class="language-plaintext highlighter-rouge">readline.h</code> is one like that.
-But others, e.g., if they declare global constants, will cause the compiler to complain about multiply-defined variables.</p>
-</blockquote>
-
-<h3 id="testing-header-files">Testing header files</h3>
-
-<p>How can you be sure your header file has included all the relevant header files?
-Compile it!
-To compile the header file <code class="language-plaintext highlighter-rouge">foo.h</code> by itself,</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mygcc <span class="nt">-c</span> foo.h
-</code></pre></div></div>
-
-<p>If there are any errors, it’s probaby because you forgot one of the include files.</p>
-
-<p>When done, <code class="language-plaintext highlighter-rouge">rm foo.gch</code> to clean up the compiler’s output.</p>
-
+<ul>
+  <li>After class, you may want to run those four global configuration commands on both your laptop and on flume, and install the <code class="language-plaintext highlighter-rouge">~/.gitignore</code> file on both your laptop and flume, as described above.</li>
+  <li>Check out <a href="/engs50/Resources/#markdown">Markdown</a> - it’s easy to learn.</li>
+  <li><a href="index.html#why-is-git-always-asking-for-my-password">Why is Git always asking for my password?</a></li>
+</ul>
 
   </div>
 

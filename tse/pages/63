@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/makefiles/headerfiles.html
+https://thayer.github.io/engs50/Labs/Lab4/REQUIREMENTS.html
 3
-6626
+5315
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/makefiles/headerfiles.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Extra - C header files</title>
+  <title>TSE Crawler Requirements Spec</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/makefiles/headerfiles.html">
+  <link rel="canonical" href="/engs50/Labs/Lab4/REQUIREMENTS.html">
 </head>
 
 
@@ -44,56 +44,52 @@ https://thayer.github.io/engs50/Notes/makefiles/headerfiles.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Extra - C header files</h1>
+    <h1 class="post-title">TSE Crawler Requirements Spec</h1>
   </header>
 
   <div class="post-content">
-    <p><strong><em>Examples are not yet updated for CS50 in 17S, but the concepts are still correct.</em></strong></p>
+    <p>The TSE crawler is a standalone program that crawls the web and retrieves webpages starting from a “seed” URL.
+It parses the seed webpage, extracts any embedded URLs, then retrieves each of those pages, recursively, but limiting its exploration to a given “depth”.</p>
 
-<p>Let’s look at the contents and purpose of <code class="language-plaintext highlighter-rouge">readline.h</code>.
-That file was used in the recent examples:</p>
+<p>The crawler <strong>shall</strong>:</p>
 
-<ul>
-  <li><a href="/engs50/Examples/names1.c">names1.c</a>: arrays of strings, reading and copying lines into an array.</li>
-  <li><a href="/engs50/Examples/names2.c">names2.c</a>: scanning a string and truncating it by overwriting a character with the null <code class="language-plaintext highlighter-rouge">\0</code> character.</li>
-</ul>
+<ol>
+  <li>execute from a command line with usage syntax
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">./crawler seedURL pageDirectory maxDepth</code></li>
+      <li>where <code class="language-plaintext highlighter-rouge">seedURL</code> is used as the initial URL,</li>
+      <li>where <code class="language-plaintext highlighter-rouge">pageDirectory</code> is the pathname for an existing directory in which to write downloaded webpages, and</li>
+      <li>where <code class="language-plaintext highlighter-rouge">maxDepth</code> is a non-negative integer representing the maximum crawl depth.</li>
+    </ul>
+  </li>
+  <li>crawl all pages reachable from <code class="language-plaintext highlighter-rouge">seedURL</code>, following  links to a maximum depth of <code class="language-plaintext highlighter-rouge">maxDepth</code>; where <code class="language-plaintext highlighter-rouge">maxDepth=0</code> means that crawler only explores the page at <code class="language-plaintext highlighter-rouge">seedURL</code>, <code class="language-plaintext highlighter-rouge">maxDepth=1</code> means that crawler only explores the page at <code class="language-plaintext highlighter-rouge">seedURL</code> and those pages to which <code class="language-plaintext highlighter-rouge">seedURL</code> links, and so forth inductively.</li>
+  <li>pause at least one second between page fetches.</li>
+  <li>ignore URLs that are not “internal” (meaning, outside the designated CS50 server).</li>
+  <li>write each explored page to the <code class="language-plaintext highlighter-rouge">pageDirectory</code> with a unique document ID, wherein
+    <ul>
+      <li>the document <code class="language-plaintext highlighter-rouge">id</code> starts at 1 and increments by 1 for each new page,</li>
+      <li>and the filename is of form <code class="language-plaintext highlighter-rouge">pageDirectory/id</code>,</li>
+      <li>and the first line of the file is the URL,</li>
+      <li>and the second line of the file is the depth,</li>
+      <li>and the rest of the file is the page content (the HTML, unchanged).</li>
+    </ul>
+  </li>
+</ol>
 
-<p>These use</p>
+<blockquote>
+  <p>In a requirements spec, <strong>shall do</strong> means <strong>must do</strong>.</p>
+</blockquote>
 
-<ul>
-  <li><a href="/engs50/Examples/readline.c">readline.c</a>: a C file defining the function <code class="language-plaintext highlighter-rouge">readline</code>, used by <code class="language-plaintext highlighter-rouge">names*.c</code>.</li>
-  <li><a href="/engs50/Examples/readline.h">readline.h</a>: a C ‘header’ file that provides prototypes needed by any C program wanting to use <code class="language-plaintext highlighter-rouge">readline</code>.</li>
-</ul>
+<h4 id="be-polite">Be polite</h4>
 
-<p>Why did we need this include file, <code class="language-plaintext highlighter-rouge">readline.h</code>?
-Because we compiled <code class="language-plaintext highlighter-rouge">names.c</code> and <code class="language-plaintext highlighter-rouge">readline.c</code> separately.
-When we compiled <code class="language-plaintext highlighter-rouge">names.c</code>, we needed to declare the prototype for the function <code class="language-plaintext highlighter-rouge">readline</code>, just as we would have if <code class="language-plaintext highlighter-rouge">readline</code> had been defined within <code class="language-plaintext highlighter-rouge">names.c</code>.
-Because the function was <em>not</em> defined within <code class="language-plaintext highlighter-rouge">names.c</code>, though, the prototype needs to be prefixed with <code class="language-plaintext highlighter-rouge">extern</code>, indicating that the function is external to the current C file.
-The C compiler leaves that symbol (<code class="language-plaintext highlighter-rouge">readline</code>) unresolved, and hopes the linker will later be able to connect it to the actual function definition when <code class="language-plaintext highlighter-rouge">names.o</code> is linked with other object files.</p>
+<p>Webservers do not like crawlers (think about why).
+Indeed, it you hit a web server too hard, its operator may block your crawler based on its Internet address.
+Actually, they’ll usually block your whole domain.
+A hyperactive CS50 crawler could cause some websites to block the whole of <code class="language-plaintext highlighter-rouge">dartmouth.edu</code>.</p>
 
-<p>We could have simply typed the prototype into <code class="language-plaintext highlighter-rouge">names.c</code>, but we put it in a separate file <code class="language-plaintext highlighter-rouge">header.h</code>, and then used the special compiler directive <code class="language-plaintext highlighter-rouge">#include</code> to literally copy the contents of <code class="language-plaintext highlighter-rouge">header.h</code> into the C file at that point.
-(See the <a href="08x-preprocessor.html">lecture extra</a> about the C preprocessor.) Just in case the header file gets included multiple times, the pair of directives <code class="language-plaintext highlighter-rouge">#ifndef</code> (if not defined) and <code class="language-plaintext highlighter-rouge">#define</code> (define) ensure the body of this file is only processed once per C file.</p>
+<p>To be polite, our crawler purposely slows its behavior by introducing a delay, sleeping for one second between fetches.</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
- * readline.h - a utility function to safely read one line of input
- * See readline.c for documentation.
- *
- * David Kotz, April 2016
- */</span>
-
-<span class="cp">#ifndef __READLINE_H__
-#define __READLINE_H__
-</span>
-<span class="cp">#include &lt;stdbool.h&gt;
-</span>
-<span class="k">extern</span> <span class="n">bool</span> <span class="nf">readline</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">len</span><span class="p">);</span>
-
-<span class="cp">#endif //  __READLINE_H__
-</span></code></pre></div></div>
-
-<p>We also include <code class="language-plaintext highlighter-rouge">header.h</code> in <code class="language-plaintext highlighter-rouge">readline.c</code>.
-This way, we write the prototype in only one place, and yet give the compiler information in both places where it is needed - and give the compiler a chance to help us catch any inconsistencies between the prototype and the function call in <code class="language-plaintext highlighter-rouge">names.c</code>, or between the prototype and the function definition in <code class="language-plaintext highlighter-rouge">readline.c</code>.</p>
-
+<p>Furthermore, our crawler will limit its crawl to a specific web <a href="http://old-www.cs.dartmouth.edu">server</a> inside CS, so we don’t bother any other servers on campus or beyond.</p>
 
   </div>
 
