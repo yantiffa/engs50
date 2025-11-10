@@ -49,7 +49,7 @@ void *producer(void *arg) {
 
 int main(void) {
     lhashtable_t *lht = lhopen(100);
-    if (lq == NULL) {
+    if (lht == NULL) {
         fprintf(stderr, "lqopen failed\n");
         return 1;
     }
