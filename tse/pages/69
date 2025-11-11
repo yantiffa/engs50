@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/design/activity.html
+https://thayer.github.io/engs50/Notes/git/activity.html
 3
-6245
+7759
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/design/activity.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Activity - C preprocessor</title>
+  <title>Activity - Git and Gitlab</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/design/activity.html">
+  <link rel="canonical" href="/engs50/Notes/git/activity.html">
 </head>
 
 
@@ -44,141 +44,77 @@ https://thayer.github.io/engs50/Notes/design/activity.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Activity - C preprocessor</h1>
+    <h1 class="post-title">Activity - Git and Gitlab</h1>
   </header>
 
   <div class="post-content">
     <h3 id="goals">Goals</h3>
 
 <ul>
-  <li>to use the C preprocessor</li>
-  <li>to understand when linker might produce errors.</li>
+  <li>to gain experience with git and Gitlab</li>
+  <li>to create and share a repo within your team</li>
 </ul>
 
-<h2 id="activity">Activity</h2>
+<h3 id="activity">Activity</h3>
 
-<p>Examine the source files in <a href="/engs50/Examples/seuss">~cs50/examples/seuss</a>, shown below.</p>
+<p>The lecture notes has a section about the <a href="index.html#cs-gitlab">CS Gitlab Server</a> that shows a similar (though not identical) activity.</p>
 
 <ol>
-  <li>Try to compile the program.
-Why do you get an error?
-is it the compiler or linker reporting the error?
-what could you do to fix it?</li>
-  <li>Run <code class="language-plaintext highlighter-rouge">gcc -E seuss.c</code>, which runs the <em>C preprocessor</em> only; this output is what the compiler would consume.
-Look at the output; ignore the <code class="language-plaintext highlighter-rouge">#</code> lines, which are annotations to help the compiler produce error messages that reference the original file name and line number.
-Notice how the preprocessor has copied everything from the include files right into the input, at the point where they are included in <code class="language-plaintext highlighter-rouge">seuss.c</code>, and then stripped out all the comments.</li>
-  <li>After class, re-read the <a href="/makefiles/preprocessor.html">Lecture extra about the C preprocessor</a>.</li>
+  <li>Use a browser to go to <a href="https://gitlab.cs.dartmouth.edu/"><code class="language-plaintext highlighter-rouge">https://gitlab.cs.dartmouth.edu/</code></a></li>
+  <li>Each member of your group that doesn’t already have one should <strong><em>create a Gitlab userid that is identical to your CS login name</em></strong>.</li>
+  <li>When the GitLab userid is created, go back and login.</li>
+  <li><strong><em>One</em></strong> member of your group should follow steps 1 through 9 in the <a href="/git/index.html#cs-gitlab">CS Gitlab Server</a> section of today’s lecture notes.</li>
+  <li>After the project has been created, the <strong><em>same</em></strong> person should click on <em>Settings</em> and then <em>Members</em>; this page allows you to share the repo with other Gitlab users.
+  Type the usernames of each of your group members and pick <em>Master</em> from the role menu, then click <em>Add to project</em>.
+  Below, I’m adding Travis as a Master on my Binary-tree repo: <img src="/engs50/Notes/git/gitlab7.png" alt="" />.</li>
+  <li><strong><em>Other</em></strong> members of your group should then receive an email message confirming their addition to this repo.
+  They should click the link in that message to visit the repo in the browser.</li>
+  <li><strong><em>All</em></strong> members of your group should then click on the repo name (right near the top of the page; in my example, it’s <em>binary-tree</em>) to pop back to the home page for this repo.</li>
+  <li><strong><em>Important:</em></strong> Click on the <code class="language-plaintext highlighter-rouge">SSH</code> pop-up to change it to <code class="language-plaintext highlighter-rouge">HTTPS</code>.</li>
+  <li>Scroll down to see the command-line instructions for using this project: <img src="/engs50/Notes/git/gitlab4.png" alt="" /></li>
+  <li>Before you proceed, copy the two <em>Git global setup</em> commands and paste them into a Terminal window.
+  While you’re at it, run two more commands:
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">git config --global push.default simple</code></li>
+      <li><code class="language-plaintext highlighter-rouge">git config --global core.editor emacs</code></li>
+      <li>(or vim, if you prefer it to emacs)</li>
+    </ul>
+  </li>
+  <li>Back to the new project.
+   Since this is a brand-new project, you have no repository on your local computer (whether that be your laptop or flume).
+   Look at the instructions under <em>Create a new Git repository.</em>
+   Copy the <code class="language-plaintext highlighter-rouge">git clone</code> command you see there.</li>
+  <li>Go to your Terminal window, and <code class="language-plaintext highlighter-rouge">cd ~/cs50</code>, your usual workspace for this class.
+   Paste the <code class="language-plaintext highlighter-rouge">git clone</code> command.
+   This command “clones” the remote repository (the one on Gitlab) into a new subdirectory.</li>
+  <li>Enter your Gitlab username and password.
+   It should proceed to create the local repository.</li>
+  <li><strong><em>One</em></strong> member of your group should create and push a <code class="language-plaintext highlighter-rouge">README.md</code> file.
+   (If you prefer plaintext, just call it <code class="language-plaintext highlighter-rouge">README</code>.) The Gitlab page lists the commands to add an empty <code class="language-plaintext highlighter-rouge">README.md</code> file but you might want to write <em>something</em> in that README!</li>
+  <li>Meanwhile, <strong><em>Other</em></strong> members of the group should each create a file <code class="language-plaintext highlighter-rouge">ABOUT-me.md</code> where they replace <code class="language-plaintext highlighter-rouge">me</code> with their name.
+   (For example, I would create <code class="language-plaintext highlighter-rouge">ABOUT-David.md</code>.
+   In the file they should write a sentence describing themself.
+   Then,
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">git add ABOUT-me.md</code> (with the appropriate filename)</li>
+      <li><code class="language-plaintext highlighter-rouge">git commit ABOUT-me.md</code> (an editor will open so you can type a commit message)</li>
+      <li><code class="language-plaintext highlighter-rouge">git push</code> (you may need to enter your Gitlab password)</li>
+    </ul>
+  </li>
+  <li>Back in the browser, refresh the repo’s home page - you should all see the new README.
+   If you click on <em>Files</em> you should see all the other files people added to the repo.</li>
+  <li><strong><em>All</em></strong> members of the group should <code class="language-plaintext highlighter-rouge">git pull</code> in their Terminal window - which should download all the files created by others to their local copy of the repo.</li>
 </ol>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* seuss.c - uses thing one and thing two. */</span>
+<p>You now have a shared repo for use by your group!</p>
 
-<span class="cp">#include "one.h"
-#include "two.h"
-</span>
-<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="kt">int</span> <span class="n">fun</span> <span class="o">=</span> <span class="n">thing_one</span><span class="p">()</span> <span class="o">+</span> <span class="n">thing_two</span><span class="p">();</span>
-  <span class="k">return</span> <span class="n">fun</span><span class="p">;</span> <span class="c1">// exit status</span>
-<span class="p">}</span>
-</code></pre></div></div>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/* one.h */
+<h3 id="tips">Tips</h3>
 
-int one = 1;
-extern int thing_one(void);
-</code></pre></div></div>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/* two.h */
-
-int two = 2;
-extern int thing_two(void);
-</code></pre></div></div>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/* one.c */
-
-#include "one.h"
-
-int thing_one(void)
-{
-  return one;
-}
-</code></pre></div></div>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/* two.c */
-
-#include "two.h"
-
-int thing_two(void)
-{
-  return two;
-}
-</code></pre></div></div>
-
-<!--
-## Solution
-
-When you compile the program:
-
-```bash
-[cs50@flume ~/demo/seuss1]$ mygcc -c one.c
-[cs50@flume ~/demo/seuss1]$ mygcc -c two.c
-[cs50@flume ~/demo/seuss1]$ mygcc -c seuss.c
-[cs50@flume ~/demo/seuss1]$ mygcc seuss.o one.o two.o -o seuss
-one.o:(.data+0x0): multiple definition of `one'
-seuss.o:(.data+0x0): first defined here
-two.o:(.data+0x0): multiple definition of `two'
-seuss.o:/net/class/cs50/demo/seuss1/seuss.c:7: first defined here
-collect2: error: ld returned 1 exit status
-```
-
-The linker `ld` complains because the global variables `one` and `two` are multiply defined.
-This happens because the variables are defined (not just declared) in the respective `.h` files, and those `.h` files are included in the respective `.c` files *and* in `seuss.c`.
-
-The solution is to move those global variables out of the `.h` file into the respective `.c` files.
-They are only used in those files, anyway, so they should further be marked `static` (so they are invisible outside the file in which they are defined).
-Thus,
-
-```c
-/* seuss.c - uses thing one and thing two. */
-
-#include "one.h"
-#include "two.h"
-
-int main()
-{
-  int fun = thing_one() + thing_two();
-  return fun; // exit status
-}
-```
-```
-/* one.h */
-
-extern int thing_one(void);
-```
-```
-/* two.h */
-
-extern int thing_two(void);
-```
-```
-/* one.c */
-
-#include "one.h"
-static int one = 1;  // this line moved and made static
-
-int thing_one(void)
-{
-  return one;
-}
-```
-```
-/* two.c */
-
-#include "two.h"
-static int two = 2;  // this line moved and made static
-
-int thing_two(void)
-{
-  return two;
-}
-```
--->
+<ul>
+  <li>After class, you may want to run those four global configuration commands on both your laptop and on flume, and install the <code class="language-plaintext highlighter-rouge">~/.gitignore</code> file on both your laptop and flume, as described above.</li>
+  <li>Check out <a href="/engs50/Resources/#markdown">Markdown</a> - it’s easy to learn.</li>
+  <li><a href="index.html#why-is-git-always-asking-for-my-password">Why is Git always asking for my password?</a></li>
+</ul>
 
   </div>
 

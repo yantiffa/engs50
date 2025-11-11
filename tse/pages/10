@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/bash1/
+https://thayer.github.io/engs50/Labs/Lab2/
 2
-44883
+33369
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/bash1/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Introduction to Bash</title>
+  <title>Lab 2 - C and Bash</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/bash1/">
+  <link rel="canonical" href="/engs50/Labs/Lab2/">
 </head>
 
 
@@ -44,624 +44,702 @@ https://thayer.github.io/engs50/Notes/bash1/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Introduction to Bash</h1>
+    <h1 class="post-title">Lab 2 - C and Bash</h1>
   </header>
 
   <div class="post-content">
-    <p>Don’t forget this week’s <a href="/engs50/Reading/#week-1">reading</a>.</p>
+    <p>This second lab is focused on three small C programs, and a regression-testing bash script.
+They start easy and get progressively more difficult.</p>
 
-<p>In this note, we discuss the Unix shell and its commands.  The
-‘shell’ is a <em>command-line interpreter</em> and invokes kernel-level
-commands.  It also can be used as a <em>programming language</em> to design
-your own commands.  We’ll come to shell programming in a future
-note.</p>
+<ul id="markdown-toc">
+  <li><a href="#reminder" id="markdown-toc-reminder">Reminder</a></li>
+  <li><a href="#preparation" id="markdown-toc-preparation">Preparation</a></li>
+  <li><a href="#assignment" id="markdown-toc-assignment">Assignment</a></li>
+  <li><a href="#regresssh" id="markdown-toc-regresssh">regress.sh</a></li>
+  <li><a href="#chillc" id="markdown-toc-chillc">chill.c</a></li>
+  <li><a href="#wordsc" id="markdown-toc-wordsc">words.c</a></li>
+  <li><a href="#histoc" id="markdown-toc-histoc">histo.c</a>    <ul>
+      <li><a href="#representing-a-histogram" id="markdown-toc-representing-a-histogram">Representing a histogram</a></li>
+    </ul>
+  </li>
+  <li><a href="#what-to-hand-in-and-how" id="markdown-toc-what-to-hand-in-and-how">What to hand in, and how</a></li>
+</ul>
 
-<p>We do not recommend that you buy a book about Unix or the shell; there
-are some very good references and free-access online books – see the
-<a href="/engs50/Resources">resources page</a> – and we have selected some
-interesting and useful <a href="/engs50/Reading">readings</a>.</p>
+<h2 id="reminder">Reminder</h2>
 
-<p>If you need help on the meaning or syntax of any Unix shell command
-you can use the manual (man) pages on a Unix system (see below) or the
-<a href="http://www.computerhope.com/unix.htm#04">web unix commands</a>.  Just
-keep in mind that some commands’ syntax varies a bit across Unix
-flavors, so when in doubt, check the man page on the system you’re
-using.</p>
+<p>Grading will focus on <a href="/engs50/Resources/CodingStyle.html">CS50 coding style</a> - including consistent formatting, selection of identifier names, and use of meaningful comments - in addition to correctness and testing.</p>
 
-<h2 id="unix-philosophy">Unix Philosophy</h2>
+<p><strong><em>Your C code must compile without producing any compiler warnings.</em></strong>  You will lose points if the compiler produces warnings when using our CS50-standard compiler flags.</p>
 
-<p>In their book <em>Program Design in the Unix Environment</em> (1984), Rob
-Pike and Brian Kernighan put it this way:</p>
+<p><strong><em>If your submitted code fails to compile, or triggers a segmentation fault,</em></strong> we’ll notify you and give you an opportunity to repair and resubmit.
+(See <em><a href="/index.html#crashes">programs that crash</a>.</em>)</p>
+
+<h2 id="preparation">Preparation</h2>
+
+<p>Set up four directories for this lab:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd</span>
+<span class="nv">$ </span><span class="nb">mkdir</span> <span class="nt">-p</span> cs50/labs/lab2
+<span class="nv">$ </span><span class="nb">cd </span>cs50/labs/lab2
+<span class="nv">$ </span><span class="nb">mkdir </span>regress chill histo words
+</code></pre></div></div>
+
+<h2 id="assignment">Assignment</h2>
+
+<p>Please follow the <a href="/engs50/Resources/CodingStyle.html">CS50 coding style</a>.</p>
+
+<p>Design, write, document, and <strong>fully test</strong> the following three separate C programs and one bash script.</p>
+
+<p><strong><em>Point breakdown:</em></strong></p>
+
+<ul>
+  <li>(25 points) regress.sh</li>
+  <li>(25 points) chill.c</li>
+  <li>(25 points) words.c</li>
+  <li>(25 points) histo.c</li>
+</ul>
+
+<h2 id="regresssh">regress.sh</h2>
+
+<p><em>Regression testing</em> is important to any quality software-development
+process.  As a software project evolves, each new revision is tested
+against a thorough suite of test cases to ensure that the new revision
+still performs correctly where it had before.  As new functionality is
+added, new tests are added to the suite.</p>
+
+<p>Write a bash script <code class="language-plaintext highlighter-rouge">regress.sh</code> to perform regression testing.  Its
+command line looks like</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./regress.sh dirname testfilename...
+</code></pre></div></div>
+<ul>
+  <li>where <code class="language-plaintext highlighter-rouge">dirname</code> is the name of a directory containing test results, and</li>
+  <li>where each <code class="language-plaintext highlighter-rouge">testfilename</code> is the name of a file containing bash command(s) for one test case.</li>
+</ul>
+
+<p>The script verifies the validity of its arguments (exit with non-zero status on any error):</p>
+
+<ul>
+  <li>there must be at least two arguments;</li>
+  <li>if something by the name <code class="language-plaintext highlighter-rouge">dirname</code> exists, it must be a directory;</li>
+  <li>each <code class="language-plaintext highlighter-rouge">testfilename</code> must be a regular file and be readable.</li>
+</ul>
+
+<p>After checking its arguments, the script creates new directory whose name has the form YYYYMMDD.HHMMSS, representing the current date and time, in the current directory.
+(For example, <code class="language-plaintext highlighter-rouge">20170402.143702</code>.) If any error, exit with non-zero status.</p>
+
+<p>The script then runs each test case with bash, redirecting stdin from <code class="language-plaintext highlighter-rouge">/dev/null</code>, producing four files for each case:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">YYYYMMDD.HHMMSS/testfilename.test</code> - a copy of <code class="language-plaintext highlighter-rouge">testfilename</code></li>
+  <li><code class="language-plaintext highlighter-rouge">YYYYMMDD.HHMMSS/testfilename.status</code> - the exit status of <code class="language-plaintext highlighter-rouge">bash testfilename</code></li>
+  <li><code class="language-plaintext highlighter-rouge">YYYYMMDD.HHMMSS/testfilename.stdout</code> - the stdout from <code class="language-plaintext highlighter-rouge">bash testfilename</code></li>
+  <li><code class="language-plaintext highlighter-rouge">YYYYMMDD.HHMMSS/testfilename.stderr</code> - the stderr from <code class="language-plaintext highlighter-rouge">bash testfilename</code></li>
+</ul>
+
+<p>If the directory <code class="language-plaintext highlighter-rouge">dirname</code> <em>does not exist,</em> YYYYMMDD.HHMMSS is renamed <code class="language-plaintext highlighter-rouge">dirname</code>.
+Exit 0 if success, non-zero if any error.</p>
+
+<p>If the directory <code class="language-plaintext highlighter-rouge">dirname</code> <em>already exists,</em> YYYYMMDD.HHMMSS is compared with <code class="language-plaintext highlighter-rouge">dirname</code> to provide a brief listing of any differences - or the simple statement “no differences”.
+Exit 0 if no differences, non-zero if differences.</p>
+
+<p>In typical usage, the first time the developer runs <code class="language-plaintext highlighter-rouge">regress.sh</code>, the script creates a directory by name <code class="language-plaintext highlighter-rouge">dirname</code>; in subsequent runs, it compares the new test results with those from the prior run.
+Over time, directories YYYYMMDD.HHMMSS accumulate, providing a historical record of test results.</p>
+
+<h4 class="no_toc" id="exit">exit</h4>
+
+<p>Non-zero if any error, or any differences from the earlier <code class="language-plaintext highlighter-rouge">dirname</code> directory.</p>
+
+<p>Zero if <code class="language-plaintext highlighter-rouge">dirname</code> created successfully, or there were no differences from an existing <code class="language-plaintext highlighter-rouge">dirname</code>.</p>
+
+<h4 class="no_toc" id="example">Example</h4>
+
+<p>Suppose we used <code class="language-plaintext highlighter-rouge">regress.sh</code> to support development of the <code class="language-plaintext highlighter-rouge">shake.sh</code> solution.
+The directory contains the script and four test files, each with a one-line command.
+(Here <code class="language-plaintext highlighter-rouge">regress.sh</code> is elsewhere in the PATH.) We start out by listing the four test cases, then run <code class="language-plaintext highlighter-rouge">regress.sh</code> twice, then add a test case, then change a test case.
+Finally, we test some erroneous cases.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[lab2]$ ls
+shake.sh*	test0		test1		test2		test3
+[lab2]$ cat test?
+cat shake.sh
+./shake.sh
+./shake.sh love
+./shake.sh computer
+[lab2]$ regress.sh base test?
+20170402.143657
+saved test results in base
+[lab2]$ regress.sh base test?
+20170402.143702
+comparing 20170402.143702 with base...
+no differences.
+[lab2]$ echo ./shake.sh two words &gt; test4
+[lab2]$ regress.sh base test?
+20170402.143721
+comparing 20170402.143721 with base...
+Only in 20170402.143721: test4.status
+Only in 20170402.143721: test4.stderr
+Only in 20170402.143721: test4.stdout
+Only in 20170402.143721: test4.test
+[lab2]$ echo ./shake.sh rose &gt; test2
+[lab2]$ cat test?
+cat shake.sh
+./shake.sh
+./shake.sh rose
+./shake.sh computer
+./shake.sh two words
+[lab2]$ regress.sh base test?
+20170402.143806
+comparing 20170402.143806 with base...
+Files base/test2.stdout and 20170402.143806/test2.stdout differ
+Files base/test2.test and 20170402.143806/test2.test differ
+Only in 20170402.143806: test4.status
+Only in 20170402.143806: test4.stderr
+Only in 20170402.143806: test4.stdout
+Only in 20170402.143806: test4.test
+[lab2]$ ls
+20170402.143702/        shake.sh*               test3
+20170402.143721/        test0                   test4
+20170402.143806/        test1
+base/                   test2
+[lab2]$
+######## now some error cases
+[lab2]$ regress.sh
+usage: regress.sh dirname testfilename...
+[lab2]$ regress.sh base
+usage: regress.sh dirname testfilename...
+[lab2]$ regress.sh test?
+first argument ('test0') is not a directory
+[lab2]$ regress.sh /base test?
+20170402.144605
+mv: rename 20170402.144605 to /base: Permission denied
+failed to save test results in /base; they remain in 20170402.144605
+[lab2]$ regress.sh base testing
+test case 'testing' is not a file (or not readable)
+[lab2]$ regress.sh base base
+test case 'base' is not a file (or not readable)
+[lab2]$ chmod -r test?
+[lab2]$ regress.sh base test?
+test case 'test0' is not a file (or not readable)
+[lab2]$
+</code></pre></div></div>
+
+<p>Note above how we use the bash globbing syntax <code class="language-plaintext highlighter-rouge">?</code> to indicate a wildcard that matches any single character; thus, <code class="language-plaintext highlighter-rouge">test?</code> expands to</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>test0 test1 test2 test3 test4
+</code></pre></div></div>
+
+<p>Note how <code class="language-plaintext highlighter-rouge">test0</code> simply prints the current copy of <code class="language-plaintext highlighter-rouge">shake.sh</code>, which adds nicely to the historic record.</p>
 
 <blockquote>
-  <p>``Much of the power of the Unix operating system comes from a style
-of program design that makes programs easy to use and, more
-important, easy to combine with other programs. This style has been
-called the use of software tools, and depends more on how the
-programs fit into the programming environment and how they can be
-used with other programs than on how they are designed
-internally. This style was based on the use of tools: using
-programs separately or in combination to get a job done, rather than
-doing it by hand, by monolithic self-sufficient subsystems, or by
-special-purpose, one-time programs.’’</p>
+  <p>The name of test files is not important to <code class="language-plaintext highlighter-rouge">regress.sh</code>, but a development team may want to agree on a naming convention.
+For example, suppose you chose to name them all with extension <code class="language-plaintext highlighter-rouge">.test</code>.
+If you had saved the first run of <code class="language-plaintext highlighter-rouge">regress.sh</code> in a directory named <code class="language-plaintext highlighter-rouge">base</code>, you could then run future tests as</p>
+
+  <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./regress.sh base *.test
+</code></pre></div>  </div>
 </blockquote>
 
-<h3 id="historical-note---unix">Historical note - Unix</h3>
+<p>Just to be clear, each testfile contains bash command(s), and your
+<code class="language-plaintext highlighter-rouge">regress.sh</code> script should execute those commands by running bash and
+providing <code class="language-plaintext highlighter-rouge">testfilename</code> as an argument.  (Recall how we did the test
+cases for <code class="language-plaintext highlighter-rouge">shake.sh</code>.)  But you should run each test only <em>once</em>
+within any given run of <code class="language-plaintext highlighter-rouge">regress.sh</code> – not only is that more
+efficient, it’s possible that the commands within some test files
+might actually not be amenable to being run multiple times (e.g., if
+they have side effects like creating or removing files).</p>
 
-<p><a href="https://en.wikipedia.org/wiki/Unix">Unix</a> was developed at Bell 
-Labs in the 1970s by a group led by 
-<a href="https://en.wikipedia.org/wiki/Douglas_McIlroy">Doug McIlroy</a>.</p>
+<p>It’s easily possible to redirect the stdin, stdout, and stderr, all in
+one run of a test - and to catch the exit status of that run.</p>
+
+<h4 class="no_toc" id="assumptions">Assumptions</h4>
+
+<p>Please expect that dirname names a directory that could be anywhere -
+not necessarily a subdirectory of the current working directory.
+(This assumption should not complicate your work.)</p>
+
+<p>Please assume that the testfilenames name files that <em>are</em> in the
+current directory.  (In principle, we should support testfiles from
+anywhere, but it’s a bit trickier; this assumption simplifies your
+work.  Your script need not validate the assumption - just assume it.)</p>
+
+<p>Please <em>do not assume</em> that the script itself, regress.sh, is in the
+current working directory.  (This assumption should not complicate
+your work.)</p>
+
+<h4 class="no_toc" id="hints">Hints</h4>
 
 <blockquote>
-  <p>``This is the Unix philosophy: Write programs that do one thing and do it well.
-Write programs to work together.
-Write programs to handle text streams, because that is a universal interface.’’
-— Doug McIlroy</p>
+  <p>Check out the <code class="language-plaintext highlighter-rouge">date</code> command and its <code class="language-plaintext highlighter-rouge">+</code> option.</p>
+
+  <p>Check out the <code class="language-plaintext highlighter-rouge">diff --brief</code> command form.</p>
+
+  <p>Check out the <code class="language-plaintext highlighter-rouge">shift</code> built-in bash command and this <a href="/engs50/Examples/shifter.sh">example SHIFTING file</a>.</p>
 </blockquote>
 
-<h2 id="goals">Goals</h2>
+<h2 id="chillc">chill.c</h2>
 
-<p>We plan to cover the following topics in this note.</p>
+<p>Write a program to calculate “wind chill” based on the current
+temperature and wind speed.  The standard formula for this calculation
+is:</p>
 
-<ul>
-  <li>The shell</li>
-  <li>The file system</li>
-</ul>
-
-<h2 id="the-shell">The shell</h2>
-
-<h3 id="commands-switches-arguments">Commands, switches, arguments</h3>
-
-<p>The shell is the Unix command-line interpreter.  It provides an
-interface between the user and the kernel and executes programs called
-‘commands’.  For example, if a user enters <code class="language-plaintext highlighter-rouge">ls </code>then the shell
-executes the <code class="language-plaintext highlighter-rouge">ls</code> command, which actually executes a program stored in
-the file <code class="language-plaintext highlighter-rouge">/bin/ls</code>.  The shell can also execute other programs
-including scripts (text files interpreted by a program like python or
-bash) and compiled programs (e.g., written in C).  Even your own
-programs – once marked ‘executable’ – become commands you can run
-from the shell!</p>
-
-<p>You will get by in the course by becoming familiar with a subset of
-the Unix commands; don’t let yourself be overwhelmed by the presence
-of hundreds of commands.  You will probably be regularly using 2-3
-dozen of them by the end of the term.</p>
-
-<p>Unix has often been criticized for being very terse (it’s rumored that
-its designers were bad typists).  Many commands have short, cryptic
-names and vowels are a rarity:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk, cat, cp, cd, chmod, echo, find, grep, ls, mv, rm, tr, sed, comm
-</code></pre></div></div>
-
-<p>We will learn to use all of these commands and more.</p>
-
-<p>Unix command output is also very terse - the default action on success
-is silence.  Only errors are reported, and error messages are often
-terse.  Unix commands are often termed ‘tools’ or ‘utilities’, because
-they are meant to be simple tools that you can combine in novel ways.</p>
-
-<p>Instructions entered in response to the shell prompt are interpreted
-first by the shell - expanding any variable references, filename
-wildcards, or special syntax.  Thus, the shell can rewrite the command
-line; then, it expects the command line to have the following syntax:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nb">command</span> <span class="o">[</span>arg1]...
-</code></pre></div></div>
-
-<p>The brackets <code class="language-plaintext highlighter-rouge">[ ]</code> indicate that the arguments are optional, and the
-notation above means that there are zero or more arguments.  Arguments
-are separated by white space.  Many commands can be executed with or
-without arguments.  Others require arguments, or a certain number of
-arguments, (e.g., <code class="language-plaintext highlighter-rouge">cp sort.c anothersort.c</code>) to work correctly.  If
-none are supplied, they will provide some error message in return.
-Another part of the Unix philosophy is to avoid an explosion in the
-number of commands by having most commands support various <em>options</em>
-(sometimes called <em>flags</em> or <em>switches</em>), which modify the actions of
-the commands.</p>
-
-<p>For example, let’s use the <code class="language-plaintext highlighter-rouge">ls</code> command and the <code class="language-plaintext highlighter-rouge">-l</code> option switch to
-list in long format the file <code class="language-plaintext highlighter-rouge">filename.c</code>.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nb">ls</span> <span class="nt">-l</span> filename.c
-</code></pre></div></div>
-
-<p>Switches are often single characters preceded by a hyphen (e.g.,
-<code class="language-plaintext highlighter-rouge">-l</code>).  Most commands accept switches in any order, though they
-generally must appear before all the real arguments (usually
-filenames).  In the case of the <code class="language-plaintext highlighter-rouge">ls</code> example below, the command
-arguments represent file or directory names.  The options modify the
-operation of the command and are usually operated on by the program
-invoked by the shell rather than the shell itself.</p>
-
-<p>Unix programs always receive a list of arguments, containing at least
-one argument, which is always the command name itself.  So, for <code class="language-plaintext highlighter-rouge">ls</code>
-that first argument would be “<code class="language-plaintext highlighter-rouge">ls</code>”.  The first argument is referred
-to as argument 0, “the zero-th argument”.  In our <code class="language-plaintext highlighter-rouge">ls</code> example,
-argument 1 is <code class="language-plaintext highlighter-rouge">-l</code> and argument 2 is <code class="language-plaintext highlighter-rouge">filename.c</code>.  Some commands also
-accept their switches grouped together.  For example, the following
-switches to <code class="language-plaintext highlighter-rouge">ls</code> are identical:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nb">ls</span> <span class="nt">-tla</span> foople<span class="k">*</span>
-    ...
-    <span class="nb">ls</span> <span class="nt">-t</span> <span class="nt">-l</span> <span class="nt">-a</span> foople<span class="k">*</span>
-</code></pre></div></div>
-
-<p>The shell parses the words or tokens (command name and arguments) you
-type on the command line, and asks the kernel to execute the program
-corresponding to that command; the interpretation of the arguments (as
-switches, filenames, or something else) is determined by that program.</p>
-
-<p>Typically, the shell processes the complete line after a carriage
-return is entered and then goes off to find the program that the
-command line specified.  If the command is a pathname, whether
-relative (e.g., <code class="language-plaintext highlighter-rouge">./mycommand</code>) or absolute (e.g., <code class="language-plaintext highlighter-rouge">/bin/ls</code> or
-<code class="language-plaintext highlighter-rouge">~engs50/mycommand</code>), the shell simply executes the program in that
-file.  If the command is not a pathname, the shell searches through a
-list of directories in your “path”, which is defined by the shell
-variable called <code class="language-plaintext highlighter-rouge">PATH</code>.</p>
-
-<h2 id="shells-path">Shell’s ‘Path’</h2>
-
-<p>Take a look at your <code class="language-plaintext highlighter-rouge">PATH</code> by asking the shell to substitute its value
-(<code class="language-plaintext highlighter-rouge">$PATH</code>) and pass it as an argument to the <code class="language-plaintext highlighter-rouge">echo</code> command:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$PATH</span>
-/usr/lib64/qt-3.3/bin:/usr/lib64/ccache:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/net/class/engs50/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/java/j2sdk/bin:/usr/local/bin:/usr/local/bin/X11:.
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>Note that in general the output from the commands shown in this note
-demonstrate notional output. You will not see exactly the same
-information portrayed if you execute the same commands. Shell prompts
-show you the current user, machine, and location e.g.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="err">$</span>
-</code></pre></div></div>
-
-<p>is a shell prompt ($) for user “engs50” on machine “mc” with the shell
-currently in the users home directory (~).</p>
-
-<p>So where does the <code class="language-plaintext highlighter-rouge">ls</code> command executed above reside in the Unix directory hierarchy?
-Let’s use another command to find out.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>which <span class="nb">ls
-ls </span>is aliased to <span class="sb">`</span><span class="nb">ls</span> <span class="nt">-F</span><span class="s1">'
-ls is /usr/bin/ls
-ls is /bin/ls
-ls is /usr/bin/ls
-[engs50@mc ~]$ 
-</span></code></pre></div></div>
-
-<p>The first line of response says that <code class="language-plaintext highlighter-rouge">ls</code> is “aliased”.  This is a
-shell feature; the shell allows us to define “aliases”, which act just
-like commands but are actually just a textual substitution of a
-command name (the alias) to some other string (in this case, <code class="language-plaintext highlighter-rouge">ls -F</code>).
-Thus, any time I type <code class="language-plaintext highlighter-rouge">ls blah blah</code>, it treats it as if I had typed
-<code class="language-plaintext highlighter-rouge">ls -F blah blah</code>.  The <code class="language-plaintext highlighter-rouge">-F</code> option tells <code class="language-plaintext highlighter-rouge">ls</code> to add a trailing
-symbol to some names in its output; it adds a <code class="language-plaintext highlighter-rouge">/</code> to the names of
-directories, a <code class="language-plaintext highlighter-rouge">@</code> to the names of symbolic links (um, that’s another
-conversation), and some other even specialized cases.</p>
-
-<p>Of course, the shell then still needs to resolve <code class="language-plaintext highlighter-rouge">ls</code>.  It then
-searches the <code class="language-plaintext highlighter-rouge">PATH</code> to find an executable file with that name; in this
-case, it appears that <code class="language-plaintext highlighter-rouge">ls</code> exists in both <code class="language-plaintext highlighter-rouge">/usr/bin</code> and in <code class="language-plaintext highlighter-rouge">/bin</code>.
-The shell will execute the first one, because it is found first in the
-PATH.  Below you can see the effect of running <code class="language-plaintext highlighter-rouge">ls</code> (the alias) and
-<code class="language-plaintext highlighter-rouge">/bin/ls</code> (the raw command, without the <code class="language-plaintext highlighter-rouge">-F</code>).</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls
-</span>Archive/  private/  proc-log  public_html/  resources/	web@
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>/bin/ls
-Archive  private  proc-log  public_html  resources  web
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<h2 id="viewing-files">Viewing files</h2>
-
-<p>You can see the contents of any file with the <code class="language-plaintext highlighter-rouge">cat</code> command, so named because it concatenates all the files listed as arguments, printing one after the other.
-For very long files, though, the output will quickly scroll off your terminal.</p>
-
-<p>Less Is More: The  <code class="language-plaintext highlighter-rouge">less</code> and <code class="language-plaintext highlighter-rouge">more</code> commands are handy for quickly looking at files.
-The syntax is <code class="language-plaintext highlighter-rouge">less filename</code> and <code class="language-plaintext highlighter-rouge">more filename</code>.
-Take a look at the <code class="language-plaintext highlighter-rouge">man</code> pages to get the details of each.
-Similarly, <code class="language-plaintext highlighter-rouge">head</code> and <code class="language-plaintext highlighter-rouge">tail</code> display a number of lines (selectable via switches, of course) at the beginning and end of a file, respectively.</p>
-
-<p>See what these do: <code class="language-plaintext highlighter-rouge">cat /etc/passwd</code>, <code class="language-plaintext highlighter-rouge">head /etc/passwd</code>, <code class="language-plaintext highlighter-rouge">tail /etc/passwd</code>, <code class="language-plaintext highlighter-rouge">more /etc/passwd</code>, and <code class="language-plaintext highlighter-rouge">less /etc/passwd</code>.
-The file <code class="language-plaintext highlighter-rouge">/etc/passwd</code> lists all the accounts on the system, and information about each account.</p>
-
-<h2 id="editing-files">Editing files</h2>
-
-<p>Long before there were windows and graphical displays, or even
-screens, there were text editors.  Two are in common use on Unix
-system today: <code class="language-plaintext highlighter-rouge">emacs</code> and <code class="language-plaintext highlighter-rouge">vi</code>.  Actually, there is an
-expanded/improved version of <code class="language-plaintext highlighter-rouge">vi</code> called <code class="language-plaintext highlighter-rouge">vim</code>, which is quite
-popular.</p>
-
-<p>I strongly recommend emacs if you are planning to take Engs62 – our
-embedded systems course, since the Xilinx vivado tool chain provides
-an Emacs mode for editing. Also, you will find that many emacs
-commands are available in bash for working at the command line.</p>
-
-<p>You should try both and become comfortable with at least one.  Yes,
-it’s tempting to use an external graphical editor (like Sublime), but
-it is frequently the case when working with embedded systems and/or
-servers that there simply is not a graphical user interface; in these
-cases you <em>must</em> use a text-only editor so you should get used
-to it now.</p>
-
-<p>See /engs50/Resources/#editors for some resources that can help you
-learn <code class="language-plaintext highlighter-rouge">emacs</code> or <code class="language-plaintext highlighter-rouge">vim</code>. I’ve provided a 15 min – “Learn Emacs Fast”
-video to help.</p>
-
-<h2 id="unix-file-system">Unix file system</h2>
-
-<p>The Unix file system is a <em>hierarchical file system</em>.  The file system
-consists of a very small number of different file <em>types</em>.  The two
-most common types are <em>files</em> and <em>directories</em>.</p>
-
-<p>A directory (akin to a folder on a MacOS or Windows computer) contains
-the names and locations of all files and directories below it.  A
-directory always contains two special files <code class="language-plaintext highlighter-rouge">.</code> (dot) and <code class="language-plaintext highlighter-rouge">..</code> (dot
-dot); <code class="language-plaintext highlighter-rouge">.</code> represents the directory itself, and <code class="language-plaintext highlighter-rouge">..</code> represents the
-directory’s parent.  In the following, I make a new directory, change
-my current working directory to be that new directory, create a new
-file in that directory, and use <code class="language-plaintext highlighter-rouge">ls</code> to explore the contents of the
-new directory and its parent.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">mkdir test</span>
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cd test</span>
-<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">echo </span>hello <span class="o">&gt;</span> somefile
-<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-a</span>
-./  ../  somefile
-<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">ls 
-</span>somefile
-<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">ls</span> <span class="nb">.</span>
-somefile
-<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">ls</span> ..
-Archive/  private/  proc-log  public_html/  resources/	<span class="nb">test</span>/  web@
-<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>Directory names are separated by a <em>forward</em> slash <code class="language-plaintext highlighter-rouge">/</code>, forming
-pathnames.  A <em>pathname</em> is a filename that includes some or all of
-the directories leading to the file; an <em>absolute pathname</em> is
-relative to the root (<code class="language-plaintext highlighter-rouge">/</code>) directory and begins with a <code class="language-plaintext highlighter-rouge">/</code>, in the
-first example below, whereas a <em>relative pathname</em> is relative to the
-current working directory, as in the second example below.  Notice
-that a relative pathname can also use <code class="language-plaintext highlighter-rouge">.</code> or <code class="language-plaintext highlighter-rouge">..</code>, as in the third
-example below.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls</span> /net/class/engs50/public_html/Labs/<span class="k">*</span>
-/net/class/engs50/public_html/Labs/index.html
-/net/class/engs50/public_html/Labs/Lab0-Preliminaries.html
-/net/class/engs50/public_html/Labs/usernames.txt
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls </span>public_html/Resources/<span class="k">*</span>
-public_html/Resources/DougMcIlroy.pdf
-public_html/Resources/Homebrew0.png
-public_html/Resources/Homebrew1.png
-public_html/Resources/Homebrew.html
-public_html/Resources/index.html
-public_html/Resources/RC13972-C-Programming.docx
-public_html/Resources/RC13972-C-Programming.pdf
-public_html/Resources/StartingSublime.pdf
-public_html/Resources/toomey-unix.pdf
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls</span> ../cs10/public_html/
-azul.css    help.html	   lab/       oldindex.html  software.html
-exams/	    indexBAK.html  lectures/  sa/	     syllabus.html
-exams.html  index.html	   old/       schedule.html
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>As implied by the shell prompt, the current working directory is
-<code class="language-plaintext highlighter-rouge">~engs50</code>, which is shorthand for “the home directory of user
-<code class="language-plaintext highlighter-rouge">engs50</code>”, which happens to be the directory at path
-<code class="language-plaintext highlighter-rouge">/net/class/engs50</code>.</p>
-
-<h3 id="moving-around-the-file-system">Moving around the file system</h3>
-
-<p>The “change directory” command (<code class="language-plaintext highlighter-rouge">cd</code>) allows us to move around the
-Unix directory hierarchy, that is, to change our “current working
-directory” from which all relative filenames and pathnames will be
-resolved.  Let’s combine <code class="language-plaintext highlighter-rouge">pwd</code>, <code class="language-plaintext highlighter-rouge">ls</code>, and <code class="language-plaintext highlighter-rouge">cd</code> to move around the
-local directories that are rooted at <code class="language-plaintext highlighter-rouge">/net/class/engs50</code>.  Remember that
-<code class="language-plaintext highlighter-rouge">~</code> refers to the home directory and <code class="language-plaintext highlighter-rouge">..</code> refers to the parent
-directory.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">mkdir test</span>
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cd test</span>
-<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">ls</span>
-<span class="o">[</span>engs50@mc ~/test]<span class="nv">$ </span><span class="nb">cd</span> ..
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cd </span>public_html/
-<span class="o">[</span>engs50@mc ~/public_html]<span class="nv">$ </span><span class="nb">ls
-</span>css/	    Labs/      Logistics/  Reading/    Schedule.pdf
-index.html  Notes/  Project/    Resources/  Schedule.xlsx
-<span class="o">[</span>engs50@mc ~/public_html]<span class="nv">$ </span><span class="nb">cd </span>Resources/
-<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls
-</span>DougMcIlroy.pdf  Homebrew.html		     RC13972-C-Programming.pdf
-Homebrew0.png	 index.html		     StartingSublime.pdf
-Homebrew1.png	 RC13972-C-Programming.docx  toomey-unix.pdf
-<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">cd</span> ../..
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls
-</span>Archive/  private/  proc-log  public_html/  resources/	<span class="nb">test</span>/  web@
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>The shell prompt is helpfully tracking the current working directory as we move.</p>
-
-<h3 id="listing-and-globbing-files">Listing and globbing files</h3>
-
-<p>Here are a popular set of switches you can use with <code class="language-plaintext highlighter-rouge">ls</code>:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-l list in long format (as we have been doing)
--a list all entries (including `dot` files, which are normally hidden)
--t sort by modification time (latest first)
--r list in reverse order (alphabetical or time)
--R list the directory and its subdirectories recursively
-</code></pre></div></div>
-
-<p>The shell also interprets certain special characters like <code class="language-plaintext highlighter-rouge">*</code>, <code class="language-plaintext highlighter-rouge">?</code>,
-and <code class="language-plaintext highlighter-rouge">[]</code>; <code class="language-plaintext highlighter-rouge">*</code> matches zero or more characters, <code class="language-plaintext highlighter-rouge">?</code> matches one
-character, and <code class="language-plaintext highlighter-rouge">[]</code> matches one character from the set (or range) of
-characters listed within the brackets:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">cd </span>public_html/Resources/
-<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls
-</span>DougMcIlroy.pdf  Homebrew.html		     RC13972-C-Programming.pdf
-Homebrew0.png	 index.html		     StartingSublime.pdf
-Homebrew1.png	 RC13972-C-Programming.docx  toomey-unix.pdf
-<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls</span> <span class="k">*</span>.pdf
-DougMcIlroy.pdf		   StartingSublime.pdf
-RC13972-C-Programming.pdf  toomey-unix.pdf
-<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls </span>H<span class="k">*</span>
-Homebrew0.png  Homebrew1.png  Homebrew.html
-<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls</span> <span class="k">*</span>-<span class="k">*</span>
-RC13972-C-Programming.docx  RC13972-C-Programming.pdf  toomey-unix.pdf
-<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls </span>Homebrew<span class="k">*</span>.<span class="k">*</span>
-Homebrew0.png  Homebrew1.png  Homebrew.html
-<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls </span>Homebrew?.<span class="k">*</span>
-Homebrew0.png  Homebrew1.png
-<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span><span class="nb">ls </span>Homebrew[0-9].png
-Homebrew0.png  Homebrew1.png
-<span class="o">[</span>engs50@mc ~/public_html/Resources]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<h3 id="hidden-files">Hidden files</h3>
-<p>The <code class="language-plaintext highlighter-rouge">ls</code> program normally does not list any files whose filename begins with <code class="language-plaintext highlighter-rouge">.</code>  There is nothing special about these files, except <code class="language-plaintext highlighter-rouge">.</code> and <code class="language-plaintext highlighter-rouge">..</code>, as far as Unix is concerned.
-It’s simply a convention - files whose names begin with <code class="language-plaintext highlighter-rouge">.</code> are to be considered ‘hidden’, and thus not listed by <code class="language-plaintext highlighter-rouge">ls</code> or matched with by the shell’s <code class="language-plaintext highlighter-rouge">*</code> globbing character.
-Home directories, in particular, include many ‘hidden’ (but important!) files.
-The <code class="language-plaintext highlighter-rouge">-a</code> switch tells <code class="language-plaintext highlighter-rouge">ls</code> to list “all” files, including those that begin with a dot (aka, the hidden files).</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls
-</span>Archive/  private/  public_html/  resources/  web@
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-a</span>
-./   Archive/	    .bash_logout   .bashrc    .environset  private/	public_html/  .ssh/  .viminfo  web@
-../  .bash_history  .bash_profile  .emacs.d/  .forward	   .procmailrc	resources/    .vim/  .vimrc
-</code></pre></div></div>
-
-<p>to see just the dot files, let’s get clever with the shell’s glob characters:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-ad</span> .??<span class="k">*</span>
-.bash_history  .bash_profile  .emacs.d/    .forward	.ssh/  .viminfo
-.bash_logout   .bashrc	      .environset  .procmailrc	.vim/  .vimrc
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>All of these “dot files” (or “dot directories”) are important to one program or another:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.bash_history</code> - used by bash to record a history of the commands you’ve typed</li>
-  <li><code class="language-plaintext highlighter-rouge">.bash_logout</code> - executed by bash when you log out</li>
-  <li><code class="language-plaintext highlighter-rouge">.bash_profile</code> - executed by bash when you log in</li>
-  <li><code class="language-plaintext highlighter-rouge">.bashrc</code> - executed by bash whenever you start a new shell</li>
-  <li><code class="language-plaintext highlighter-rouge">.emacs.d/</code> - a directory used by emacs text editor</li>
-  <li><code class="language-plaintext highlighter-rouge">.environset</code> - a Dartmouth-specific thing; read by .bashrc</li>
-  <li><code class="language-plaintext highlighter-rouge">.forward</code> - tells Mail where to forwad your email</li>
-  <li><code class="language-plaintext highlighter-rouge">.procmailrc</code> - for handling email with <code class="language-plaintext highlighter-rouge">procmail</code></li>
-  <li><code class="language-plaintext highlighter-rouge">.ssh/</code> - directory used by inbound ssh connections</li>
-  <li><code class="language-plaintext highlighter-rouge">.vim/</code> - a directory used by vim text editor</li>
-  <li><code class="language-plaintext highlighter-rouge">.viminfo</code> - used by vim text editor</li>
-  <li><code class="language-plaintext highlighter-rouge">.vimrc</code> - used by vim text editor</li>
-</ul>
-
-<h3 id="bash-shell-startup-files">Bash shell startup files</h3>
-
-<p>The <code class="language-plaintext highlighter-rouge">bash</code> shell looks for several files in your home directory:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.bash_profile</code> - executed by bash when you log in</li>
-  <li><code class="language-plaintext highlighter-rouge">.bashrc</code> - executed by bash whenever you start a new shell</li>
-  <li><code class="language-plaintext highlighter-rouge">.bash_logout</code> - executed by bash when you log out</li>
-  <li><code class="language-plaintext highlighter-rouge">.bash_history</code> - used by bash to record a history of the commands you’ve typed</li>
-</ul>
-
-<p>The <code class="language-plaintext highlighter-rouge">.bashrc</code> file is especially important, because <code class="language-plaintext highlighter-rouge">bash</code> reads it
-every time you start a new <code class="language-plaintext highlighter-rouge">bash</code> shell, that is, when you log in,
-when you start a new interactive shell, or when you run a new bash
-script.  (In contrast, <code class="language-plaintext highlighter-rouge">.bash_profile</code> is only read when you login.)
-In each case,<code class="language-plaintext highlighter-rouge">bash</code> reads the files and executes the commands therein.
-Thus, you can configure your <code class="language-plaintext highlighter-rouge">bash</code> experience by having it declare
-some variables, define some aliases, and set up some personal
-favorites.</p>
-
-<h2 id="locating-files">Locating files</h2>
-
-<p>Many times you want to find a file but do not know where it is in the
-directory tree (Unix directory structure is a tree - rooted at the <code class="language-plaintext highlighter-rouge">/</code>
-directory) .  The <code class="language-plaintext highlighter-rouge">find</code> command can walk a file hierarchy:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find <span class="nb">.</span> <span class="nt">-name</span> DougMcIlroy.pdf <span class="nt">-print</span>
-./public_html/Resources/DougMcIlroy.pdf
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find public_html <span class="nt">-iname</span> reading <span class="nt">-print</span>
-public_html/Reading
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find public_html <span class="nt">-type</span> d <span class="nt">-print</span>
-public_html
-public_html/Logistics
-public_html/Resources
-public_html/Labs
-public_html/Project
-public_html/Notes
-public_html/css
-public_html/Reading
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find public_html <span class="nt">-name</span> <span class="se">\*</span>.html <span class="nt">-print</span>
-public_html/Logistics/index.html
-public_html/Resources/index.html
-public_html/Resources/Homebrew.html
-public_html/Labs/index.html
-public_html/Labs/Lab0-Preliminaries.html
-public_html/Project/index.html
-public_html/Notes/01-gettingstarted.html
-public_html/Notes/index.html
-public_html/index.html
-public_html/Reading/index.html
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>find public_html <span class="nt">-name</span> <span class="se">\*</span>.png <span class="nt">-mtime</span> <span class="nt">-1</span> <span class="nt">-print</span>
-public_html/Resources/Homebrew1.png
-public_html/Resources/Homebrew0.png
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
-</code></pre></div></div>
-
-<p>The first example searches directory <code class="language-plaintext highlighter-rouge">.</code> to find a file by a specific
-name and prints its pathname.  The second example used <code class="language-plaintext highlighter-rouge">-iname</code> (case
-insensitive search) instead of <code class="language-plaintext highlighter-rouge">-name</code> (which is case sensitive) to
-search <code class="language-plaintext highlighter-rouge">public_html</code> for the “reading” directory.  The third example
-searches <code class="language-plaintext highlighter-rouge">public_html</code> for any directories (<code class="language-plaintext highlighter-rouge">-type d</code>) and prints
-their pathnames.  The fourth example uses a wildcard <code class="language-plaintext highlighter-rouge">*</code> to print
-pathnames of files whose name matches a pattern; the backslash <code class="language-plaintext highlighter-rouge">\</code> is
-there to prevent the shell from interpreting the <code class="language-plaintext highlighter-rouge">*</code>, allowing it to
-be part of the argument to <code class="language-plaintext highlighter-rouge">find</code>, which interprets that character
-itself.  The fifth example combines two factors, to print pathnames of
-files whose name matches <code class="language-plaintext highlighter-rouge">*.png</code> and whose modication time <code class="language-plaintext highlighter-rouge">mtime</code> is
-less than one day <code class="language-plaintext highlighter-rouge">-1</code> in the past.</p>
-
-<h2 id="our-top-commands">Our top commands</h2>
-
-<p>We’ve explored almost four dozen shell commands, below (those with *asterisk will be introduced later).
-You’ll often need only about half of them.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nb">alias
-
-    cat</span>, <span class="nb">cd</span>, <span class="nb">chmod</span>, <span class="nb">comm</span>, <span class="nb">cp</span>, <span class="nb">cut
-
-    date
-
-    echo</span>, emacs, <span class="nb">expr</span>, <span class="nb">exit
-
-    </span>file, find
-
-    gcc, gdb<span class="k">*</span>, git<span class="k">*</span>, <span class="nb">grep
-
-    head
-
-    </span>less, <span class="nb">logout</span>, lpr, <span class="nb">ls
-
-    </span>make<span class="k">*</span>, man, <span class="nb">mkdir</span>, more, <span class="nb">mv
-
-    </span>open <span class="o">(</span>MacOS<span class="o">)</span>
-
-    pbpaste, pbcopy <span class="o">(</span>MacOS<span class="o">)</span>
-
-    <span class="nb">pwd
-
-    rm</span>, <span class="nb">rmdir
-
-    </span>scp, <span class="nb">sed</span>, <span class="nb">sort</span>, ssh
-
-    <span class="nb">tail</span>, <span class="nb">tar</span>, <span class="nb">touch</span>, <span class="nb">tr
-
-    uniq
-
-    </span>whereis, which
-
-    vi, vim
-</code></pre></div></div>
-
-<h1 id="historical-note">Historical note</h1>
-
-<p>Recall we mentioned “teletypes” in the first lecture.  <strong>It was <em>at
-Dartmouth</em> that a teletype was actually used to interact with a remote
-computer</strong> - the first ever long-distance terminal, decades before the
-Internet.</p>
-
-<p><img src="/engs50/Notes/bash1/history-Stibitz1.jpg" alt="Stibitz plaque" /></p>
-
-<h2 id="navigating-within-man-pages">Navigating within man pages</h2>
-
-<p>You may have found the <code class="language-plaintext highlighter-rouge">man</code> system to be a little challenging to navigate.
-There is a message that is displayed at the very bottom of the screen when you first enter the command that you might have missed (most people do):</p>
-
-<pre><code class="language-man">Manual page xxx(n) line 1 (press h for help or q to quit)
+<pre><code class="language-Matlab">    Wind Chill = 35.74 + 0.6215T - 35.75(V^0.16) + 0.4275T(V^0.16)
 </code></pre>
 
-<p>If you enter ‘<code class="language-plaintext highlighter-rouge">h</code>’ to see the help you will find many more commands than you’re likely to ever use when reading <code class="language-plaintext highlighter-rouge">man</code> pages.
-This is because the man-page reader is actually the <code class="language-plaintext highlighter-rouge">less</code> command of Unix.
-I tend to use only a few:</p>
+<p>where <code class="language-plaintext highlighter-rouge">T</code> is the temperature in degrees Fahrenheit (when less than 50)
+and <code class="language-plaintext highlighter-rouge">V</code> is the wind velocity in miles per hour.  The <code class="language-plaintext highlighter-rouge">^</code> character
+denotes exponentiation.  Note that the above formula is <em>not</em> in C
+programming language syntax.</p>
 
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">f</code> or <em>space</em> (the spacebar) advances to the next screenful,</li>
-  <li><code class="language-plaintext highlighter-rouge">b</code> goes back to the previous screenful,</li>
-  <li><code class="language-plaintext highlighter-rouge">e</code> or down-arrow advances one more line,</li>
-  <li><code class="language-plaintext highlighter-rouge">y</code> or up-arrow goes back one line,</li>
-  <li><code class="language-plaintext highlighter-rouge">/</code> allows one to type a search phrase and hit return,</li>
-  <li><code class="language-plaintext highlighter-rouge">q</code> quits <code class="language-plaintext highlighter-rouge">man</code>, and returns to the shell prompt.</li>
-</ul>
+<h4 class="no_toc" id="input">input</h4>
 
-<h2 id="there-are-shells-shells-and-more-shells">There are shells, shells, and more shells</h2>
+<p>No input files; stdin is ignored.</p>
 
-<p>There are a number of shells available to a Unix user – so which one do you select?
-The most common shells are:</p>
+<p>The user may run your program with no arguments, one argument, or two arguments as explained below.</p>
 
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">sh</code> : the original shell, known as the Bourne Shell,</li>
-  <li><code class="language-plaintext highlighter-rouge">csh</code>, <code class="language-plaintext highlighter-rouge">tcsh</code> : well-known and widely used derivatives of the Bourne shell,</li>
-  <li><code class="language-plaintext highlighter-rouge">ksh</code> : the Korn shell, and</li>
-  <li><code class="language-plaintext highlighter-rouge">bash</code> : the Bourne Again SHell, developed by GNU, is the most popular shell used for Linux.</li>
-</ul>
+<h4 class="no_toc" id="output-no-arguments">output: no arguments</h4>
 
-<p><code class="language-plaintext highlighter-rouge">bash</code> is the default shell for new Unix accounts in our department.</p>
+<p>If the user provides no arguments to your program, it should print out
+a table of temperatures (from -10 to +40 by 10’s) and and wind speeds
+(from 5 to 15 by 5’s).  Your output should look similar to the
+following, with nice columns and titles:</p>
 
-<p>The basic shell operation is as follows.  The shell parses the command
-line; the first word on the line is the command name.  If the command
-is an alias, it substitutes the alias text and again identifies the
-command.  If the command is one built-in to the shell (there are a
-few, like <code class="language-plaintext highlighter-rouge">cd</code>, <code class="language-plaintext highlighter-rouge">echo</code>, <code class="language-plaintext highlighter-rouge">pwd</code>, and <code class="language-plaintext highlighter-rouge">which</code>) it performs that command’s
-action.  Otherwise, the shell looks for the executable file that
-matches that program name by searching directories listed in the
-<code class="language-plaintext highlighter-rouge">PATH</code> variable.  The shell then starts that program as a new process
-and passes any options and arguments to the program.  A <em>process</em> is a
-running program.  You can see a list of your processes with the
-command <code class="language-plaintext highlighter-rouge">ps</code>.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nv">$ </span>./chill
+    Temp    Wind    Chill
+    <span class="nt">----</span>    <span class="nt">----</span>    <span class="nt">-----</span>
+     <span class="nt">-10</span>       5    <span class="nt">-22</span>.3
+     <span class="nt">-10</span>      10    <span class="nt">-28</span>.3
+     <span class="nt">-10</span>      15    <span class="nt">-32</span>.2
 
-<h2 id="file-type">File type</h2>
+       0       5    <span class="nt">-10</span>.5
+       0      10    <span class="nt">-15</span>.9
+       0      15    <span class="nt">-19</span>.4
 
-<p>Unix itself imposes almost no constraints or interpretation on the
-contents of files - the only common case is that of a compiled,
-executable program: it has to be in a very specific binary format for
-the operating system (Unix) to execute it.  All other files are used
-by some program or another, and it’s up to those programs to interpret
-the contents as they see fit.  The great power of Unix, and the common
-shell commands, is that any file can be read by any program; the most
-common format are plain-text (ASCII) files that are formatted as a
-series of “lines” delimited by “newline” characters (\n, known by its
-ASCII code 012).</p>
+      10       5     1.2
+      10      10    <span class="nt">-3</span>.5
+      10      15    <span class="nt">-6</span>.6
 
-<p>If you are unsure about the contents of a file (text, binary,
-compressed, Unix executabe, some format specific a certain
-application, etc.).  The <code class="language-plaintext highlighter-rouge">file</code> command is useful; it makes an attempt
-to judge the format of the file.</p>
+      20       5     13.0
+      20      10     8.9
+      20      15     6.2
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>file downloaded
-downloaded: POSIX <span class="nb">tar </span>archive
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>file fig1
-fig1: GIF image data, version 87a, 440 x 306
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>file trash.tar.gz
-trash.tar.gz: <span class="nb">gzip </span>compressed data, from Unix
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>file public_html/Schedule.<span class="k">*</span>
-public_html/Schedule.pdf:  PDF document, version 1.3
-public_html/Schedule.xlsx: Microsoft Excel 2007+
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>file /bin/ls
-/bin/ls: ELF 64-bit LSB shared object, x86-64, version 1 <span class="o">(</span>SYSV<span class="o">)</span>, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, <span class="k">for </span>GNU/Linux 2.6.32, BuildID[sha1]<span class="o">=</span>0ac5c509289d650534ce80cdbf5b72744b5c5f3d, stripped
-<span class="o">[</span>engs50@mc ~]<span class="nv">$ </span>
+      30       5     24.7
+      30      10     21.2
+      30      15     19.0
+
+      40       5     36.5
+      40      10     33.6
+      40      15     31.8
 </code></pre></div></div>
+
+<h4 class="no_toc" id="output-one-argument">output: one argument</h4>
+
+<p>If the user provides one argument, it will assumed to be a temperature (expressed as a floating-point number).
+If that temperature is less than 50, it is acceptable; <code class="language-plaintext highlighter-rouge">chill</code> then prints a table of wind speeds (from 5 to 15 by 5’s) and the calculated wind chills <em>for that temperature only</em>.
+Your program’s output for one argument should look like this:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nv">$ </span>./chill 32
+     Temp   Wind   Chill
+    <span class="nt">-----</span>   <span class="nt">----</span>   <span class="nt">-----</span>
+      32      5     27.1
+      32     10     23.7
+      32     15     21.6
+</code></pre></div></div>
+
+<h4 class="no_toc" id="output-two-arguments">output: two arguments</h4>
+
+<p>If the user provides two arguments, they will be temperature and
+velocity, respectively (expressed as floating-point numbers).  The
+temperature must be less than 50 and the velocity must be greater than
+or equal to 0.5.</p>
+
+<p>If the arguments are acceptable, then your program should calculate
+and print the wind chill for <em>that temperature and velocity only</em>.</p>
+
+<p>Your program’s output for two arguments should look like this:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nv">$ </span>./chill 5 20
+     Temp    Wind   Chill
+     <span class="nt">-----</span>   <span class="nt">----</span>   <span class="nt">-----</span>
+        5     20    <span class="nt">-15</span>.4
+</code></pre></div></div>
+
+<p>If either argument is out of range, your program should issue a
+message and exit.  Here’s an example:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nv">$ </span>./chill 55
+    Temperature must be less than 50 degrees Fahrenheit
+
+    <span class="nv">$ </span>./chill <span class="nt">-150</span> 
+    Temperature must be greater than <span class="nt">-139</span> Fahrenheit 
+    <span class="o">(</span>coldest recorded earth temperature, see https://en.wikipedia.org/wiki/Lowest_temperature_recorded_on_Earth<span class="o">)</span>
+
+    <span class="nv">$ </span>./chill 10 0
+    Wind velocity must be greater than or equal to 0.5 MPH
+</code></pre></div></div>
+
+<blockquote>
+  <p>In the preceding examples some values were printed as integers and some as decimal fractions.
+You may print everything in the format “x.y”, if you wish, but do not print more than one decimal place.
+Indeed, it may be wise to use this format when the user specifies temperature or windspeed, because the user may specify a non-integral value and it may be misleading to print it as an integer.</p>
+</blockquote>
+
+<h4 class="no_toc" id="output-more-than-two-arguments">output: more than two arguments</h4>
+
+<p>print a “usage” line and exit with error status.</p>
+
+<h4 class="no_toc" id="exit-1">exit</h4>
+
+<p>If the program terminates normally, it exits with a return code  of <code class="language-plaintext highlighter-rouge">0</code>.
+Otherwise, it terminates with a documented, non-zero return code.</p>
+
+<h4 class="no_toc" id="compiling">Compiling</h4>
+
+<p>You will likely need the math library.
+To use it, add
+<code class="language-plaintext highlighter-rouge">#include &lt;math.h&gt;</code>
+to your <code class="language-plaintext highlighter-rouge">chill.c</code> file, and add
+<code class="language-plaintext highlighter-rouge">-lm</code> to your <code class="language-plaintext highlighter-rouge">mygcc</code> command.
+(That is “dash ell emm”, which is short for “library math”.)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mygcc chill.c <span class="nt">-lm</span> <span class="nt">-o</span> chill
+</code></pre></div></div>
+
+<h2 id="wordsc">words.c</h2>
+
+<p>Write a C program reminiscent of one of the pipelines we explored in Lab 1; specifically, a program called <code class="language-plaintext highlighter-rouge">words</code> that breaks its input into a series of words, one per line.
+It may take input from stdin, or from files whose names are listed as arguments.</p>
+
+<h4 class="no_toc" id="usage">usage</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>words [filename]...
+</code></pre></div></div>
+
+<h4 class="no_toc" id="input-1">input</h4>
+
+<p>When no filenames are given on the command line, <code class="language-plaintext highlighter-rouge">words</code> reads from stdin.</p>
+
+<p>When one or more filenames are given on the command line, <code class="language-plaintext highlighter-rouge">words</code> reads from each file in sequence.</p>
+
+<p>If the special filename <code class="language-plaintext highlighter-rouge">-</code> is given as one of the filenames, the stdin is read at that point in the sequence.</p>
+
+<h4 class="no_toc" id="output">output</h4>
+
+<p>In any case, the stdout should consist of a sequence of lines, with
+exactly one word on each output line (i.e., each output line contains
+exactly one word and no other characters).  A “word” is a sequence of
+letters.</p>
+
+<blockquote>
+  <p>Although you may be tempted to think of the input as a sequence of lines, it may be helpful to think of it as a sequence of characters.</p>
+</blockquote>
+
+<blockquote>
+  <p>Note it is possible for the output to be empty, if there are no words in any of the input files.</p>
+</blockquote>
+
+<p>Any error messages are written to stderr.</p>
+
+<h4 class="no_toc" id="exit-2">exit</h4>
+
+<p>If the program terminates normally, it exits with a return code  of <code class="language-plaintext highlighter-rouge">0</code>.
+Otherwise, it terminates with a documented, non-zero return code.</p>
+
+<h4 class="no_toc" id="hints-1">hints</h4>
+
+<blockquote>
+  <p>Check out <code class="language-plaintext highlighter-rouge">man ctype</code> on a mac, or <code class="language-plaintext highlighter-rouge">man ctype.h</code> on a Linux system.</p>
+
+  <p>Consider a function that processes a file, given a <code class="language-plaintext highlighter-rouge">FILE*</code> as parameter.</p>
+
+  <p>Would it be easier to process the file(s) one character at a time?</p>
+</blockquote>
+
+<h2 id="histoc">histo.c</h2>
+
+<p>Write a program that reads a series of positive integers from stdin, and prints out a histogram.
+There should be 16 bins in your histogram.
+The catch?
+You don’t know in advance the <em>range</em> of input values; assume the integers range from 0 to some unknown positive maximum.
+Thus, you will need to dynamically scale the bin size for your histogram.
+An example is below.</p>
+
+<h4 class="no_toc" id="usage-1">Usage:</h4>
+
+<p>There are no command-line arguments.</p>
+
+<h4 class="no_toc" id="requirements">Requirements:</h4>
+
+<p>You must begin with bin size 1, and double it as needed so all
+positive integers observed on input fit within the histogram.</p>
+
+<p>You must have 16 bins.
+The number ‘16’ should appear only <em>once</em> in your code.</p>
+
+<h4 class="no_toc" id="input-2">input:</h4>
+
+<p>Input is read from stdin, whether from the keyboard, redirected from a
+file, or piped in from another command.  You can use a simple
+<code class="language-plaintext highlighter-rouge">scanf()</code> for this.  Assume the input contains only integers,
+separated by white space (space, tab, newline).  Assume the smallest
+integer is zero; ignore any negative integers.  If there is
+non-integer non-space content in the file, it is ok for the program to
+treat that as the end of input; the program should not crash, or enter
+an infinite loop – it should just silently behave as if there are no
+more integers.  (These assumptions make it easy to use <code class="language-plaintext highlighter-rouge">scanf</code> for
+your input.)</p>
+
+<p>As always, any other assumptions you make should be documented in your <code class="language-plaintext highlighter-rouge">README</code> file and your testing procedure should be documented in your <code class="language-plaintext highlighter-rouge">TESTING</code> file.</p>
+
+<h4 class="no_toc" id="output-1">output:</h4>
+
+<p>See examples below.</p>
+
+<h4 class="no_toc" id="exit-3">exit</h4>
+
+<p>This program has no arguments and does not check its input for errors, so it should always exit with zero status.</p>
+
+<h4 class="no_toc" id="examples">Examples:</h4>
+
+<p>Here we compile and run the program, and type a set of numbers (spread
+over three lines, but it doesn’t matter as long as we put space or
+newline between numbers), ending with <code class="language-plaintext highlighter-rouge">ctrl-D</code> on the beginning of a
+line.  (That sends EOF to the program.)  It then printed a histogram,
+nicely labeling each line with the range of values assigned to that
+bin, and printing a row of <code class="language-plaintext highlighter-rouge">*</code> to represent the count of values that
+fell into that bin.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mygcc histo.c -o histo
+$ ./histo
+16 bins of size 1 for range [0,16)
+3 -4 5 1 7 0
+8 0 15 12 3 5
+3 3 3 3 3
+^D
+[ 0: 0] **
+[ 1: 1] *
+[ 2: 2]
+[ 3: 3] *******
+[ 4: 4]
+[ 5: 5] **
+[ 6: 6]
+[ 7: 7] *
+[ 8: 8] *
+[ 9: 9]
+[10:10]
+[11:11]
+[12:12] *
+[13:13]
+[14:14]
+[15:15] *
+$
+</code></pre></div></div>
+
+<p>The notation [a,b) includes all values <em>x</em> such that <em>a &lt;= x &lt; b</em>,
+that is, the range includes <em>a</em> but does not include <em>b</em>.  For
+example, [0,4) = {0, 1, 2, 3}.</p>
+
+<p>Now watch what happens if we input a number outside the original range
+of [0,16).</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./histo
+16 bins of size 1 for range [0,16)
+3 -4 5 1 7 0
+8 0 15 12 3 5
+18
+16 bins of size 2 for range [0,32)
+19 20 30 7 12
+50
+16 bins of size 4 for range [0,64)
+34
+32
+19
+44
+^D
+[ 0: 3] *****
+[ 4: 7] ****
+[ 8:11] *
+[12:15] ***
+[16:19] ***
+[20:23] *
+[24:27]
+[28:31] *
+[32:35] **
+[36:39]
+[40:43]
+[44:47] *
+[48:51] *
+[52:55]
+[56:59]
+[60:63]
+$
+</code></pre></div></div>
+
+<p>Each time it sees a number outside the current range, it doubles the
+range and doubles the size of each bin.  (Notice also the [low:high]
+labels in the histogram; this notation includes both <em>low</em> and <em>high</em>
+and everything in between.) It might have to repeat the doubling if we
+put in a number well past the current bin size:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./histo
+16 bins of size 1 for range [0,16)
+150
+16 bins of size 2 for range [0,32)
+16 bins of size 4 for range [0,64)
+16 bins of size 8 for range [0,128)
+16 bins of size 16 for range [0,256)
+^D
+[  0: 15]
+[ 16: 31]
+[ 32: 47]
+[ 48: 63]
+[ 64: 79]
+[ 80: 95]
+[ 96:111]
+[112:127]
+[128:143]
+[144:159] *
+[160:175]
+[176:191]
+[192:207]
+[208:223]
+[224:239]
+[240:255]
+$
+</code></pre></div></div>
+
+<p>Here’s an example using bash syntax to generate a list of numbers, and
+piping the output to <code class="language-plaintext highlighter-rouge">histo</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ echo {1..16} 150 | ./histo
+16 bins of size 1 for range [0,16)
+16 bins of size 2 for range [0,32)
+16 bins of size 4 for range [0,64)
+16 bins of size 8 for range [0,128)
+16 bins of size 16 for range [0,256)
+[  0: 15] ***************
+[ 16: 31] *
+[ 32: 47]
+[ 48: 63]
+[ 64: 79]
+[ 80: 95]
+[ 96:111]
+[112:127]
+[128:143]
+[144:159] *
+[160:175]
+[176:191]
+[192:207]
+[208:223]
+[224:239]
+[240:255]
+$
+</code></pre></div></div>
+
+<p>Although we scale the bin size (x axis), I’m not asking you to scale
+the bin count (y axis) for printing, which can lead to some really
+wide output:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ echo {1..100} 1500 | ./histo
+16 bins of size 1 for range [0,16)
+16 bins of size 2 for range [0,32)
+16 bins of size 4 for range [0,64)
+16 bins of size 8 for range [0,128)
+16 bins of size 16 for range [0,256)
+16 bins of size 32 for range [0,512)
+16 bins of size 64 for range [0,1024)
+16 bins of size 128 for range [0,2048)
+[   0: 127] ****************************************************************************************************
+[ 128: 255]
+[ 256: 383]
+[ 384: 511]
+[ 512: 639]
+[ 640: 767]
+[ 768: 895]
+[ 896:1023]
+[1024:1151]
+[1152:1279]
+[1280:1407]
+[1408:1535] *
+[1536:1663]
+[1664:1791]
+[1792:1919]
+[1920:2047]
+$
+</code></pre></div></div>
+
+<p>We took some pains to format the [low:high] range indicators for each
+row, using a fixed-width field just wide enough to hold the biggest
+number.  It’s a nice touch (read <code class="language-plaintext highlighter-rouge">man printf</code> for some clues) but it’s
+ok if you make a simpler assumption (e.g., always use 6-digit field
+width).</p>
+
+<h4 id="representing-a-histogram">Representing a histogram</h4>
+
+<p>You will need an array of 16 bins to represent the number of integers
+observed in each bin.  You’ll need to keep track of the bin size and
+the range of the histogram.  If you observe a value outside the range,
+you should double the bin size and range - but first you need to
+compress the current 16 bins into the first 8 bins.  You’ll likely
+need one loop to compute the new values for the lower half of the bins
+(each bin receiving the sum of two bins’ counts), and then another to
+assign the new value (0) to the upper half of the bins.</p>
+
+<p>(Again: the number ‘16’ may only occur <em>once</em> in your code; scattering
+hard-coded numbers around your code is bad style.)</p>
+
+<p>Notice that the number of bins, bin size, and histogram range are all
+powers of 2.</p>
+
+<h2 id="what-to-hand-in-and-how">What to hand in, and how</h2>
+
+<p>Make sure to compile and test your solutions on one of the machines in
+M210.  If you choose to develop your solutions on some other system,
+you are responsible to ensure that the work you submit runs correctly
+on a machine in M210 — which is where where we will test it!</p>
+
+<ul>
+  <li>
+    <p>In addition to your code, each of the four subdirectories of
+<code class="language-plaintext highlighter-rouge">lab2</code> must include two simple text files:</p>
+
+    <p>a.  <code class="language-plaintext highlighter-rouge">README</code>,
+     which describes how your program should be compiled and executed, along with an explanation of any assumptions you made about the assignment.
+See the <a href="/engs50/Examples/subtemplate-README.txt">example README file</a>.</p>
+
+    <p>b.  <code class="language-plaintext highlighter-rouge">TESTING</code>,
+     which describes how you tested the program, including test inputs and test scripts; these test inputs and test scripts should be included as files in the same directory.</p>
+  </li>
+</ul>
+
+<blockquote>
+  <p>See the <a href="/engs50/Examples/subtemplate-TESTING.txt">example TESTING file</a>; in that case we would not need to include testing inputs because they were CS50-provided files, or generated within the testing file itself.
+(We created this file in MacOS Terminal by choosing “Export Text As…” from the Shell menu when we had finished all the testing commands, we edited it with emacs to add the comments.</p>
+</blockquote>
+
+<p>When finished, you should have the following files:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lab2
+├── chill
+│   ├── README
+│   ├── TESTING
+│   └── chill.c
+├── histo
+│   ├── README
+│   ├── TESTING
+│   ├── histo.c
+├── regress
+│   ├── README
+│   ├── TESTING
+│   └── regress.sh
+└── words
+    ├── README
+    ├── TESTING
+    └── words.c
+</code></pre></div></div>
+
+<blockquote>
+  <p>This listing was produced by the <code class="language-plaintext highlighter-rouge">tree</code> command.  Neat, huh?</p>
+</blockquote>
+
 
   </div>
 

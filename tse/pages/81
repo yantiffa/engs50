@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Labs/Lab3/array-allocate.html
+https://thayer.github.io/engs50/Notes/cohesion/activity.html
 3
-6209
+8500
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Labs/Lab3/array-allocate.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Allocating an array with calloc</title>
+  <title>Activity - Cohesion and Coupling</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Labs/Lab3/array-allocate.html">
+  <link rel="canonical" href="/engs50/Notes/cohesion/activity.html">
 </head>
 
 
@@ -44,37 +44,95 @@ https://thayer.github.io/engs50/Labs/Lab3/array-allocate.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Allocating an array with calloc</h1>
+    <h1 class="post-title">Activity - Cohesion and Coupling</h1>
   </header>
 
   <div class="post-content">
-    <p>We’ve seen the use of a one-dimensional array of pointers to strings, in <a href="/engs50/Examples/names3.c">names3.c</a>.
-In that case, the number of slots in the array was a constant.
-What if we don’t know that number at compile time?</p>
+    <p>With your group, take a look at the <a href="/engs50/Notes/cohesion/example.c">example</a> code and comment on its naming, cohesion, and coupling.
+The code is reproduced below.</p>
 
-<p>Here’s a snippet of code to hint at how to allocate an array of <code class="language-plaintext highlighter-rouge">num</code> slots:</p>
+<!--See [Solution](solution.html).-->
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// the number of elements in the array</span>
-<span class="kt">int</span> <span class="n">num</span> <span class="o">=</span> <span class="p">...;</span> <span class="c1">// somehow obtained; below we assume num&gt;=2</span>
-<span class="p">...</span>
-<span class="c1">// array of ints</span>
-<span class="kt">int</span> <span class="o">*</span><span class="n">array</span> <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
-<span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// pseudo-code from a calendar/datebook application</span>
 
-<span class="c1">// array of pointers to int</span>
-<span class="kt">int</span> <span class="o">**</span><span class="n">array</span> <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">));</span>
-<span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
-<span class="o">*</span><span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">date</span> <span class="n">date_t</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">calendar</span> <span class="n">calendar_t</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">event</span> <span class="n">event_t</span><span class="p">;</span>
 
-<span class="c1">// for other types, the process is analogous</span>
-<span class="k">struct</span> <span class="n">foo</span> <span class="o">**</span><span class="n">array</span> <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">foo</span><span class="o">*</span><span class="p">);</span>
-<span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">foo</span><span class="p">));</span>
-<span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">foomember</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span> <span class="c1">// assuming foomember is an integer member of struct foo</span>
+<span class="c1">// given one date, compute the next date;</span>
+<span class="c1">// account for leap years, etc.</span>
+<span class="n">date_t</span> <span class="o">*</span><span class="nf">date_next</span><span class="p">(</span><span class="n">date_t</span> <span class="o">*</span><span class="n">day</span><span class="p">);</span>
 
-<span class="c1">// or, sometimes, you don't know how to initialize the structure</span>
-<span class="c1">// because it provides a 'constructor' function. first step is the same:</span>
-<span class="k">struct</span> <span class="n">foo</span> <span class="o">**</span><span class="n">array</span> <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">foo</span><span class="o">*</span><span class="p">);</span>
-<span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">foo_new</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span> <span class="c1">// let the constructor allocate and initialize a new foo.</span>
+<span class="c1">// compute the number of days from "this" date until "that" date</span>
+<span class="kt">int</span> <span class="nf">date_ComputeDaysUntil</span><span class="p">(</span><span class="k">const</span> <span class="n">date_t</span> <span class="o">*</span><span class="n">this</span><span class="p">,</span> <span class="k">const</span> <span class="n">date_t</span> <span class="o">*</span><span class="n">that</span><span class="p">);</span>
+
+<span class="c1">// return current date</span>
+<span class="n">date_t</span> <span class="o">*</span><span class="nf">date_today</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+
+<span class="c1">// print calendar</span>
+<span class="kt">void</span> <span class="nf">calendar_print1</span><span class="p">(</span><span class="n">calendar_t</span> <span class="o">*</span><span class="n">cal</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">// print the month name</span>
+  <span class="c1">// print the day names </span>
+  <span class="c1">// for each row, print the dates in that row</span>
+<span class="p">}</span>
+
+<span class="c1">// print calendar</span>
+<span class="kt">void</span> <span class="nf">calendar_print2</span><span class="p">(</span><span class="n">calendar_t</span> <span class="o">*</span><span class="n">cal</span><span class="p">,</span> <span class="kt">int</span> <span class="n">which</span><span class="p">,</span> <span class="n">date_t</span> <span class="o">*</span><span class="n">day</span><span class="p">)</span> 
+<span class="p">{</span>
+  <span class="c1">// if which==1 </span>
+  <span class="c1">//   print the month name</span>
+  <span class="c1">//   print the day names </span>
+  <span class="c1">//   for each row, print the dates in that row</span>
+  <span class="c1">// else if which==2</span>
+  <span class="c1">//   print the month name, day name, and day number</span>
+  <span class="c1">//   print the events occurring on that day</span>
+<span class="p">}</span>
+
+<span class="c1">// print calendar</span>
+<span class="kt">void</span> <span class="nf">calendar_print3</span><span class="p">(</span><span class="n">calendar_t</span> <span class="o">*</span><span class="n">cal</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">// print the month name, day name, and day number</span>
+  <span class="c1">// foreach event occurring on that day</span>
+  <span class="c1">//   print the time of the event</span>
+  <span class="c1">//   print the type of event</span>
+  <span class="c1">//   print the description of the event</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">DoPrintBook</span><span class="p">(</span><span class="n">calendar_t</span> <span class="o">*</span><span class="n">cal</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">intro</span><span class="p">,</span>
+		 <span class="n">image_t</span> <span class="o">*</span><span class="n">frontCover</span><span class="p">,</span> <span class="n">image_t</span> <span class="o">*</span><span class="n">backCover</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">// print the frontCover</span>
+  <span class="c1">// print the intro</span>
+  <span class="c1">// foreach month</span>
+  <span class="c1">//   foreach day of that month</span>
+  <span class="c1">//     calendar_print2(cal, 2, day);</span>
+  <span class="c1">// print the backCover</span>
+<span class="p">}</span>
+
+<span class="n">calendar_t</span> <span class="n">theCalendar</span><span class="p">;</span>      <span class="c1">// the calendar we use below</span>
+
+<span class="kt">void</span> <span class="nf">Initialize</span><span class="p">(</span><span class="n">string</span> <span class="n">filename</span><span class="p">,</span> <span class="n">window_t</span> <span class="o">*</span><span class="n">window</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">// initialize theCalendar</span>
+  <span class="c1">// for each event read from the file</span>
+  <span class="c1">//   add event to the calendar</span>
+  <span class="c1">// initialize the window</span>
+  <span class="c1">// create some buttons on the window</span>
+  <span class="c1">// current date =  Today()</span>
+  <span class="c1">// display the current day in window</span>
+  <span class="c1">// look for any events in the next hour</span>
+  <span class="c1">//    pop up dialog box for each such event </span>
+  <span class="c1">// Update(cal, window);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">Update</span><span class="p">(</span><span class="n">date_t</span> <span class="o">*</span><span class="n">today</span><span class="p">,</span> <span class="n">window_t</span> <span class="o">*</span><span class="n">window</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">// check the current time</span>
+  <span class="c1">// look through theCalendar.eventlist for events on date "today"</span>
+  <span class="c1">//   if some events are now in the past, change their state to "past"</span>
+  <span class="c1">//   update today's events on the window</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
   </div>

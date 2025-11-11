@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/cohesion/activity.html
+https://thayer.github.io/engs50/Notes/unittest/activity.html
 3
-8500
+7445
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/cohesion/activity.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Activity - Cohesion and Coupling</title>
+  <title>Activity - Unit testing</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/cohesion/activity.html">
+  <link rel="canonical" href="/engs50/Notes/unittest/activity.html">
 </head>
 
 
@@ -44,96 +44,100 @@ https://thayer.github.io/engs50/Notes/cohesion/activity.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Activity - Cohesion and Coupling</h1>
+    <h1 class="post-title">Activity - Unit testing</h1>
   </header>
 
   <div class="post-content">
-    <p>With your group, take a look at the <a href="/engs50/Notes/cohesion/example.c">example</a> code and comment on its naming, cohesion, and coupling.
-The code is reproduced below.</p>
+    <p>Consider the simple one-function <code class="language-plaintext highlighter-rouge">jhash</code> module used in Lab3 and the TSE.
+It comprises <a href="/engs50/Labs/Lab3/starter/hashtable/jhash.c">jhash.c</a> and <a href="/engs50/Labs/Lab3/starter/hashtable/jhash.h">jhash.h</a> and implements the <code class="language-plaintext highlighter-rouge">JenkinsHash()</code> function below.</p>
 
-<!--See [Solution](solution.html).-->
+<ol>
+  <li>With your group, list all the tests a good unit test should run against this unit.
+    <ul>
+      <li>Can you spot the bug?  (I just noticed one I’d overlooked before.)</li>
+      <li>If you have time,</li>
+    </ul>
+    <ul>
+      <li>download the above files, or copy them:</li>
+      <li><code class="language-plaintext highlighter-rouge">cp ~cs50/public_html/Labs/Lab3/starter/hashtable/jhash.[ch] .</code></li>
+      <li>extend <code class="language-plaintext highlighter-rouge">jhash.c</code> with a unit test like those we saw demonstrated in class today; you can <code class="language-plaintext highlighter-rouge">#include "unittest.h"</code> and copy that file from <code class="language-plaintext highlighter-rouge">~cs50/examples/unittest.h</code> for your testing.</li>
+    </ul>
+  </li>
+</ol>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// pseudo-code from a calendar/datebook application</span>
-
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">date</span> <span class="n">date_t</span><span class="p">;</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">calendar</span> <span class="n">calendar_t</span><span class="p">;</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">event</span> <span class="n">event_t</span><span class="p">;</span>
-
-<span class="c1">// given one date, compute the next date;</span>
-<span class="c1">// account for leap years, etc.</span>
-<span class="n">date_t</span> <span class="o">*</span><span class="nf">date_next</span><span class="p">(</span><span class="n">date_t</span> <span class="o">*</span><span class="n">day</span><span class="p">);</span>
-
-<span class="c1">// compute the number of days from "this" date until "that" date</span>
-<span class="kt">int</span> <span class="nf">date_ComputeDaysUntil</span><span class="p">(</span><span class="k">const</span> <span class="n">date_t</span> <span class="o">*</span><span class="n">this</span><span class="p">,</span> <span class="k">const</span> <span class="n">date_t</span> <span class="o">*</span><span class="n">that</span><span class="p">);</span>
-
-<span class="c1">// return current date</span>
-<span class="n">date_t</span> <span class="o">*</span><span class="nf">date_today</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
-
-<span class="c1">// print calendar</span>
-<span class="kt">void</span> <span class="nf">calendar_print1</span><span class="p">(</span><span class="n">calendar_t</span> <span class="o">*</span><span class="n">cal</span><span class="p">)</span>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">unsigned</span> <span class="kt">long</span>
+<span class="nf">JenkinsHash</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">str</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">mod</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// print the month name</span>
-  <span class="c1">// print the day names </span>
-  <span class="c1">// for each row, print the dates in that row</span>
-<span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">str</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+      <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 
-<span class="c1">// print calendar</span>
-<span class="kt">void</span> <span class="nf">calendar_print2</span><span class="p">(</span><span class="n">calendar_t</span> <span class="o">*</span><span class="n">cal</span><span class="p">,</span> <span class="kt">int</span> <span class="n">which</span><span class="p">,</span> <span class="n">date_t</span> <span class="o">*</span><span class="n">day</span><span class="p">)</span> 
-<span class="p">{</span>
-  <span class="c1">// if which==1 </span>
-  <span class="c1">//   print the month name</span>
-  <span class="c1">//   print the day names </span>
-  <span class="c1">//   for each row, print the dates in that row</span>
-  <span class="c1">// else if which==2</span>
-  <span class="c1">//   print the month name, day name, and day number</span>
-  <span class="c1">//   print the events occurring on that day</span>
-<span class="p">}</span>
+    <span class="kt">size_t</span> <span class="n">len</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">str</span><span class="p">);</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">hash</span><span class="p">,</span> <span class="n">i</span><span class="p">;</span>
 
-<span class="c1">// print calendar</span>
-<span class="kt">void</span> <span class="nf">calendar_print3</span><span class="p">(</span><span class="n">calendar_t</span> <span class="o">*</span><span class="n">cal</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="c1">// print the month name, day name, and day number</span>
-  <span class="c1">// foreach event occurring on that day</span>
-  <span class="c1">//   print the time of the event</span>
-  <span class="c1">//   print the type of event</span>
-  <span class="c1">//   print the description of the event</span>
-<span class="p">}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">hash</span> <span class="o">=</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">hash</span> <span class="o">+=</span> <span class="n">str</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">hash</span> <span class="o">+=</span> <span class="p">(</span><span class="n">hash</span> <span class="o">&lt;&lt;</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="n">hash</span> <span class="o">^=</span> <span class="p">(</span><span class="n">hash</span> <span class="o">&gt;&gt;</span> <span class="mi">6</span><span class="p">);</span>
+    <span class="p">}</span>
 
-<span class="kt">void</span> <span class="nf">DoPrintBook</span><span class="p">(</span><span class="n">calendar_t</span> <span class="o">*</span><span class="n">cal</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">intro</span><span class="p">,</span>
-		 <span class="n">image_t</span> <span class="o">*</span><span class="n">frontCover</span><span class="p">,</span> <span class="n">image_t</span> <span class="o">*</span><span class="n">backCover</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="c1">// print the frontCover</span>
-  <span class="c1">// print the intro</span>
-  <span class="c1">// foreach month</span>
-  <span class="c1">//   foreach day of that month</span>
-  <span class="c1">//     calendar_print2(cal, 2, day);</span>
-  <span class="c1">// print the backCover</span>
-<span class="p">}</span>
+    <span class="n">hash</span> <span class="o">+=</span> <span class="p">(</span><span class="n">hash</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span><span class="p">);</span>
+    <span class="n">hash</span> <span class="o">^=</span> <span class="p">(</span><span class="n">hash</span> <span class="o">&gt;&gt;</span> <span class="mi">11</span><span class="p">);</span>
+    <span class="n">hash</span> <span class="o">+=</span> <span class="p">(</span><span class="n">hash</span> <span class="o">&lt;&lt;</span> <span class="mi">15</span><span class="p">);</span>
 
-<span class="n">calendar_t</span> <span class="n">theCalendar</span><span class="p">;</span>      <span class="c1">// the calendar we use below</span>
-
-<span class="kt">void</span> <span class="nf">Initialize</span><span class="p">(</span><span class="n">string</span> <span class="n">filename</span><span class="p">,</span> <span class="n">window_t</span> <span class="o">*</span><span class="n">window</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="c1">// initialize theCalendar</span>
-  <span class="c1">// for each event read from the file</span>
-  <span class="c1">//   add event to the calendar</span>
-  <span class="c1">// initialize the window</span>
-  <span class="c1">// create some buttons on the window</span>
-  <span class="c1">// current date =  Today()</span>
-  <span class="c1">// display the current day in window</span>
-  <span class="c1">// look for any events in the next hour</span>
-  <span class="c1">//    pop up dialog box for each such event </span>
-  <span class="c1">// Update(cal, window);</span>
-<span class="p">}</span>
-
-<span class="kt">void</span> <span class="nf">Update</span><span class="p">(</span><span class="n">date_t</span> <span class="o">*</span><span class="n">today</span><span class="p">,</span> <span class="n">window_t</span> <span class="o">*</span><span class="n">window</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="c1">// check the current time</span>
-  <span class="c1">// look through theCalendar.eventlist for events on date "today"</span>
-  <span class="c1">//   if some events are now in the past, change their state to "past"</span>
-  <span class="c1">//   update today's events on the window</span>
+    <span class="k">return</span> <span class="n">hash</span> <span class="o">%</span> <span class="n">mod</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
+
+<!--
+## Solution
+
+The bug is actually a failure to be defensive in regards to the arguments.
+If a caller passes `mod = 0` then this function will divide by zero and the program will crash.
+The caller cannot pass a negative `mod` -- because the parameter is of `unsigned` type.
+(It's worth considering whether `mod = 1` should be allowed -- with `mod = 1` the hash would always be zero.)
+
+You could create some unit tests by adding the following to the bottom of `jhash.c`:
+
+```c
+#ifdef UNIT_TEST
+#include <stdio.h>
+#include "unittest.h"
+
+int main()
+{
+  START_TEST_CASE("jhash");
+  EXPECT(JenkinsHash(NULL, 1) == 0);
+  EXPECT(JenkinsHash("", 1) == 0);
+  EXPECT(JenkinsHash("CS50", 1) == 0);
+  EXPECT(JenkinsHash("CS50", 99999) == JenkinsHash("CS50", 99999));
+  EXPECT(JenkinsHash("CS50", 99999) == 18704);
+  EXPECT(JenkinsHash("This is a very long string and it will make it hard to read this test; fortunately, the function does not care.", 99999) == 86041);
+
+  END_TEST_CASE;
+  return TEST_RESULT;
+}
+
+#endif // UNIT_TEST
+```
+
+I did not test the `mod = 0` case because I don't want to crash the program.
+If I fix that bug by changing the first lines of the function:
+
+```c
+    if (str == NULL || mod <= 1)
+      return 0;
+```
+
+I could then add another test case.
+
+```c
+  EXPECT(JenkinsHash("CS50", 0) == 0);
+```
+
+Here's the final [jhash.c](/engs50/Notes/unittest/jhash.c).
+
+-->
 
   </div>
 

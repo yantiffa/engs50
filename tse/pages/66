@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/crawler/activity.html
+https://thayer.github.io/engs50/Notes/makefiles/headerfiles.html
 3
-3088
+6626
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/crawler/activity.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Activity - TSE Crawler</title>
+  <title>Extra - C header files</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/crawler/activity.html">
+  <link rel="canonical" href="/engs50/Notes/makefiles/headerfiles.html">
 </head>
 
 
@@ -44,34 +44,55 @@ https://thayer.github.io/engs50/Notes/crawler/activity.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Activity - TSE Crawler</h1>
+    <h1 class="post-title">Extra - C header files</h1>
   </header>
 
   <div class="post-content">
-    <h3 id="goals">Goals</h3>
+    <p><strong><em>Examples are not yet updated for CS50 in 17S, but the concepts are still correct.</em></strong></p>
+
+<p>Let’s look at the contents and purpose of <code class="language-plaintext highlighter-rouge">readline.h</code>.
+That file was used in the recent examples:</p>
 
 <ul>
-  <li>to run the <em>Crawler</em> over a small website</li>
-  <li>to understand how it explores from page to page</li>
+  <li><a href="/engs50/Examples/names1.c">names1.c</a>: arrays of strings, reading and copying lines into an array.</li>
+  <li><a href="/engs50/Examples/names2.c">names2.c</a>: scanning a string and truncating it by overwriting a character with the null <code class="language-plaintext highlighter-rouge">\0</code> character.</li>
 </ul>
 
-<h3 id="activity">Activity</h3>
+<p>These use</p>
 
-<p><strong><em>One</em></strong> person in your group should run my crawler over a little website, at various depths, and try to understand what it’s doing.
-It’s a long command so I broke it over several lines:</p>
+<ul>
+  <li><a href="/engs50/Examples/readline.c">readline.c</a>: a C file defining the function <code class="language-plaintext highlighter-rouge">readline</code>, used by <code class="language-plaintext highlighter-rouge">names*.c</code>.</li>
+  <li><a href="/engs50/Examples/readline.h">readline.h</a>: a C ‘header’ file that provides prototypes needed by any C program wanting to use <code class="language-plaintext highlighter-rouge">readline</code>.</li>
+</ul>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~cs50/demo/crawler \
-  http://old-www.cs.dartmouth.edu/~cs50/data/tse/letters/index.html \
-  data 0
-</code></pre></div></div>
+<p>Why did we need this include file, <code class="language-plaintext highlighter-rouge">readline.h</code>?
+Because we compiled <code class="language-plaintext highlighter-rouge">names.c</code> and <code class="language-plaintext highlighter-rouge">readline.c</code> separately.
+When we compiled <code class="language-plaintext highlighter-rouge">names.c</code>, we needed to declare the prototype for the function <code class="language-plaintext highlighter-rouge">readline</code>, just as we would have if <code class="language-plaintext highlighter-rouge">readline</code> had been defined within <code class="language-plaintext highlighter-rouge">names.c</code>.
+Because the function was <em>not</em> defined within <code class="language-plaintext highlighter-rouge">names.c</code>, though, the prototype needs to be prefixed with <code class="language-plaintext highlighter-rouge">extern</code>, indicating that the function is external to the current C file.
+The C compiler leaves that symbol (<code class="language-plaintext highlighter-rouge">readline</code>) unresolved, and hopes the linker will later be able to connect it to the actual function definition when <code class="language-plaintext highlighter-rouge">names.o</code> is linked with other object files.</p>
 
-<p><strong><em>Another</em></strong> person in your group should examine the source files for that website:</p>
+<p>We could have simply typed the prototype into <code class="language-plaintext highlighter-rouge">names.c</code>, but we put it in a separate file <code class="language-plaintext highlighter-rouge">header.h</code>, and then used the special compiler directive <code class="language-plaintext highlighter-rouge">#include</code> to literally copy the contents of <code class="language-plaintext highlighter-rouge">header.h</code> into the C file at that point.
+(See the <a href="08x-preprocessor.html">lecture extra</a> about the C preprocessor.) Just in case the header file gets included multiple times, the pair of directives <code class="language-plaintext highlighter-rouge">#ifndef</code> (if not defined) and <code class="language-plaintext highlighter-rouge">#define</code> (define) ensure the body of this file is only processed once per C file.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd ~cs50/data/tse/letters
-less *.html
-</code></pre></div></div>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+ * readline.h - a utility function to safely read one line of input
+ * See readline.c for documentation.
+ *
+ * David Kotz, April 2016
+ */</span>
 
-<p><strong><em>Another</em></strong> person in your group can visit the page in your browser, <a href="http://old-www.cs.dartmouth.edu/~cs50/data/tse/letters/index.html">here</a>.</p>
+<span class="cp">#ifndef __READLINE_H__
+#define __READLINE_H__
+</span>
+<span class="cp">#include &lt;stdbool.h&gt;
+</span>
+<span class="k">extern</span> <span class="n">bool</span> <span class="nf">readline</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">len</span><span class="p">);</span>
+
+<span class="cp">#endif //  __READLINE_H__
+</span></code></pre></div></div>
+
+<p>We also include <code class="language-plaintext highlighter-rouge">header.h</code> in <code class="language-plaintext highlighter-rouge">readline.c</code>.
+This way, we write the prototype in only one place, and yet give the compiler information in both places where it is needed - and give the compiler a chance to help us catch any inconsistencies between the prototype and the function call in <code class="language-plaintext highlighter-rouge">names.c</code>, or between the prototype and the function definition in <code class="language-plaintext highlighter-rouge">readline.c</code>.</p>
 
 
   </div>

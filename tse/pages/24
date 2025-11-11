@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/unittest/
+https://thayer.github.io/engs50/Notes/memory/
 2
-23701
+14317
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/unittest/
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Unit testing</title>
+  <title>Memory, pointers, and malloc</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/unittest/">
+  <link rel="canonical" href="/engs50/Notes/memory/">
 </head>
 
 
@@ -44,234 +44,159 @@ https://thayer.github.io/engs50/Notes/unittest/
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Unit testing</h1>
+    <h1 class="post-title">Memory, pointers, and malloc</h1>
   </header>
 
   <div class="post-content">
-    <p>The goal of effective unit testing is to isolate each functional part of the system and to demonstrate that each of those parts is working properly.</p>
+    <p>To truly understand C, and in particular, the use of pointers, you need to understand how C programs use memory.
+These same concepts underly nearly all procedural languages, though some languages cover up the details.</p>
 
-<p>A short online reference is Jeff Canna’s <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>.
-Although he is talking mostly about Java, his insights on unit testing are superb.</p>
+<!--
+***We started today with a demo of my solutions for [Lab 2](/engs50/Labs/Lab2)***.
+-->
+<!-- Terminal [script](/engs50/Notes/memory/script.txt) from today's class. -->
 
-<blockquote>
-  <p>“Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.” – Jeff Canna, <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>.</p>
-</blockquote>
-
-<blockquote>
-  <p>“Unit tests are written from the developer’s perspective and focus on particular methods of the class under test.” – Jeff Canna, <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>.</p>
-</blockquote>
-
-<p>Use these guidelines when writing unit tests (from Jeff Canna, <em><a href="http://www.ibm.com/developerworks/library/j-test.html">Testing, Fun, Really</a></em>):</p>
+<h3 id="goals">Goals</h3>
 
 <ul>
-  <li>“Write the unit test before writing code for class it tests.</li>
-  <li>“Capture code comments in unit tests.</li>
-  <li>“Test all the public methods that perform an “interesting” function (that is, not getters and setters, unless they do their getting and setting in some unique way).</li>
-  <li>“Put each test case in the same package as the class it’s testing to gain access to package and protected members.</li>
-  <li>“Avoid using domain-specific objects in unit tests.”</li>
+  <li>to recognize that all data is stored in memory, that memory is a linear sequence of bytes, and that every byte has a numeric <em>address</em>.</li>
+  <li>to understand that C stores the running program and its data in one of <em>four areas of memory</em>, each managed differently.</li>
+  <li>to learn about C syntax for pointers, addresses, and dereferencing.</li>
+  <li>to begin to explore dynamic memory allocation.</li>
 </ul>
 
-<h3 id="unit-testing-of-our-binary-tree">Unit testing of our binary tree</h3>
+<h3 id="slides-and-examples">Slides and examples</h3>
 
-<p>Today’s Terminal <a href="/engs50/Notes/unittest/script.txt">script</a> is available.</p>
-
-<p>Unzip the <a href="/engs50/Examples/trees.zip">tree examples file</a>. The tree9 example
-demonstrated a binary-tree data structure. Here we enhance it to become treeA (to a computer scientist, <code class="language-plaintext highlighter-rouge">A</code> comes next after <code class="language-plaintext highlighter-rouge">9</code>).</p>
-
-<p>Look at treeA/tree.c and its Makefile and you’ll notice three things:</p>
+<p>Today I used a brief set of slides (in <a href="/engs50/Notes/memory/memory-pointers-C.key">Keynote</a> or <a href="/engs50/Notes/memory/memory-pointers-C.pdf">PDF</a>) to explain memory, addresses, and pointers, complementing the notes below.
+The slides reference several examples:</p>
 
 <ul>
-  <li>The code now has a <code class="language-plaintext highlighter-rouge">main()</code> function at the bottom of the file.
-It is protected inside <code class="language-plaintext highlighter-rouge">#ifdef UNIT_TEST ... #endif</code> so it is only compiled-in when we want to compile a unit test.</li>
-  <li>Preceding <code class="language-plaintext highlighter-rouge">main()</code> is an <code class="language-plaintext highlighter-rouge">#include "unittest.h"</code> to pick up several <em>preprocessor macros</em>, which we explain below.</li>
-  <li>The <code class="language-plaintext highlighter-rouge">Makefile</code> now has a <code class="language-plaintext highlighter-rouge">unittest</code> target, which builds a distinct executable, and a <code class="language-plaintext highlighter-rouge">unit</code> target, which runs it.</li>
+  <li><a href="/engs50/Examples/pointer0.c">pointer0.c</a></li>
+  <li><a href="/engs50/Examples/pointer1.c">pointer1.c</a></li>
+  <li><a href="/engs50/Examples/pointer2.c">pointer2.c</a></li>
+  <li><a href="/engs50/Examples/pointer3.c">pointer3.c</a></li>
 </ul>
 
+<h1 id="memory-and-addresses">Memory, and addresses</h1>
+
+<p>Every bit of information the computer needs must be stored somewhere in memory - whether instructions or data.
+The computer’s memory is a sequence of bytes, each byte with its own numeric <em>address</em>.
+If the computer has one megabyte of memory, these 2^20 bytes will be numbered from 0 to 2^20-1, that is, from 0 to 1,048,575.
+Or, since we’re computer scientists, we work in hexadecimal rather than decimal; the bytes are numbered from 00000 to FFFFF.
+In practice, we tend to write hexadecimal numbers in C notation: 0x00000 to 0xFFFFF.</p>
+
+<p>Given a variable, we can use a C operator <code class="language-plaintext highlighter-rouge">&amp;</code> to get its address.
+You might read this operator as “address of…”.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<span class="kt">int</span><span class="o">*</span> <span class="n">xp</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>The first variable <code class="language-plaintext highlighter-rouge">x</code> is an integer.
+The second variable <code class="language-plaintext highlighter-rouge">xp</code> is a pointer to an integer, and it is initialized to the address in memory where <code class="language-plaintext highlighter-rouge">x</code> is stored.</p>
+
 <blockquote>
-  <p>The <code class="language-plaintext highlighter-rouge">unittest</code> target is unusual in that it explicitly mentions dependency on <code class="language-plaintext highlighter-rouge">test.c</code>.
-Normally Make automatically recognizes the dependency between <code class="language-plaintext highlighter-rouge">.o</code> files and <code class="language-plaintext highlighter-rouge">.c</code> files, so we rarely see rules with dependency on <code class="language-plaintext highlighter-rouge">.c</code> files.
-Here, because there is no <code class="language-plaintext highlighter-rouge">unittest.c</code>, we always build <code class="language-plaintext highlighter-rouge">unittest</code> from <code class="language-plaintext highlighter-rouge">tree.c</code> with a special <code class="language-plaintext highlighter-rouge">-D</code> flag and do not use <code class="language-plaintext highlighter-rouge">tree.o</code>; we must explicitly list all the pieces that go into building <code class="language-plaintext highlighter-rouge">unitest</code>.</p>
+  <p>By the way, the <code class="language-plaintext highlighter-rouge">NULL</code> pointer is simply address zero (0x00000).
+The OS arranges for that memory segment to be illegal for reading or for writing, so if you try to dereference a null pointer for reading or writing (think <code class="language-plaintext highlighter-rouge">char *p=NULL; char c = *p;</code>) the OS will catch it and trigger a ‘segmentation fault’.</p>
 </blockquote>
 
-<p><strong><em>Preprocessor macros.</em></strong></p>
+<p>When you run your program, it becomes a <em>process</em> within Unix.
+(To see a list of all your processes, type <code class="language-plaintext highlighter-rouge">ps</code> at the bash commandline.
+To see <em>all</em> the processes running on the system, try <code class="language-plaintext highlighter-rouge">ps ax</code>.)  Your program’s executable code is copied into memory so the processor can read the instructions and execute them.
+This region is often called the <em>code segment</em> or <em>text segment</em>).</p>
 
-<p>The unit test makes heavy use of some <em>macros</em>, which are recognized and textually replaced by the C preprocessor before the C compiler even runs.
-They are so useful I’ve put them in a separate <code class="language-plaintext highlighter-rouge">unittest.h</code> file, and textually include them in <code class="language-plaintext highlighter-rouge">test.c</code> when <code class="language-plaintext highlighter-rouge">UNIT_TEST</code> has been defined.
-I show the core of <code class="language-plaintext highlighter-rouge">unittest.h</code> below.</p>
+<p>Let’s focus on data, which live in the other three segments.</p>
 
-<p>These are <em>macros.</em>
-Note how I define fragments of code with each <code class="language-plaintext highlighter-rouge">#define</code>; the first two even take parameters.
-When scanning C code, the preprocessor does <em>textual substitution</em> for each defined symbol - it does not evaluate the code at all, it just substitutes the remainder of the line (after the symbol and after a space) into the C program wherever it sees that symbol, optionally inserting the parameter wherever it appears in the macro body.
-Because each definition must appear on one “line”, I had to use a <em>line continuation</em> character (backslash in the last character of the line) to let me format the definitions in a human-readable way.
-I lined up the backslashes so they all look neat.</p>
+<h2 id="three-regions-of-data-memory">Three regions of data memory</h2>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// each test should start by setting the result count to zero</span>
-<span class="cp">#define START_TEST_CASE(name) int _failures=0; char *_testname = (name);
-</span>
-<span class="c1">// Check a condition; if false, print warning message.</span>
-<span class="c1">// e.g., EXPECT(dict-&gt;start == NULL).</span>
-<span class="c1">// note: the preprocessor </span>
-<span class="c1">//   converts __LINE__ into line number where this macro was used, and</span>
-<span class="c1">//   converts "#x" into a string constant for arg x.</span>
-<span class="cp">#define EXPECT(x)                                               \
-  if (!(x)) {                                                   \
-    _failures++;                                                \
-    printf("Fail %s Line %d: [%s]\n", _testname, __LINE__, #x); \
-  }
-</span>
-<span class="c1">// return the result count at the end of a test</span>
-<span class="cp">#define END_TEST_CASE                                                   \
-  if (_failures == 0) {                                                 \
-    printf("PASS test %s\n\n", _testname);                              \
-  } else {                                                              \
-    printf("FAIL test %s with %d errors\n\n", _testname, _failures);    \
-  }
-</span>
-<span class="cp">#define TEST_RESULT (_failures)
-</span></code></pre></div></div>
+<p>C stores all of the data your program manipulates in three distinct regions of memory (aka <em>segments</em>).
+There’s nothing special about each region - they’re all somewhere in that linear sequence of bytes - but C manages each differently.
+Let’s look at each in turn.</p>
 
-<p>The preprocessor defines a special macro <code class="language-plaintext highlighter-rouge">__LINE__</code> that is set to the line number of the original source file, as each source line is processed; this is great for printing out the line number where our test case failed.</p>
+<h3 id="global-memory-aka-static">Global memory (aka static)</h3>
 
-<p>The preprocessor also has special syntax <code class="language-plaintext highlighter-rouge">#parameter</code> that substitutes a C string constant for the text of the parameter.
-You can see it right at the end of the <code class="language-plaintext highlighter-rouge">EXPECT</code> macro.
-Thus, <code class="language-plaintext highlighter-rouge">EXPECT(tree != NULL)</code> will produce code that ends with <code class="language-plaintext highlighter-rouge">"tree != NULL");</code> enabling us to print the line number <em>and</em> the condition that failed.
-You can’t do that with C, only with the preprocessor!</p>
+<p>The simplest region is called ‘global’ (or ‘static’) storage, and it’s where global variables live.
+If you define a constant or variable outside of any function, it has</p>
 
-<p><em>Warning: I strongly discourage the use of preprocessor macros.</em>
-There are times, however, where they are the right tool for the job, and this is one of those times.</p>
+<ul>
+  <li><em>global scope</em> - meaning that it is visible to all code in any function within the current file, and</li>
+  <li><em>static storage</em> - meaning that C allocates space for it (and initializes the contents) before the program begins executing; its address will never change throughout the execution of the program (hence the name ‘static’).</li>
+</ul>
 
-<p>The macros are meant to be used for constructing small unit tests like this one:</p>
+<p>For example,</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">/////////////////////////////////////</span>
-<span class="c1">// create and validate an empty tree</span>
-<span class="kt">int</span> <span class="nf">test_newtree0</span><span class="p">()</span>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">float</span> <span class="n">pi</span><span class="o">=</span><span class="mi">3</span><span class="p">.</span><span class="mi">1415926535</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">char</span> <span class="n">usage</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"Usage: dog [-n] [-m mapfile] [-] [filename]...</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">error_count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="n">START_TEST_CASE</span><span class="p">(</span><span class="s">"newtree0"</span><span class="p">);</span>
-  <span class="n">tree_t</span> <span class="o">*</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree_new</span><span class="p">();</span>
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree</span><span class="o">-&gt;</span><span class="n">root</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
-
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"hello"</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
-
-  <span class="n">tree_delete</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-  <span class="n">EXPECT</span><span class="p">(</span><span class="n">count_net</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
-
-  <span class="n">END_TEST_CASE</span><span class="p">;</span>
-  <span class="k">return</span> <span class="n">TEST_RESULT</span><span class="p">;</span>
+<span class="p">...</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>In the above test, I create a new (empty) tree, try to find something in it, and delete the tree.
-Notice, though, that I actually peek <em>inside</em> the <code class="language-plaintext highlighter-rouge">struct tree</code> to verify that all its members are set correctly.</p>
+<p>The above declares three global variables, two of which are constants and one of which is variable.
+All are visible to functions defined below their declaration.
+Global variables are always declared at the top of a C file, after <code class="language-plaintext highlighter-rouge">#include</code> directives and before any function definitions.</p>
 
-<p>Note, too, how I used those new macros - using <code class="language-plaintext highlighter-rouge">START_TEST_CASE()</code> to give the test a name and initialize everything, <code class="language-plaintext highlighter-rouge">EXPECT()</code> to indicate the conditions I expect to be true, <code class="language-plaintext highlighter-rouge">END_TEST_CASE</code> to print the summary and clean up, and <code class="language-plaintext highlighter-rouge">return TEST_RESULT</code> to provide a return value for this function.
-Here’s how that code looks after running it through the preprocessor with <code class="language-plaintext highlighter-rouge">gcc -DUNIT_TEST -E tree.c</code>:</p>
+<p>Global variables can be handy, and sometimes necessary, but it is good style to avoid use of global variables.
+(Global constants are generally ok.)  Well-modularized programs keep their data close - passing the data (or pointers to data) among functions.</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">test_newtree0</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="kt">int</span> <span class="n">_failures</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="kt">char</span> <span class="o">*</span><span class="n">_testname</span> <span class="o">=</span> <span class="p">(</span><span class="s">"newtree0"</span><span class="p">);;</span>
-  <span class="n">tree_t</span> <span class="o">*</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree_new</span><span class="p">();</span>
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">tree</span> <span class="o">!=</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">)))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">244</span><span class="p">,</span> <span class="s">"tree != NULL"</span><span class="p">);</span> <span class="p">};</span>
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">tree</span><span class="o">-&gt;</span><span class="n">root</span> <span class="o">==</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">)))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">245</span><span class="p">,</span> <span class="s">"tree-&gt;root == NULL"</span><span class="p">);</span> <span class="p">};</span>
+<p>There are two kinds of ‘global’ in C: global within a C file, and global across all C files in the program.
+The former are reasonable, if used carefully, but the latter are more dangerous.
+We’ll discuss the differences later, if we have time.</p>
 
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"hello"</span><span class="p">)</span> <span class="o">==</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">)))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">247</span><span class="p">,</span> <span class="s">"tree_find(tree, </span><span class="se">\"</span><span class="s">hello</span><span class="se">\"</span><span class="s">) == NULL"</span><span class="p">);</span> <span class="p">};</span>
+<h3 id="the-stack-for-local-variables">The Stack (for local variables)</h3>
 
-  <span class="n">tree_delete</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">));</span>
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">count_net</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span> <span class="p">{</span> <span class="n">_failures</span><span class="o">++</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"Fail %s Line %d: [%s]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="s">"count_net() == 0"</span><span class="p">);</span> <span class="p">};</span>
+<p>All of the example code we’ve seen so far makes extensive use of local variables; these variables are defined within a function and have</p>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">_failures</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="n">printf</span><span class="p">(</span><span class="s">"PASS test %s</span><span class="se">\n\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">);</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="n">printf</span><span class="p">(</span><span class="s">"FAIL test %s with %d errors</span><span class="se">\n\n</span><span class="s">"</span><span class="p">,</span> <span class="n">_testname</span><span class="p">,</span> <span class="n">_failures</span><span class="p">);</span> <span class="p">};</span>
-  <span class="k">return</span> <span class="p">(</span><span class="n">_failures</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></div>
+<ul>
+  <li><em>local scope</em> - meaning that the variable is visible within the function only, and</li>
+  <li><em>stack storage</em> - meaning that C allocates space for the variable within the stack frame for this particular instance of this function call.</li>
+</ul>
 
-<p>If you look closely, you can see the original bits of code (like <code class="language-plaintext highlighter-rouge">tree_delete(tree, NULL)</code> (with <code class="language-plaintext highlighter-rouge">NULL</code> expanded!) as well as the expanded <code class="language-plaintext highlighter-rouge">EXPECT</code> and other macros.</p>
+<p><strong>Note:</strong> Local variables include the function’s parameters.</p>
 
-<p>Then the <code class="language-plaintext highlighter-rouge">main()</code> program runs a series of unit tests, and prints an error if any of them failed:</p>
+<p>Think about how a stack works.
+When the program starts, C allocates a chunk of bytes on the stack to hold all the variables defined in <code class="language-plaintext highlighter-rouge">main</code>.
+This chunk is called a ‘stack frame’.
+<em>It does not initialize these bytes</em> - the program must initialize variables, either in the variable definition or in the code to follow.
+Later, when <code class="language-plaintext highlighter-rouge">main</code> calls another function, say, <code class="language-plaintext highlighter-rouge">readline</code>, it allocates another chunk of bytes on the stack (you could say, it <em>pushes another frame on the stack</em>) to hold the variables defined by <code class="language-plaintext highlighter-rouge">readline </code>.
+When <code class="language-plaintext highlighter-rouge">readline</code> calls <code class="language-plaintext highlighter-rouge">fgetc</code>, it pushes another stack frame on the stack, a chunk of bytes to hold the variables defined within <code class="language-plaintext highlighter-rouge">fgetc</code>.
+When <code class="language-plaintext highlighter-rouge">fgetc</code> returns, it <em>pops the frame off the stack</em>.
+When <code class="language-plaintext highlighter-rouge">readline</code> returns, it pops that frame off the stack.
+The local variables defined in <code class="language-plaintext highlighter-rouge">readline </code> are not just syntactically inaccessible to <code class="language-plaintext highlighter-rouge">main</code> (out of scope), their memory is no longer allocated.
+Indeed, when <code class="language-plaintext highlighter-rouge">main</code> calls another function, say, <code class="language-plaintext highlighter-rouge">printf</code>, a stack frame is pushed on to the stack for <code class="language-plaintext highlighter-rouge">printf</code>, re-using the same memory that had been allocated to <code class="language-plaintext highlighter-rouge">readline </code> and <code class="language-plaintext highlighter-rouge">fgetc</code>).</p>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span>
-<span class="nf">main</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
-<span class="p">{</span>
-  <span class="kt">int</span> <span class="n">failed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<h3 id="the-heap-dynamically-allocated-memory">The Heap (dynamically allocated memory)</h3>
 
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_newtree0</span><span class="p">();</span>
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_newtree1</span><span class="p">();</span>
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_treeleft</span><span class="p">();</span>
-  <span class="n">failed</span> <span class="o">+=</span> <span class="n">test_treefind</span><span class="p">();</span>
+<p>The third kind of data memory is called the “heap”.
+It is a large region of memory managed by <code class="language-plaintext highlighter-rouge">malloc()</code>.
+Each call to <code class="language-plaintext highlighter-rouge">malloc()</code> selects a chunk of bytes from the heap region, and returns a pointer to that chunk.
+It keeps careful records of which chunks have been allocated, and which are free.
+It is the programmer’s responsibility to, eventually, return unused chunks by calling <code class="language-plaintext highlighter-rouge">free(p)</code> where <code class="language-plaintext highlighter-rouge">p</code> is a pointer earlier returned by <code class="language-plaintext highlighter-rouge">malloc</code>.
+If the programmer forgets to call <code class="language-plaintext highlighter-rouge">free</code>, that chunk can never be reused, and eventually <code class="language-plaintext highlighter-rouge">malloc</code> will run out of free chunks to be allocated.
+(This situation is called a ‘memory leak.’)   It is also the programmer’s responsibility not to call <code class="language-plaintext highlighter-rouge">free</code> multiple times for the same pointer; doing so may corrupt the records kept by the memory-allocation library, and will likely lead to program crashes.</p>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">failed</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">printf</span><span class="p">(</span><span class="s">"FAIL %d test cases</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">failed</span><span class="p">);</span>
-    <span class="k">return</span> <span class="n">failed</span><span class="p">;</span>
-  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="n">printf</span><span class="p">(</span><span class="s">"PASS all test cases</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
+<p>There are four related functions you should understand:</p>
 
-<p>Here’s what the output looks like when everything passes:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">p = malloc(n)</code> - allocates <code class="language-plaintext highlighter-rouge">n</code> bytes of heap memory</li>
+  <li><code class="language-plaintext highlighter-rouge">p = calloc(count, size)</code> allocates <code class="language-plaintext highlighter-rouge">count*size</code> bytes of heap memory</li>
+  <li><code class="language-plaintext highlighter-rouge">p = realloc(p, n)</code> - where <code class="language-plaintext highlighter-rouge">p</code> is a pointer to heap memory - expands (or shrinks) its allocation to <code class="language-plaintext highlighter-rouge">n</code> bytes.</li>
+  <li><code class="language-plaintext highlighter-rouge">free(p)</code> - where <code class="language-plaintext highlighter-rouge">p</code> is a pointer to heap memory - releases that portion of heap memory for future use.</li>
+</ul>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ make unit
-gcc -Wall -pedantic -std=c11 -ggdb    -c -o memory.o memory.c
-gcc -Wall -pedantic -std=c11 -ggdb  -DUNIT_TEST tree.c memory.o -o unittest
-./unittest
-PASS test newtree0
+<p>Check out this <a href="https://www.youtube.com/watch?v=5VnDaHBi8dM">animated explanation of pointers</a>.
+Fun!</p>
 
-PASS test newtree1
+<h3 id="on-exit">On exit</h3>
 
-PASS test treeleft
+<p>When the process exits, all its memory is released - the four segments (code, global, stack, and heap) disappear.</p>
 
-  ann(1)
-   bob(2)
-    cheri(3)
- dave(4)
-PASS test treefind
+<h3 id="activity">Activity</h3>
 
-PASS all test cases
-</code></pre></div></div>
-
-<p>To see what it looks like when a failure occurs, I could either break the tree code (which I’d rather not do!) or break the test code; I’ll do the latter by changing one line</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"abcd"</span><span class="p">)</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>to</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">EXPECT</span><span class="p">(</span><span class="n">tree_find</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s">"abcd"</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>and run the test again:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ make -k unit
-gcc -Wall -pedantic -std=c11 -ggdb  -DUNIT_TEST tree.c memory.o -o unittest
-./unittest
-PASS test newtree0
-
-Fail newtree1 Line 271: [tree_find(tree, "abcd") == NULL]
-FAIL test newtree1 with 1 errors
-
-PASS test treeleft
-
-  ann(1)
-   bob(2)
-    cheri(3)
- dave(4)
-PASS test treefind
-
-FAIL 1 test cases
-make: *** [unit] Error 1
-</code></pre></div></div>
-
-<p>Notice how Make exited with error; that’s because <code class="language-plaintext highlighter-rouge">unittest</code> exited with non-zero status: note the code at end of <code class="language-plaintext highlighter-rouge">main()</code>.</p>
-
-<h2 id="cunit-test-framework">CUnit test framework</h2>
-
-<p>Although we don’t have time to study any professional frameworks, there are several C unit testing frameworks available on the Internet: <a href="https://libcheck.github.io/check/">Check</a> and <a href="http://cunit.sourceforge.net/">CUnit</a>.
-Here’s an <a href="http://cunit.sourceforge.net/example.html">example</a> using CUnit.</p>
-
-<h2 id="activity">Activity</h2>
-
-<p>In today’s <a href="activity.html">activity</a> your group will design a unit test for one of our other modules.</p>
-
+<p>Today’s <a href="activity.html">activity</a> looks at a program that copies a string - and tries to find a bug.</p>
 
   </div>
 
